@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel/CSV/HTML數據匹配與合併工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .config-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .config-group {
+            margin-bottom: 15px;
+        }
+        
+        .config-group h3 {
+            margin-bottom: 10px;
+            color: #3498db;
+            font-size: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input[type="number"], select, input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-merge {
+            background-color: #2ecc71;
+            display: block;
+            margin: 30px auto;
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+        
+        .btn-merge:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .preview-section, .result-section {
+            margin-top: 40px;
+        }
+        
+        .preview-container, .result-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .preview, .result-box {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f8fafc;
+            overflow: auto;
+            max-height: 400px;
+        }
+        
+        .preview h4, .result-box h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .instructions {
+            background-color: #fff4e6;
+            border-left: 4px solid #ffa94d;
+            padding: 15px;
+            margin: 30px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .job-type-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+        }
+        
+        .job-type-options {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .job-type-option {
+            display: flex;
+            align-items: center;
+        }
+        
+        .job-type-option input {
+            margin-right: 8px;
+        }
+        
+        .distributed-panel-input {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .file-format-info {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .html-preview {
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .config-grid, .preview-container, .result-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .job-type-options {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Excel/CSV/HTML數據匹配與合併工具</h1>
+        
+        <div class="instructions">
+            <h3>使用說明</h3>
+            <ol>
+                <li>選擇作業類型（單台總機或分散盤）</li>
+                <li>上傳源文件A（Excel/CSV）和目標文件B（Excel/CSV/HTML）</li>
+                <li>點擊"執行匹配與合併"按鈕</li>
+                <li>查看合併結果並下載結果文件（格式與B文件相同）</li>
+            </ol>
+        </div>
+        
+        <div class="job-type-section">
+            <h2>選擇作業類型</h2>
+            <div class="job-type-options">
+                <div class="job-type-option">
+                    <input type="radio" id="singlePanel" name="jobType" value="single" checked>
+                    <label for="singlePanel">單台總機</label>
+                </div>
+                <div class="job-type-option">
+                    <input type="radio" id="distributedPanel" name="jobType" value="distributed">
+                    <label for="distributedPanel">分散盤</label>
+                </div>
+            </div>
+            
+            <div id="distributedPanelInput" class="distributed-panel-input">
+                <label for="panelNumber">分散盤編號 (1-63):</label>
+                <input type="number" id="panelNumber" min="1" max="63" value="1">
+            </div>
+        </div>
+        
+        <div class="upload-section">
+            <div class="config-grid">
+                <div>
+                    <h2>源文件A</h2>
+                    <input type="file" id="fileA" accept=".xlsx, .xls, .csv" class="btn">
+                    <div class="file-format-info">支持Excel(.xlsx, .xls)和CSV(.csv)格式</div>
+                    <div class="file-info" id="fileAInfo"></div>
+                </div>
+                
+                <div>
+                    <h2>目標文件B</h2>
+                    <input type="file" id="fileB" accept=".xlsx, .xls, .csv, .html, .htm" class="btn">
+                    <div class="file-format-info">支持Excel(.xlsx, .xls)、CSV(.csv)和HTML(.html, .htm)格式</div>
+                    <div class="file-info" id="fileBInfo"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button id="mergeBtn" class="btn btn-merge" disabled>執行匹配與合併</button>
+        
+        <div class="preview-section">
+            <h2>文件預覽</h2>
+            <div class="preview-container">
+                <div class="preview">
+                    <h4>文件A內容</h4>
+                    <div id="previewA">尚未選擇文件</div>
+                </div>
+                <div class="preview">
+                    <h4>文件B內容</h4>
+                    <div id="previewB">尚未選擇文件</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-section">
+            <h2>合併結果</h2>
+            <div class="result-container">
+                <div class="result-box">
+                    <h3>A文件合併結果</h3>
+                    <div id="resultA">等待執行操作...</div>
+                </div>
+                <div class="result-box">
+                    <h3>B文件更新結果</h3>
+                    <div id="resultB">等待執行操作...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const jobTypeSingle = document.getElementById('singlePanel');
+            const jobTypeDistributed = document.getElementById('distributedPanel');
+            const distributedPanelInput = document.getElementById('distributedPanelInput');
+            const panelNumberInput = document.getElementById('panelNumber');
+            
+            const fileAInput = document.getElementById('fileA');
+            const fileBInput = document.getElementById('fileB');
+            const fileAInfo = document.getElementById('fileAInfo');
+            const fileBInfo = document.getElementById('fileBInfo');
+            const mergeBtn = document.getElementById('mergeBtn');
+            const previewA = document.getElementById('previewA');
+            const previewB = document.getElementById('previewB');
+            const resultA = document.getElementById('resultA');
+            const resultB = document.getElementById('resultB');
+            
+            let fileAData = null;
+            let fileBData = null;
+            let fileBType = null;
+            let originalHTMLContent = null;
+            let originalHTMLDocument = null;
+            let isDistributedPanel = false;
+            let panelNumber = 1;
+            
+            // 監聽作業類型選擇變化
+            jobTypeSingle.addEventListener('change', function() {
+                isDistributedPanel = false;
+                distributedPanelInput.style.display = 'none';
+            });
+            
+            jobTypeDistributed.addEventListener('change', function() {
+                isDistributedPanel = true;
+                distributedPanelInput.style.display = 'block';
+                panelNumber = parseInt(panelNumberInput.value) || 1;
+            });
+            
+            // 監聽分散盤編號變化
+            panelNumberInput.addEventListener('change', function() {
+                panelNumber = parseInt(this.value) || 1;
+                if (panelNumber < 1) panelNumber = 1;
+                if (panelNumber > 63) panelNumber = 63;
+                this.value = panelNumber;
+            });
+            
+            // 文件A處理
+            fileAInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    readFileA(file, function(data) {
+                        fileAData = data;
+                        fileAInfo.textContent = `文件名: ${file.name} | 大小: ${(file.size/1024).toFixed(2)} KB`;
+                        previewA.innerHTML = generateTableHTML(data);
+                        checkMergeAbility();
+                    });
+                }
+            });
+            
+            // 文件B處理
+            fileBInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    readFileB(file, function(data, type, originalContent, htmlDoc) {
+                        fileBData = data;
+                        fileBType = type;
+                        originalHTMLContent = originalContent;
+                        originalHTMLDocument = htmlDoc;
+                        fileBInfo.textContent = `文件名: ${file.name} | 大小: ${(file.size/1024).toFixed(2)} KB | 類型: ${type.toUpperCase()}`;
+                        
+                        if (type === 'html') {
+                            previewB.innerHTML = '<div class="html-preview">' + originalContent + '</div>';
+                        } else {
+                            previewB.innerHTML = generateTableHTML(data);
+                        }
+                        checkMergeAbility();
+                    });
+                }
+            });
+            
+            // 檢查是否可以合併
+            function checkMergeAbility() {
+                mergeBtn.disabled = !(fileAData && fileBData);
+            }
+            
+            // 讀取文件A（只支持Excel和CSV）
+            function readFileA(file, callback) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = e.target.result;
+                    const fileName = file.name.toLowerCase();
+                    
+                    if (fileName.endsWith('.csv')) {
+                        const csvData = parseCSV(data);
+                        callback(csvData);
+                    } else {
+                        const excelData = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(excelData, {type: 'array'});
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                        callback(jsonData);
+                    }
+                };
+                
+                const fileName = file.name.toLowerCase();
+                if (fileName.endsWith('.csv')) {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsArrayBuffer(file);
+                }
+            }
+            
+            // 讀取文件B（支持Excel、CSV和HTML）
+            function readFileB(file, callback) {
+                const reader = new FileReader();
+                const fileName = file.name.toLowerCase();
+                
+                reader.onload = function(e) {
+                    const data = e.target.result;
+                    
+                    if (fileName.endsWith('.csv')) {
+                        const csvData = parseCSV(data);
+                        callback(csvData, 'csv', null, null);
+                    } else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
+                        // 對於HTML文件，保存原始內容和解析後的文檔
+                        const parser = new DOMParser();
+                        const htmlDoc = parser.parseFromString(data, 'text/html');
+                        const tableData = extractDataFromHTML(htmlDoc);
+                        callback(tableData, 'html', data, htmlDoc);
+                    } else {
+                        const excelData = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(excelData, {type: 'array'});
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                        callback(jsonData, 'excel', null, null);
+                    }
+                };
+                
+                if (fileName.endsWith('.csv')) {
+                    reader.readAsText(file);
+                } else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsArrayBuffer(file);
+                }
+            }
+            
+            // 解析CSV數據
+            function parseCSV(csvText) {
+                const lines = csvText.split('\n');
+                const result = [];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line === '') continue;
+                    
+                    const fields = line.split(',');
+                    result.push(fields);
+                }
+                
+                return result;
+            }
+            
+// 從HTML文檔中提取數據，保持對應關係
+function extractDataFromHTML(htmlDoc) {
+    const tables = htmlDoc.getElementsByTagName('table');
+    const result = [];
+    
+    if (tables.length === 0) return result;
+    
+    // 查找所有包含"設備編號"標題的表格（所有系統分區）
+    for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+        const headers = table.querySelectorAll('th');
+        let isDeviceTable = false;
+        
+        for (let j = 0; j < headers.length; j++) {
+            if (headers[j].textContent.trim() === '設備編號') {
+                isDeviceTable = true;
+                break;
+            }
+        }
+        
+        if (isDeviceTable) {
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let k = 0; k < rows.length; k++) {
+                const row = rows[k];
+                const cells = row.querySelectorAll('td, th');
+                const rowData = [];
+                
+                for (let l = 0; l < cells.length; l++) {
+                    const cell = cells[l];
+                    const cellValue = cell.textContent.trim();
+                    rowData.push(cellValue);
+                }
+                
+                if (rowData.length > 0) {
+                    result.push({
+                        rowIndex: k,
+                        data: rowData,
+                        element: row,
+                        tableIndex: i, // 記錄表格索引
+                        globalRowIndex: result.length // 全局行索引
+                    });
+                }
+            }
+        }
+    }
+    
+    console.log(`找到 ${result.length} 行設備數據，來自多個系統分區表格`);
+    return result;
+}
+
+// 生成與原始HTML完全相同的輸出
+function generateIdenticalHTML(updatedData) {
+    if (!originalHTMLDocument) return '<p>無數據</p>';
+    
+    // 克隆原始文檔
+    const clonedDoc = originalHTMLDocument.cloneNode(true);
+    
+    // 更新所有設備編號詳細列表的表格
+    const tables = clonedDoc.getElementsByTagName('table');
+    
+    // 查找所有包含"設備編號"標題的表格
+    const deviceTables = [];
+    for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+        const headers = table.querySelectorAll('th');
+        for (let j = 0; j < headers.length; j++) {
+            if (headers[j].textContent.trim() === '設備編號') {
+                deviceTables.push({
+                    table: table,
+                    index: i
+                });
+                break;
+            }
+        }
+    }
+    
+    console.log(`找到 ${deviceTables.length} 個設備編號表格需要更新`);
+    
+    // 按表格索引分組更新數據
+    const updatesByTable = {};
+    updatedData.forEach(item => {
+        if (!updatesByTable[item.tableIndex]) {
+            updatesByTable[item.tableIndex] = [];
+        }
+        updatesByTable[item.tableIndex].push(item);
+    });
+    
+    // 更新每個表格
+    Object.keys(updatesByTable).forEach(tableIndex => {
+        const tableUpdates = updatesByTable[tableIndex];
+        const targetTable = deviceTables.find(t => t.index == tableIndex);
+        
+        if (targetTable) {
+            const rows = targetTable.table.getElementsByTagName('tr');
+            
+            // 更新對應行的數據
+            for (let i = 0; i < tableUpdates.length; i++) {
+                const rowData = tableUpdates[i];
+                if (rows[rowData.rowIndex]) {
+                    const cells = rows[rowData.rowIndex].querySelectorAll('td, th');
+                    for (let j = 0; j < Math.min(cells.length, rowData.data.length); j++) {
+                        // 只更新文本內容，保持所有樣式和屬性
+                        cells[j].textContent = rowData.data[j] || '';
+                    }
+                }
+            }
+        }
+    });
+    
+    // 返回完整的HTML文檔
+    return '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML;
+}     
+
+            
+            // 生成表格HTML（用於預覽）
+            function generateTableHTML(data) {
+                if (!data || data.length === 0) return '<p>無數據</p>';
+                
+                let html = '<table>';
+                
+                // 添加數據行
+                html += '<tbody>';
+                const displayData = Array.isArray(data) ? data : data.map(item => item.data);
+                for (let i = 0; i < Math.min(displayData.length, 10); i++) {
+                    html += '<tr>';
+                    const rowData = displayData[i];
+                    for (let j = 0; j < rowData.length; j++) {
+                        const isHeader = i === 0;
+                        if (isHeader) {
+                            html += `<th>${rowData[j] || ''}</th>`;
+                        } else {
+                            html += `<td>${rowData[j] || ''}</td>`;
+                        }
+                    }
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+                
+                if (displayData.length > 10) {
+                    html += `<p>... 還有${displayData.length - 10}行未顯示</p>`;
+                }
+                
+                return html;
+            }
+            
+            // 預處理A文件數據
+            function preprocessAData() {
+                if (!fileAData) return null;
+                
+                // 固定配置
+                const col1 = 6; // 第7列
+                const col2 = 7; // 第8列
+                const destCol = 9; // 第10列
+                
+                // 根據作業類型設置格式
+                let format = "{0}-{1:3}"; // 默認格式（單台總機）
+                if (isDistributedPanel) {
+                    format = panelNumber + "-1-{1:3}"; // 分散盤格式，例如 "6-1-001"
+                }
+                
+                const processedData = JSON.parse(JSON.stringify(fileAData));
+                
+                // 確保目標列存在
+                for (let i = 0; i < processedData.length; i++) {
+                    if (processedData[i].length <= destCol) {
+                        processedData[i] = processedData[i].concat(new Array(destCol - processedData[i].length + 1).fill(''));
+                    }
+                }
+                
+                for (let i = 0; i < processedData.length; i++) {
+                    if (processedData[i][col1] !== undefined && processedData[i][col2] !== undefined) {
+                        // 解析自定義格式
+                        let mergedValue = format;
+                        
+                        // 處理第一列
+                        if (format.includes('{0')) {
+                            mergedValue = mergedValue.replace(/\{0(?::(\d+))?\}/g, function(match, p1) {
+                                return processedData[i][col1];
+                            });
+                        }
+                        
+                        // 處理第二列
+                        if (format.includes('{1')) {
+                            mergedValue = mergedValue.replace(/\{1(?::(\d+))?\}/g, function(match, p1) {
+                                const num = processedData[i][col2];
+                                if (p1) {
+                                    return String(num).padStart(parseInt(p1), '0');
+                                }
+                                return num;
+                            });
+                        }
+                        
+                        processedData[i][destCol] = mergedValue;
+                    }
+                }
+                
+                return processedData;
+            }
+            
+// 從設備編號中解析CMA編號（格式：CMA編號-系統編號-設備編號）
+function extractCMANumber(deviceNumber) {
+    if (!deviceNumber) return null;
+    
+    const parts = deviceNumber.split('-');
+    if (parts.length >= 3) {
+        return parts[0]; // 返回CMA編號
+    }
+    return null;
+}
+
+// 移除CMA編號，只保留系統編號-設備編號部分
+function removeCMANumber(deviceNumber) {
+    if (!deviceNumber) return deviceNumber;
+    
+    const parts = deviceNumber.split('-');
+    if (parts.length >= 3) {
+        // 移除CMA編號部分，返回系統編號-設備編號
+        return parts.slice(1).join('-');
+    }
+    return deviceNumber;
+}
+
+// 恢復完整的設備編號格式
+function restoreCMANumber(deviceNumber, cmaNumber) {
+    if (!deviceNumber || !cmaNumber) return deviceNumber;
+    
+    // 如果已經包含CMA編號，則不處理
+    if (deviceNumber.startsWith(cmaNumber + '-')) {
+        return deviceNumber;
+    }
+    
+    return `${cmaNumber}-${deviceNumber}`;
+}
+
+// 修改HTML數據提取函數，記錄每行的CMA編號
+function extractDataFromHTML(htmlDoc) {
+    const tables = htmlDoc.getElementsByTagName('table');
+    const result = [];
+    
+    if (tables.length === 0) return result;
+    
+    for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+        const headers = table.querySelectorAll('th');
+        let isDeviceTable = false;
+        
+        for (let j = 0; j < headers.length; j++) {
+            if (headers[j].textContent.trim() === '設備編號') {
+                isDeviceTable = true;
+                break;
+            }
+        }
+        
+        if (isDeviceTable) {
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let k = 0; k < rows.length; k++) {
+                const row = rows[k];
+                const cells = row.querySelectorAll('td, th');
+                const rowData = [];
+                
+                for (let l = 0; l < cells.length; l++) {
+                    const cell = cells[l];
+                    const cellValue = cell.textContent.trim();
+                    rowData.push(cellValue);
+                }
+                
+                if (rowData.length > 0) {
+                    // 提取設備編號列的CMA編號
+                    const deviceNumber = rowData[5]; // 第6列是設備編號
+                    const cmaNumber = extractCMANumber(deviceNumber);
+                    
+                    result.push({
+                        rowIndex: k,
+                        data: rowData,
+                        element: row,
+                        tableIndex: i,
+                        globalRowIndex: result.length,
+                        originalDeviceNumber: deviceNumber, // 保存原始設備編號
+                        cmaNumber: cmaNumber // 保存CMA編號
+                    });
+                }
+            }
+        }
+    }
+    
+    console.log(`找到 ${result.length} 行設備數據，來自多個系統分區表格`);
+    return result;
+}
+
+// 修改匹配與合併邏輯
+mergeBtn.addEventListener('click', function() {
+    if (!fileAData || !fileBData) return;
+    
+    try {
+        // 1. 預處理A文件數據
+        const processedData = preprocessAData();
+        resultA.innerHTML = generateTableHTML(processedData);
+        
+        // 2. 固定配置參數
+        const sourceMatchCol = 9; // 第10列
+        const sourceDataCol = 8; // 第9列
+        
+        let targetMatchCol, targetDataCol, bCombineColNum;
+        
+        if (fileBType === 'html') {
+            targetMatchCol = 5; // 第6列（設備編號）
+            targetDataCol = 6; // 第7列（區域名稱 - 目標列）
+            bCombineColNum = 2; // 第3列（樓層 - 用於合併的B文件列）
+        } else {
+            targetMatchCol = 5; // 第6列
+            targetDataCol = 6; // 第7列
+            bCombineColNum = 2; // 第3列
+        }
+        
+        const currentCombineFormat = "{0}{1}";
+        
+        // 3. 根據B文件類型處理數據
+        let bDataForProcessing;
+        let outputData;
+        
+        if (fileBType === 'html') {
+            bDataForProcessing = JSON.parse(JSON.stringify(fileBData));
+        } else {
+            bDataForProcessing = JSON.parse(JSON.stringify(fileBData));
+        }
+        
+        // 4. 創建A文件的匹配值到數據的映射
+        const sourceMap = {};
+        for (let i = 0; i < processedData.length; i++) {
+            if (processedData[i][sourceMatchCol] !== undefined) {
+                sourceMap[processedData[i][sourceMatchCol]] = processedData[i][sourceDataCol];
+            }
+        }
+        
+        console.log("A文件匹配值映射:", sourceMap);
+        console.log(`A文件提供 ${Object.keys(sourceMap).length} 個匹配值`);
+        
+        // 5. 在B文件中查找匹配項並更新數據
+        let matchCount = 0;
+        let debugInfo = "匹配調試信息:\n";
+        let processedTables = new Set();
+        
+        for (let i = 0; i < bDataForProcessing.length; i++) {
+            const rowItem = bDataForProcessing[i];
+            const rowData = rowItem.data || rowItem;
+            
+            // 獲取原始設備編號和CMA編號
+            const originalDeviceNumber = rowItem.originalDeviceNumber || rowData[targetMatchCol];
+            const cmaNumber = rowItem.cmaNumber || extractCMANumber(originalDeviceNumber);
+            
+            // 臨時移除CMA編號進行匹配
+            const matchValue = removeCMANumber(originalDeviceNumber);
+            
+            // 記錄處理的表格
+            if (rowItem.tableIndex !== undefined) {
+                processedTables.add(rowItem.tableIndex);
+            }
+            
+            if (matchValue !== undefined && sourceMap[matchValue] !== undefined) {
+                const bValue = rowData[bCombineColNum] || ''; // 樓層
+                const aValue = sourceMap[matchValue] || '';
+                
+                // 應用合併格式
+                let combinedValue = currentCombineFormat
+                    .replace(/\{0\}/g, bValue)
+                    .replace(/\{1\}/g, aValue);
+                
+                // 更新數據
+                if (fileBType === 'html') {
+                    rowItem.data[targetDataCol] = combinedValue;
+                } else {
+                    rowItem[targetDataCol] = combinedValue;
+                }
+                matchCount++;
+                debugInfo += `表格${rowItem.tableIndex || '未知'} 行${i}: 設備${originalDeviceNumber} (匹配值:${matchValue}) → ${combinedValue}\n`;
+            } else if (matchValue && matchValue !== '設備編號') {
+                debugInfo += `表格${rowItem.tableIndex || '未知'} 行${i}: 設備${originalDeviceNumber} (匹配值:${matchValue}) 無匹配\n`;
+            }
+        }
+        
+        console.log(debugInfo);
+        console.log(`處理了 ${processedTables.size} 個系統分區表格`);
+        
+        // 6. 根據B文件類型生成輸出
+        if (fileBType === 'html') {
+            // 生成與原始HTML完全相同的輸出
+            outputData = generateIdenticalHTML(bDataForProcessing);
+            resultB.innerHTML = '<div class="html-preview">' + outputData + '</div>';
+            
+            // 下載HTML文件
+            const blob = new Blob([outputData], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '匹配合併結果.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+        } else {
+            // 對於Excel/CSV文件，如果需要也可以恢復CMA編號
+            const displayData = fileBType === 'html' ? 
+                bDataForProcessing.map(item => item.data) : bDataForProcessing;
+            resultB.innerHTML = generateTableHTML(displayData);
+            
+            // 創建工作簿和工作表
+            const ws = XLSX.utils.aoa_to_sheet(displayData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "合併數據");
+            
+            // 生成文件並下載
+            if (fileBType === 'csv') {
+                const csvOutput = XLSX.utils.sheet_to_csv(ws);
+                const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '匹配合併結果.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                XLSX.writeFile(wb, "匹配合併結果.xlsx");
+            }
+        }
+        
+        alert(`操作完成！成功匹配並更新了 ${matchCount} 條數據。\n處理了 ${processedTables.size} 個系統分區表格。\n輸出格式: ${fileBType.toUpperCase()}\n\n查看控制台了解詳細匹配信息。`);
+        
+    } catch (error) {
+        console.error('處理出錯:', error);
+        alert('處理過程中出錯: ' + error.message);
+    }
+});
+
+
+        });
+    </script>
+
+	<!-- 在每個工具的HTML檔案中，body結束前加入 -->
+<button onclick="window.location.href='index.html'" 
+        style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    返回主選單
+</button>		
+	
+	
+</body>
+</html>

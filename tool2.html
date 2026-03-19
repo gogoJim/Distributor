@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消防設備管理系統 - 專業版</title>
+    <style>
+        /* 原有的CSS樣式保持不變 */
+        @font-face {
+            font-family: 'NotoSansTC';
+            src: url('https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/OTF/TraditionalChinese/NotoSansTC-Regular.otf') format('opentype');
+        }
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        h1 {
+            color: #d32f2f;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        label {
+            display: inline-block;
+            width: 180px;
+            font-weight: bold;
+            vertical-align: top;
+            color: #555;
+        }
+        input, select, textarea {
+            padding: 8px 10px;
+            width: 300px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            min-width: 120px;
+        }
+        button:hover {
+            background-color: #b71c1c;
+        }
+        button.secondary {
+            background-color: #757575;
+        }
+        button.secondary:hover {
+            background-color: #616161;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            font-weight: bold;
+            color: #333;
+        }
+        .floor-row {
+            background-color: #f9f9f9;
+        }
+        .error {
+            color: #d32f2f;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+        .hidden {
+            display: none;
+        }
+        .device-input {
+            width: 60px;
+            text-align: center;
+            padding: 5px;
+        }
+        .floors-input, .systems-input {
+            width: 300px;
+            height: 100px;
+        }
+        .floor-tag, .system-tag {
+            display: inline-block;
+            background-color: #e0e0e0;
+            padding: 3px 8px;
+            margin: 3px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .tab {
+            display: none;
+        }
+        .tab.active {
+            display: block;
+        }
+        .tab-buttons {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            background-color: #d32f2f;
+            color: white;
+        }
+        .system-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .additional-devices {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .additional-device {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .additional-device input {
+            margin-right: 10px;
+            flex-grow: 1;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-label {
+            padding: 10px 20px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 14px;
+            min-width: 120px;
+            text-align: center;
+        }
+        .file-label:hover {
+            background-color: #b71c1c;
+        }
+        .help-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .required:after {
+            content: " *";
+            color: #d32f2f;
+        }
+        .version-info {
+            text-align: right;
+            font-size: 12px;
+            color: #757575;
+            margin-bottom: 10px;
+        }
+        .device-number {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .device-selection {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .device-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        .device-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .device-item .device-name {
+            width: 150px;
+        }
+        .device-item .device-code {
+            width: 80px;
+            font-family: monospace;
+        }
+        .device-item .device-current {
+            width: 60px;
+            font-family: monospace;
+            color: #666;
+        }
+        .sortable-handle {
+            cursor: move;
+            margin-right: 10px;
+            color: #757575;
+        }
+        .numbering-method-container {
+            display: inline-block;
+            margin-left: 20px;
+            background-color: #f5f5f5;
+            padding: 8px 15px;
+            border-radius: 4px;
+        }
+        .numbering-method-container label {
+            display: inline;
+            width: auto;
+            margin-right: 10px;
+        }
+        .numbering-method-container select {
+            width: auto;
+        }
+        .vertical-numbering-checkbox {
+            margin-left: 10px;
+        }
+        .export-buttons {
+            margin-bottom: 15px;
+        }
+        .file-export-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        /* 添加 #export-html 按钮的样式 */
+        #export-html {
+            margin-left: 20px;
+        }
+        .html-report {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .html-report h1 {
+            color: #d32f2f;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .html-report .report-info {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .html-report .report-info p {
+            margin: 5px 0;
+        }
+        .html-report table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .html-report th, .html-report td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .html-report th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .html-report .device-number {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .html-report .system-title {
+            margin-top: 30px;
+            color: #d32f2f;
+            border-bottom: 1px solid #d32f2f;
+            padding-bottom: 5px;
+        }
+        .warning {
+            color: #d32f2f;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+            border-left: 4px solid #d32f2f;
+        }
+        .point-count {
+            display: inline-block;
+            margin-left: 20px;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+        .custom-devices-section {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .subtotal-row {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .current-row {
+            background-color: #e8f5e9;
+            font-weight: bold;
+        }
+        .summary-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th {
+            background-color: #d32f2f;
+            color: white;
+        }
+        
+        .device-number.cma {
+            color: green !important;
+        }
+        
+        .cma-prefix {
+            color: green !important;
+            font-weight: bold;
+        }
+        .device-number {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+		
+		.form-group.align-top {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+        .form-group.align-top label {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .form-group.align-top .help-text {
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .device-selection {
+            width: 100%;
+        }
+        
+        /* 新增的樣式 */
+        .save-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        .save-status.show {
+            opacity: 1;
+        }
+        .save-status.error {
+            background-color: #d32f2f;
+        }
+        .validation-error {
+            border-color: #d32f2f !important;
+            background-color: #ffebee;
+        }
+        .auto-save-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .auto-save-container label {
+            width: auto;
+            margin-right: 10px;
+        }
+        .auto-save-container input {
+            width: auto;
+        }
+		
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="version-info">Ver.12  2025/8/25 HTBO/Jim - 優化版</div>
+        <h1>消防設備管理系統</h1>
+        
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="basic-info">基本資料設定</button>
+            <button class="tab-button" data-tab="system-config">系統分區配置</button>
+            <button class="tab-button" data-tab="device-config">設備數量設定</button>
+            <button class="tab-button" data-tab="result">設備編碼報表</button>			
+            <button class="tab-button" data-tab="device-summary">設備數量統計</button>
+        </div>
+        
+        <!-- 基本資料 -->
+        <div id="basic-info" class="tab active">
+            <div class="form-group">
+                <label for="project-name" class="required">案件名稱:</label>
+                <input type="text" id="project-name" placeholder="請輸入案件名稱">
+                <div class="help-text">例如: XX大樓消防設備配置</div>
+            </div>
+            <div class="form-group">
+                <label for="panel-type" class="required">設備類型:</label>
+                <select id="panel-type">
+                    <option value="panel">使用總機型號</option>
+                    <option value="cma">中繼器CMA</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="panel-model" class="required" id="panel-model-label">總機型號:</label>
+                <input type="text" id="panel-model" placeholder="HRR-AAS510">
+                <div class="help-text" id="panel-model-help">例如: HRR-AAS510</div>
+            </div>
+            <div class="form-group">
+                <label for="system-count" class="required">系統分區數量:</label>
+                <input type="number" id="system-count" min="1" value="1" placeholder="請輸入系統數量" class="system-count-input">
+                <select id="system-count-cma" class="system-count-select hidden">
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                    <option value="8">8</option>
+                </select>
+                <div class="help-text">根據建築物分區設定系統數量</div>
+            </div>
+			
+            <div class="form-group">
+                <label for="numbering-method" class="required">設備編號方式:</label>
+                <select id="numbering-method">
+                    <option value="horizontal">橫向編號 (由低樓層到高樓層)</option>
+                    <option value="vertical">縱向編號 (按設備類型順序)</option>
+                    <option value="mixed">縱橫混合 (橫向為主，可選設備縱向)</option>
+                </select>
+                <div class="help-text">
+                    橫向編號: 先編完一層樓的所有設備再往上一層<br>
+                    縱向編號: 先編完一種設備的所有樓層再編下一種設備<br>
+                    縱橫混合: 縱向編列優先,橫向為次，被勾選設備為縱向處理
+                </div>
+            </div>
+
+            <div class="form-group align-top">
+                <label class="required">設備類型選擇與排序:</label>
+                <div class="device-selection" id="device-selection">
+                    <!-- 設備列表將由JavaScript動態生成 -->
+                </div>
+                <div class="help-text">勾選不需要的設備並拖動調整順序 (預設全部勾選)</div>
+            </div>
+            
+            <!-- 將自定義設備移動到基本資料設定頁面 -->
+            <div class="custom-devices-section">
+                <h4>自定義設備類型</h4>
+                <p class="help-text">如需添加標準設備類型之外的設備，請在此設定</p>
+                <div id="additional-devices-container"></div>
+                <button id="add-device">+ 添加自定義設備</button>
+            </div>
+            
+            <!-- 自動保存選項 -->
+            <div class="form-group">
+                <div class="auto-save-container">
+                    <label for="auto-save">自動保存:</label>
+                    <input type="checkbox" id="auto-save" checked>
+                    <div class="help-text">啟用後將自動保存您的進度到瀏覽器本地存儲</div>
+                </div>
+            </div>
+            
+            <button id="next-to-system">下一步：系統分區配置</button>
+            <div id="basic-error" class="error"></div>
+        </div>
+        
+        <!-- 系統配置 -->
+        <div id="system-config" class="tab">
+            <h3>系統分區配置</h3>
+            <p class="help-text">請為每個系統分區設定管理樓層，樓層請從高到低輸入 (例如: 3F, 2F, 1F, B1F, B2F) - 編號仍會從低樓層開始</p>
+            <div id="systems-container"></div>
+            <button id="prev-to-basic" class="secondary">上一步</button>
+            <button id="next-to-device">下一步：設備數量設定</button>
+            <div id="system-error" class="error"></div>
+        </div>
+        
+        <!-- 設備配置 -->
+        <div id="device-config" class="tab">
+            <h3>設備數量設定</h3>
+            <p class="help-text">請為每個系統分區的各樓層設定設備數量</p>
+            <div id="device-tabs-content"></div>
+            
+            <div class="form-group">
+                <div class="file-export-buttons">
+                    <input type="file" id="import-json" class="file-input" accept=".json">
+                    <label for="import-json" class="file-label">導入設定檔</label>
+                    <button id="export-json" class="secondary">導出設定檔</button>
+                    <button id="clear-data" class="secondary">清除所有數據</button>
+                </div>
+                <div class="help-text">可將當前設定保存為JSON檔案，方便下次使用</div>
+            </div>
+            
+            <button id="prev-to-system" class="secondary">上一步</button>
+            <button id="generate-result">生成設備編碼報表</button>
+            <div id="device-error" class="error"></div>
+        </div>
+        
+        <!-- 設備數量統計 -->
+        <div id="device-summary" class="tab">
+            <h2>設備數量統計</h2>
+            <p class="help-text">以下為各系統中各項設備的總數量統計</p>
+            <div id="summary-container"></div>
+            <button id="prev-to-device" class="secondary" hidden >上一步</button>
+            <button id="next-to-result" hidden >下一步：設備編碼報表</button>
+        </div>
+        
+        <!-- 生成結果 -->
+        <div id="result" class="tab">
+            <h2>消防設備編碼報表</h2>
+            <p class="help-text">以下為自動生成的設備編碼表，請檢查無誤後導出HTML檔案</p>
+            <div class="export-buttons">
+                <div class="numbering-method-container">
+                    <label>編號方式:</label>
+                    <select id="result-numbering-method">
+                        <option value="horizontal">橫向編號 (由低樓層到高樓層)</option>
+                        <option value="vertical">縱向編號 (按設備類型順序)</option>
+                        <option value="mixed">縱橫混合 (橫向為主，可選設備縱向)</option>
+                    </select>
+                </div>
+                <!-- 添加導出HTML按鈕 -->
+                <button id="export-html">輸出HTML</button>
+            </div>
+            <div id="result-container"></div>
+            <button id="prev-to-summary" class="secondary" hidden >上一步</button>
+        </div>
+    </div>
+
+    <!-- 保存狀態提示 -->
+    <div class="save-status" id="save-status">數據已保存</div>
+
+    <script>
+        // 標準設備類型 (依照消防法規常用設備) 新增電流消耗屬性
+        const standardDeviceTypes = [
+            { id: 1, name: "警鈴", code: "BY", symbol: "J", current: 0.4 },
+            { id: 2, name: "手動報警機", code: "PRK", symbol: "Z", current: 0.4 },
+            { id: 3, name: "火警模組 (K8)", code: "K8", symbol: "A", isK8: true, current: 1.6 },
+            { id: 4, name: "火警模組 (K4)", code: "K4", symbol: "A", isK4: true, current: 0.8 },
+            { id: 5, name: "火警模組 (KL)", code: "KL", symbol: "B", current: 0.4 },
+            { id: 6, name: "偵煙式探測器", code: "ALK", symbol: "N", current: 0.4 },
+            { id: 7, name: "差動式探測器", code: "ASB", symbol: "C", current: 0.4 },
+            { id: 8, name: "定溫式探測器", code: "ATI", symbol: "O", current: 0.4 },
+            { id: 9, name: "監視模組", code: "S4", symbol: "F", isS4: true, current: 0.4 },
+            { id: 10, name: "排煙設備", code: "R4", symbol: "R", isR4: true, current: 0.4 },
+            { id: 11, name: "瓦斯探測器", code: "G4", symbol: "E", isG4: true, current: 0.4 },
+            { id: 12, name: "光電分離", code: "ABC", symbol: "P", current: 2.0 },
+            { id: 13, name: "訊號隔離", code: "SCI", current: 0.8 }
+        ];
+        
+        // 當前專案數據
+        let currentProject = {
+            name: "",
+            panelType: "panel",
+            panelModel: "",
+            numberingMethod: "horizontal",
+            selectedDevices: [...standardDeviceTypes],
+            verticalNumberingDevices: [],
+            systems: [],
+            additionalDevices: [],
+            nextDeviceId: 100,
+            deviceInputValues: {},
+            hasUnsavedChanges: false,
+            deviceOrder: []
+        };
+        
+        // 自動保存計時器
+        let autoSaveTimer = null;
+        
+        // 初始化設備選擇列表
+        function initializeDeviceSelection() {
+            const container = document.getElementById('device-selection');
+            container.innerHTML = '';
+            
+            const allDevices = [...standardDeviceTypes, ...currentProject.additionalDevices];
+            
+            if (currentProject.deviceOrder && currentProject.deviceOrder.length > 0) {
+                const orderedDevices = [];
+                currentProject.deviceOrder.forEach(deviceId => {
+                    const device = allDevices.find(d => d.id === deviceId);
+                    if (device) orderedDevices.push(device);
+                });
+                
+                standardDeviceTypes.forEach(device => {
+                    if (!currentProject.deviceOrder.includes(device.id)) orderedDevices.push(device);
+                });
+                
+                currentProject.additionalDevices.forEach(device => {
+                    if (!currentProject.deviceOrder.includes(device.id)) orderedDevices.push(device);
+                });
+                
+                orderedDevices.forEach(device => {
+                    const div = document.createElement('div');
+                    div.className = 'device-item';
+                    div.dataset.deviceId = device.id;
+                    div.innerHTML = `
+                        <span class="sortable-handle">≡</span>
+                        <input type="checkbox" id="device-${device.id}" ${currentProject.selectedDevices.some(d => d.id === device.id) ? 'checked' : ''}>
+                        <span class="device-name">${device.name}</span>
+                        <span class="device-code">(${device.code || 'CUS'})</span>
+                        <span class="device-current">${device.current || 0}mA</span>
+                        <input type="checkbox" class="vertical-numbering-checkbox" id="vertical-${device.id}" 
+                            title="使用縱向編號" style="display: none;" ${currentProject.verticalNumberingDevices.includes(device.id) ? 'checked' : ''}>
+                    `;
+                    container.appendChild(div);
+                    
+                    const verticalCheckbox = div.querySelector('.vertical-numbering-checkbox');
+                    if (currentProject.numberingMethod === 'mixed') verticalCheckbox.style.display = 'inline-block';
+                });
+            } else {
+                standardDeviceTypes.forEach(device => {
+                    const div = document.createElement('div');
+                    div.className = 'device-item';
+                    div.dataset.deviceId = device.id;
+                    div.innerHTML = `
+                        <span class="sortable-handle">≡</span>
+                        <input type="checkbox" id="device-${device.id}" ${currentProject.selectedDevices.some(d => d.id === device.id) ? 'checked' : ''}>
+                        <span class="device-name">${device.name}</span>
+                        <span class="device-code">(${device.code || 'CUS'})</span>
+                        <span class="device-current">${device.current || 0}mA</span>
+                        <input type="checkbox" class="vertical-numbering-checkbox" id="vertical-${device.id}" 
+                            title="使用縱向編號" style="display: none;" ${currentProject.verticalNumberingDevices.includes(device.id) ? 'checked' : ''}>
+                    `;
+                    container.appendChild(div);
+                    
+                    const verticalCheckbox = div.querySelector('.vertical-numbering-checkbox');
+                    if (currentProject.numberingMethod === 'mixed') verticalCheckbox.style.display = 'inline-block';
+                });
+                
+                currentProject.additionalDevices.forEach(device => {
+                    const div = document.createElement('div');
+                    div.className = 'device-item';
+                    div.dataset.deviceId = device.id;
+                    div.innerHTML = `
+                        <span class="sortable-handle">≡</span>
+                        <input type="checkbox" id="device-${device.id}" ${currentProject.selectedDevices.some(d => d.id === device.id) ? 'checked' : ''}>
+                        <span class="device-name">${device.name}</span>
+                        <span class="device-code">(${device.code || 'CUS'})</span>
+                        <span class="device-current">${device.current || 0}mA</span>
+                        <input type="checkbox" class="vertical-numbering-checkbox" id="vertical-${device.id}" 
+                            title="使用縱向編號" style="display: none;" ${currentProject.verticalNumberingDevices.includes(device.id) ? 'checked' : ''}>
+                    `;
+                    container.appendChild(div);
+                    
+                    const verticalCheckbox = div.querySelector('.vertical-numbering-checkbox');
+                    if (currentProject.numberingMethod === 'mixed') verticalCheckbox.style.display = 'inline-block';
+                });
+            }
+            
+            new Sortable(container, {
+                handle: '.sortable-handle',
+                animation: 150,
+                onEnd: function() {
+                    updateDeviceOrder();
+                    updateSelectedDevices();
+                    currentProject.hasUnsavedChanges = true;
+                    scheduleAutoSave();
+                }
+            });
+            
+            container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.classList.contains('vertical-numbering-checkbox')) updateVerticalNumberingDevices();
+                    else updateSelectedDevices();
+                    currentProject.hasUnsavedChanges = true;
+                    scheduleAutoSave();
+                });
+            });
+            
+            updateSelectedDevices();
+            updateVerticalNumberingDevices();
+        }
+        
+        function updateDeviceOrder() {
+            const container = document.getElementById('device-selection');
+            const deviceItems = container.querySelectorAll('.device-item');
+            currentProject.deviceOrder = Array.from(deviceItems).map(item => parseInt(item.dataset.deviceId));
+        }
+        
+        function updateSelectedDevices() {
+            const container = document.getElementById('device-selection');
+            const selectedDevices = [];
+            
+            container.querySelectorAll('.device-item').forEach(item => {
+                const deviceId = parseInt(item.dataset.deviceId);
+                const isStandardDevice = standardDeviceTypes.some(d => d.id === deviceId);
+                const device = isStandardDevice 
+                    ? standardDeviceTypes.find(d => d.id === deviceId)
+                    : currentProject.additionalDevices.find(d => d.id === deviceId);
+                
+                const isChecked = item.querySelector('input[type="checkbox"]:not(.vertical-numbering-checkbox)').checked;
+                
+                if (device && isChecked) selectedDevices.push(device);
+            });
+            
+            currentProject.selectedDevices = selectedDevices;
+        }
+        
+        function updateVerticalNumberingDevices() {
+            const container = document.getElementById('device-selection');
+            const verticalDevices = [];
+            
+            container.querySelectorAll('.device-item').forEach(item => {
+                const deviceId = parseInt(item.dataset.deviceId);
+                const verticalCheckbox = item.querySelector('.vertical-numbering-checkbox');
+                
+                if (verticalCheckbox && verticalCheckbox.checked) verticalDevices.push(deviceId);
+            });
+            
+            currentProject.verticalNumberingDevices = verticalDevices;
+        }
+        
+        // 顯示保存狀態提示
+        function showSaveStatus(message, isError = false) {
+            const statusElement = document.getElementById('save-status');
+            statusElement.textContent = message;
+            
+            if (isError) {
+                statusElement.classList.add('error');
+            } else {
+                statusElement.classList.remove('error');
+            }
+            
+            statusElement.classList.add('show');
+            
+            // 3秒後隱藏提示
+            setTimeout(() => {
+                statusElement.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 安排自動保存
+        function scheduleAutoSave() {
+            if (!document.getElementById('auto-save').checked) return;
+            
+            // 清除之前的計時器
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+            }
+            
+            // 設置新的計時器（1秒後保存）
+            autoSaveTimer = setTimeout(() => {
+                saveToLocalStorage();
+            }, 1000);
+        }
+        
+        // 保存到本地存儲
+        function saveToLocalStorage() {
+            try {
+                // 收集當前數據
+                collectDeviceData();
+                updateDeviceOrder();
+                
+                const data = {
+                    basicInfo: {
+                        projectName: document.getElementById('project-name').value,
+                        panelType: document.getElementById('panel-type').value,
+                        panelModel: document.getElementById('panel-model').value,
+                        systemCount: document.getElementById('system-count').value,
+                        numberingMethod: document.getElementById('numbering-method').value
+                    },
+                    systemConfig: currentProject.systems.map((system, index) => {
+                        const floorsInput = document.getElementById(`floors-input-${index}`);
+                        return {
+                            id: system.id,
+                            floors: floorsInput ? floorsInput.value.split('\n').map(f => f.trim()).filter(f => f.length > 0) : system.floors
+                        };
+                    }),
+                    deviceCounts: {
+                        selectedDevices: [...currentProject.selectedDevices],
+                        verticalNumberingDevices: currentProject.verticalNumberingDevices,
+                        customDevices: currentProject.additionalDevices,
+                        deviceOrder: currentProject.deviceOrder
+                    },
+                    deviceInputs: currentProject.systems.map(system => ({
+                        systemId: system.id,
+                        devices: system.devices
+                    }))
+                };
+                
+                localStorage.setItem('fireEquipmentSystemData', JSON.stringify(data));
+                currentProject.hasUnsavedChanges = false;
+                showSaveStatus('數據已自動保存');
+            } catch (error) {
+                console.error('保存數據時出錯:', error);
+                showSaveStatus('保存數據時出錯', true);
+            }
+        }
+        
+        // 從本地存儲加載數據
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('fireEquipmentSystemData');
+                if (!savedData) return false;
+                
+                const data = JSON.parse(savedData);
+                
+                // 恢復基本資料
+                document.getElementById('project-name').value = data.basicInfo.projectName || '';
+                document.getElementById('panel-type').value = data.basicInfo.panelType || 'panel';
+                document.getElementById('panel-model').value = data.basicInfo.panelModel || '';
+                document.getElementById('system-count').value = data.basicInfo.systemCount || 1;
+                document.getElementById('numbering-method').value = data.basicInfo.numberingMethod || 'horizontal';
+                
+                // 更新面板類型相關UI
+                const panelType = data.basicInfo.panelType || 'panel';
+                const label = document.getElementById('panel-model-label');
+                const input = document.getElementById('panel-model');
+                const helpText = document.getElementById('panel-model-help');
+                const systemCountInput = document.getElementById('system-count');
+                const systemCountSelect = document.getElementById('system-count-cma');
+                
+                if (panelType === 'cma') {
+                    label.textContent = 'CMA編號:';
+                    input.placeholder = 'CMA編號';
+                    helpText.textContent = '例如: 1~63';
+                    systemCountInput.classList.add('hidden');
+                    systemCountSelect.classList.remove('hidden');
+                } else {
+                    label.textContent = '總機型號:';
+                    input.placeholder = 'HRR-AAS510';
+                    helpText.textContent = '例如: HRR-AAS510';
+                    systemCountInput.classList.remove('hidden');
+                    systemCountSelect.classList.add('hidden');
+                }
+                
+                // 恢復設備選擇
+                currentProject.selectedDevices = data.deviceCounts.selectedDevices || [...standardDeviceTypes];
+                currentProject.verticalNumberingDevices = data.deviceCounts.verticalNumberingDevices || [];
+                currentProject.additionalDevices = data.deviceCounts.customDevices || [];
+                currentProject.deviceOrder = data.deviceCounts.deviceOrder || [];
+                
+                // 恢復系統配置
+                currentProject.systems = data.systemConfig.map((system, index) => ({
+                    id: system.id,
+                    floors: system.floors,
+                    devices: [],
+                    index: index
+                }));
+                
+                // 如果有設備輸入數據，恢復它們
+                if (data.deviceInputs) {
+                    data.deviceInputs.forEach(systemInput => {
+                        const system = currentProject.systems.find(s => s.id === systemInput.systemId);
+                        if (system) system.devices = systemInput.devices;
+                    });
+                }
+                
+                // 重新初始化UI
+                initializeDeviceSelection();
+                
+                // 生成系統配置UI
+                const container = document.getElementById('systems-container');
+                container.innerHTML = '';
+                
+                currentProject.systems.forEach((system, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'system-item';
+                    div.innerHTML = `
+                        <h4>系統分區 ${system.id}</h4>
+                        <div class="form-group">
+                            <label for="floors-input-${i}" class="required">管理樓層 (從高到低):</label>
+                            <textarea id="floors-input-${i}" class="floors-input" placeholder="請從高樓層到低樓層輸入，每行一個樓層\n例如:\n3F\n2F\n1F\nB1F\nB2F">${system.floors.join('\n')}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>樓層預覽:</label>
+                            <div id="floors-preview-${i}" class="floors-preview"></div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                    
+                    document.getElementById(`floors-input-${i}`).addEventListener('input', function() {
+                        updateFloorsPreview(i);
+                        currentProject.hasUnsavedChanges = true;
+                        scheduleAutoSave();
+                    });
+                    
+                    updateFloorsPreview(i);
+                });
+                
+                // 生成設備配置UI
+                generateDeviceConfigUI();
+                
+                // 恢復設備輸入值
+                currentProject.systems.forEach((system, systemIndex) => {
+                    system.devices.forEach(device => {
+                        const input = document.querySelector(
+                            `.device-input[data-system="${systemIndex}"][data-device="${device.deviceId}"][data-floor="${device.floor}"]`
+                        );
+                        if (input) {
+                            input.value = device.count;
+                            updateDeviceTotal(input);
+                        }
+                    });
+                });
+                
+                currentProject.hasUnsavedChanges = false;
+                showSaveStatus('已恢復上次的數據');
+                return true;
+            } catch (error) {
+                console.error('加載數據時出錯:', error);
+                showSaveStatus('加載數據時出錯', true);
+                return false;
+            }
+        }
+        
+        // 清除所有數據
+        function clearAllData() {
+            if (!confirm('確定要清除所有數據嗎？此操作無法撤銷。')) return;
+            
+            // 重置表單
+            document.getElementById('project-name').value = '';
+            document.getElementById('panel-type').value = 'panel';
+            document.getElementById('panel-model').value = '';
+            document.getElementById('system-count').value = 1;
+            document.getElementById('numbering-method').value = 'horizontal';
+            
+            // 更新面板類型UI
+            const label = document.getElementById('panel-model-label');
+            const input = document.getElementById('panel-model');
+            const helpText = document.getElementById('panel-model-help');
+            const systemCountInput = document.getElementById('system-count');
+            const systemCountSelect = document.getElementById('system-count-cma');
+            
+            label.textContent = '總機型號:';
+            input.placeholder = 'HRR-AAS510';
+            helpText.textContent = '例如: HRR-AAS510';
+            systemCountInput.classList.remove('hidden');
+            systemCountSelect.classList.add('hidden');
+            
+            // 重置項目數據
+            currentProject = {
+                name: "",
+                panelType: "panel",
+                panelModel: "",
+                numberingMethod: "horizontal",
+                selectedDevices: [...standardDeviceTypes],
+                verticalNumberingDevices: [],
+                systems: [],
+                additionalDevices: [],
+                nextDeviceId: 100,
+                deviceInputValues: {},
+                hasUnsavedChanges: false,
+                deviceOrder: []
+            };
+            
+            // 清除UI
+            document.getElementById('systems-container').innerHTML = '';
+            document.getElementById('device-tabs-content').innerHTML = '';
+            document.getElementById('additional-devices-container').innerHTML = '';
+            
+            // 重新初始化設備選擇
+            initializeDeviceSelection();
+            
+            // 清除本地存儲
+            localStorage.removeItem('fireEquipmentSystemData');
+            
+            // 切換到第一個標籤頁
+            document.querySelector('.tab-button[data-tab="basic-info"]').click();
+            
+            showSaveStatus('所有數據已清除');
+        }
+        
+        // 輸入驗證函數
+        function validateInputs() {
+            let isValid = true;
+            
+            // 清除之前的錯誤標記
+            document.querySelectorAll('.validation-error').forEach(el => {
+                el.classList.remove('validation-error');
+            });
+            document.querySelectorAll('.error').forEach(el => {
+                el.textContent = '';
+            });
+            
+            // 驗證案件名稱
+            const projectName = document.getElementById('project-name').value.trim();
+            if (!projectName) {
+                document.getElementById('project-name').classList.add('validation-error');
+                document.getElementById('basic-error').textContent = '請填寫案件名稱';
+                isValid = false;
+            }
+            
+            // 驗證面板型號/CMA編號
+            const panelModel = document.getElementById('panel-model').value.trim();
+            const panelType = document.getElementById('panel-type').value;
+            
+            if (!panelModel) {
+                document.getElementById('panel-model').classList.add('validation-error');
+                document.getElementById('basic-error').textContent = document.getElementById('basic-error').textContent || 
+                    (panelType === 'cma' ? '請填寫CMA編號' : '請填寫總機型號');
+                isValid = false;
+            } else if (panelType === 'cma') {
+                // 驗證CMA編號範圍 (1-63)
+                const cmaNumber = parseInt(panelModel);
+                if (isNaN(cmaNumber) || cmaNumber < 1 || cmaNumber > 63) {
+                    document.getElementById('panel-model').classList.add('validation-error');
+                    document.getElementById('basic-error').textContent = 'CMA編號必須是1-63之間的數字';
+                    isValid = false;
+                }
+            }
+            
+            // 驗證系統分區數量
+            const systemCount = parseInt(document.getElementById('system-count').value);
+            if (isNaN(systemCount) || systemCount < 1) {
+                document.getElementById('system-count').classList.add('validation-error');
+                document.getElementById('basic-error').textContent = document.getElementById('basic-error').textContent || '請輸入有效的系統分區數量';
+                isValid = false;
+            }
+            
+            // 驗證至少選擇一種設備
+            if (currentProject.selectedDevices.length === 0) {
+                document.getElementById('basic-error').textContent = document.getElementById('basic-error').textContent || '請至少選擇一種設備類型';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // 頁面加載時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 嘗試從本地存儲加載數據
+            const hasSavedData = loadFromLocalStorage();
+            
+            // 設置事件監聽器
+            setupEventListeners();
+            
+            // 如果沒有保存的數據，初始化設備選擇
+            if (!hasSavedData) {
+                initializeDeviceSelection();
+            }
+        });
+        
+        // 設置事件監聽器
+        function setupEventListeners() {
+            // 標籤頁切換
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    if (tabId === 'device-summary') generateDeviceSummary();
+                });
+            });
+            
+            // 下一步到系統配置
+            document.getElementById('next-to-system').addEventListener('click', function() {
+                if (!validateInputs()) return;
+                
+                const projectName = document.getElementById('project-name').value.trim();
+                const panelType = document.getElementById('panel-type').value;
+                const panelModel = document.getElementById('panel-model').value.trim();
+                const systemCount = parseInt(document.getElementById('system-count').value);
+                const numberingMethod = document.getElementById('numbering-method').value;
+                
+                currentProject.name = projectName;
+                currentProject.panelType = panelType;
+                currentProject.panelModel = panelModel;
+                currentProject.numberingMethod = numberingMethod;
+                currentProject.systems = [];
+                
+                const container = document.getElementById('systems-container');
+                container.innerHTML = '';
+                
+                for (let i = 0; i < systemCount; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'system-item';
+                    div.innerHTML = `
+                        <h4>系統分區 ${i+1}</h4>
+                        <div class="form-group">
+                            <label for="floors-input-${i}" class="required">管理樓層 (從高到低):</label>
+                            <textarea id="floors-input-${i}" class="floors-input" placeholder="請從高樓層到低樓層輸入，每行一個樓層\n例如:\n3F\n2F\n1F\nB1F\nB2F"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>樓層預覽:</label>
+                            <div id="floors-preview-${i}" class="floors-preview"></div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                    
+                    document.getElementById(`floors-input-${i}`).addEventListener('input', function() {
+                        updateFloorsPreview(i);
+                        currentProject.hasUnsavedChanges = true;
+                        scheduleAutoSave();
+                    });
+                }
+                
+                document.querySelector('.tab-button[data-tab="system-config"]').click();
+                currentProject.hasUnsavedChanges = true;
+                scheduleAutoSave();
+            });
+            
+            // 下一步到設備配置
+            document.getElementById('next-to-device').addEventListener('click', function() {
+                const systemCount = parseInt(document.getElementById('system-count').value);
+                currentProject.systems = [];
+                
+                for (let i = 0; i < systemCount; i++) {
+                    const floorsInput = document.getElementById(`floors-input-${i}`).value;
+                    
+                    let floors = floorsInput.split('\n')
+                        .map(f => f.trim())
+                        .filter(f => f.length > 0);
+                    
+                    if (floors.length === 0) {
+                        document.getElementById('system-error').textContent = `系統分區 ${i+1}: 請至少輸入一個樓層`;
+                        return;
+                    }
+                    
+                    currentProject.systems.push({
+                        id: `${i+1}`,
+                        floors: floors,
+                        devices: []
+                    });
+                }
+                
+                generateDeviceConfigUI();
+                document.querySelector('.tab-button[data-tab="device-config"]').click();
+                currentProject.hasUnsavedChanges = true;
+                scheduleAutoSave();
+            });
+            
+            // 設備輸入變化
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('device-input')) {
+                    updateDeviceTotal(e.target);
+                    currentProject.hasUnsavedChanges = true;
+                    scheduleAutoSave();
+                }
+            });
+            
+            // 添加自定義設備
+            document.getElementById('add-device').addEventListener('click', function() {
+                const newDevice = {
+                    id: currentProject.nextDeviceId++,
+                    name: `自定義設備${currentProject.nextDeviceId - 99}`,
+                    code: `CUS${currentProject.nextDeviceId - 100}`,
+                    symbol: '',
+                    current: 0.4
+                };
+                currentProject.additionalDevices.push(newDevice);
+                currentProject.selectedDevices.push(newDevice);
+                
+                if (!currentProject.deviceOrder) currentProject.deviceOrder = [];
+                currentProject.deviceOrder.push(newDevice.id);
+                
+                initializeDeviceSelection();
+                generateDeviceConfigUI();
+                currentProject.hasUnsavedChanges = true;
+                scheduleAutoSave();
+            });
+            
+            // 導入JSON
+            document.getElementById('import-json').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (!data.basicInfo || !data.systemConfig || !data.deviceCounts) {
+                            alert('無效的設定檔案格式');
+                            return;
+                        }
+                        
+                        currentProject = {
+                            name: data.basicInfo.projectName,
+                            panelType: data.basicInfo.panelType || "panel",
+                            panelModel: data.basicInfo.panelModel,
+                            numberingMethod: data.basicInfo.numberingMethod || "horizontal",
+                            selectedDevices: data.deviceCounts.selectedDevices || standardDeviceTypes,
+                            verticalNumberingDevices: data.deviceCounts.verticalNumberingDevices || [],
+                            systems: [],
+                            additionalDevices: data.deviceCounts.customDevices || [],
+                            nextDeviceId: data.deviceCounts.customDevices && data.deviceCounts.customDevices.length > 0 ? 
+                                Math.max(...data.deviceCounts.customDevices.map(d => d.id)) + 1 : 100,
+                            deviceInputValues: {},
+                            hasUnsavedChanges: false,
+                            deviceOrder: data.deviceCounts.deviceOrder || []
+                        };
+                        
+                        document.getElementById('project-name').value = currentProject.name;
+                        document.getElementById('panel-type').value = currentProject.panelType;
+                        document.getElementById('panel-model').value = currentProject.panelModel;
+                        document.getElementById('numbering-method').value = currentProject.numberingMethod || "horizontal";
+                        document.getElementById('result-numbering-method').value = currentProject.numberingMethod || "horizontal";
+                        
+                        const panelType = currentProject.panelType;
+                        const label = document.getElementById('panel-model-label');
+                        const input = document.getElementById('panel-model');
+                        const helpText = document.getElementById('panel-model-help');
+                        
+                        if (panelType === 'cma') {
+                            label.textContent = 'CMA編號:';
+                            input.placeholder = 'CMA編號';
+                            helpText.textContent = '例如: 1~63';
+                        } else {
+                            label.textContent = '總機型號:';
+                            input.placeholder = 'HRR-AAS510';
+                            helpText.textContent = '例如: HRR-AAS510';
+                        }
+                        
+                        currentProject.systems = data.systemConfig.map((system, index) => ({
+                            id: system.id,
+                            floors: system.floors,
+                            devices: [],
+                            index: index
+                        }));
+                        
+                        document.getElementById('system-count').value = currentProject.systems.length;
+                        
+                        initializeDeviceSelection();
+                        
+                        if (data.deviceCounts && data.deviceCounts.selectedDevices) {
+                            const container = document.getElementById('device-selection');
+                            container.querySelectorAll('.device-item').forEach(item => {
+                                const deviceId = parseInt(item.dataset.deviceId);
+                                const isSelected = data.deviceCounts.selectedDevices.some(d => d.id === deviceId);
+                                item.querySelector('input[type="checkbox"]:not(.vertical-numbering-checkbox)').checked = isSelected;
+                            });
+                            updateSelectedDevices();
+                        }
+                        
+                        const container = document.getElementById('systems-container');
+                        container.innerHTML = '';
+                        
+                        currentProject.systems.forEach((system, i) => {
+                            const div = document.createElement('div');
+                            div.className = 'system-item';
+                            div.innerHTML = `
+                                <h4>系統分區 ${system.id}</h4>
+                                <div class="form-group">
+                                    <label for="floors-input-${i}" class="required">管理樓層 (從高到低):</label>
+                                    <textarea id="floors-input-${i}" class="floors-input">${system.floors.join('\n')}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>樓層預覽:</label>
+                                    <div id="floors-preview-${i}" class="floors-preview"></div>
+                                </div>
+                            `;
+                            container.appendChild(div);
+                            updateFloorsPreview(i);
+                        });
+                        
+                        if (data.deviceInputs) {
+                            data.deviceInputs.forEach(systemInput => {
+                                const system = currentProject.systems.find(s => s.id === systemInput.systemId);
+                                if (system) system.devices = systemInput.devices;
+                            });
+                        }
+                        
+                        generateDeviceConfigUI();
+                        
+                        currentProject.systems.forEach((system, systemIndex) => {
+                            system.devices.forEach(device => {
+                                const input = document.querySelector(
+                                    `.device-input[data-system="${systemIndex}"][data-device="${device.deviceId}"][data-floor="${device.floor}"]`
+                                );
+                                if (input) {
+                                    input.value = device.count;
+                                    updateDeviceTotal(input);
+                                }
+                            });
+                        });
+                        
+                        document.querySelector('.tab-button[data-tab="device-config"]').click();
+                        
+                        alert('設定檔導入成功');
+                        currentProject.hasUnsavedChanges = true;
+                        scheduleAutoSave();
+                    } catch (err) {
+                        alert('解析設定檔時出錯: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            });
+            
+            // 導出JSON
+            document.getElementById('export-json').addEventListener('click', function() {
+                collectDeviceData();
+                updateDeviceOrder();
+                
+                const data = {
+                    basicInfo: {
+                        projectName: currentProject.name,
+                        panelType: currentProject.panelType,
+                        panelModel: currentProject.panelModel,
+                        numberingMethod: currentProject.numberingMethod,
+                        systemCount: currentProject.systems.length
+                    },
+                    systemConfig: currentProject.systems.map(system => ({
+                        id: system.id,
+                        floors: system.floors
+                    })),
+                    deviceCounts: {
+                        selectedDevices: [...currentProject.selectedDevices],
+                        verticalNumberingDevices: currentProject.verticalNumberingDevices,
+                        standardDevices: standardDeviceTypes,
+                        customDevices: currentProject.additionalDevices,
+                        deviceOrder: currentProject.deviceOrder
+                    },
+                    deviceInputs: currentProject.systems.map(system => ({
+                        systemId: system.id,
+                        devices: system.devices
+                    }))
+                };
+                
+                const today = new Date();
+                const dateString = `${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+     
+                const panelType = document.getElementById('panel-type').value;
+                const panelModel = document.getElementById('panel-model').value.trim();
+                const deviceTypeStr = panelType === 'cma' ? `CMA${panelModel}` : `總機${panelModel}`;
+                const fileName = `${currentProject.name}_${deviceTypeStr}_${dateString}_消防設備設定.json`;
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                currentProject.hasUnsavedChanges = false;
+                showSaveStatus('設定檔導出成功');
+            });
+            
+            // 生成結果
+            document.getElementById('generate-result').addEventListener('click', function() {
+                collectDeviceData();
+                
+                const hasDevices = currentProject.systems.some(system => system.devices.length > 0);
+                if (!hasDevices) {
+                    document.getElementById('device-error').textContent = '請至少輸入一個設備的數量';
+                    return;
+                }
+                
+                let hasOverflow = false;
+                currentProject.systems.forEach(system => {
+                    const totalDevices = system.devices.reduce((sum, d) => {
+                        const device = [...standardDeviceTypes, ...currentProject.additionalDevices].find(dev => dev.id === d.deviceId);
+                        return sum + (device && device.isK8 ? d.count * 2 : d.count);
+                    }, 0);
+                    if (totalDevices > 255) hasOverflow = true;
+                });
+                
+                if (hasOverflow) {
+                    if (!confirm('警告：某些系統分區的設備總數超過255，可能超出總機容量限制！是否繼續生成報表？')) return;
+                }
+                
+                generateResultTable();
+                document.querySelector('.tab-button[data-tab="result"]').click();
+                currentProject.hasUnsavedChanges = true;
+                scheduleAutoSave();
+            });
+            
+            // 編號方式變化
+            document.getElementById('result-numbering-method').addEventListener('change', function() {
+                currentProject.numberingMethod = this.value;
+                
+                if (currentProject.numberingMethod === 'mixed') {
+                    const container = document.getElementById('device-selection');
+                    container.querySelectorAll('.vertical-numbering-checkbox').forEach(checkbox => {
+                        checkbox.style.display = 'inline-block';
+                    });
+                } else {
+                    const container = document.getElementById('device-selection');
+                    container.querySelectorAll('.vertical-numbering-checkbox').forEach(checkbox => {
+                        checkbox.style.display = 'none';
+                    });
+                }
+                
+                generateResultTable();
+            });
+            
+            // 導出HTML
+            document.getElementById('export-html').addEventListener('click', function() {
+                collectDeviceData();
+                generateDeviceSummary();
+                
+                const panelType = document.getElementById('panel-type').value;
+                const panelModel = document.getElementById('panel-model').value.trim();
+                const deviceTypeStr = panelType === 'cma' ? `CMA${panelModel}` : `總機${panelModel}`;
+                
+                const today = new Date();
+                const dateString = `${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+                const timeString = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}:${today.getSeconds().toString().padStart(2, '0')}`;
+                const fullDateTime = `${today.getFullYear()}/${(today.getMonth()+1).toString().padStart(2, '0')}/${today.getDate().toString().padStart(2, '0')} ${timeString}`;
+                
+                const fileName = `${currentProject.name}_${deviceTypeStr}_${dateString}_消防設備報表.html`;
+                
+                // 生成HTML報表內容
+                let htmlContent = `
+                <!DOCTYPE html>
+                <html lang="zh-TW">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${currentProject.name} - 消防設備報表</title>
+                        <style>
+                body {
+                    font-family: 'Microsoft JhengHei', Arial, sans-serif;
+                    margin: 20px;
+                    padding: 0;
+                    color: #333;
+                    font-size: 12pt; /* 修改基础字体大小为12pt */
+                }
+                h1 {
+                    color: #d32f2f;
+                    border-bottom: 2px solid #d32f2f;
+                    padding-bottom: 10px;
+                    text-align: center;
+                    font-size: 18pt; /* 修改标题1字体大小 */
+                }
+                h2 {
+                    color: #d32f2f;
+                    border-bottom: 1px solid #d32f2f;
+                    padding-bottom: 5px;
+                    margin-top: 30px;
+                    font-size: 16pt; /* 修改标题2字体大小 */
+                }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 20px 0;
+                    font-size: 12pt; /* 修改表格字体大小为12pt */
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: center;
+                }
+                th {
+                    background-color: #f2f2f2;
+                    font-weight: bold;
+                }
+                .device-number {
+                    color: #d32f2f;
+                    font-weight: bold;
+                }
+                .warning {
+                    color: #d32f2f;
+                    font-weight: bold;
+                    margin: 10px 0;
+                    padding: 10px;
+                    background-color: #ffebee;
+                    border-radius: 4px;
+                    border-left: 4px solid #d32f2f;
+                    font-size: 12pt; /* 修改警告信息字体大小 */
+                }
+                .subtotal-row {
+                    background-color: #f2f2f2;
+                    font-weight: bold;
+                }
+                .current-row {
+                    background-color: #e8f5e9;
+                    font-weight: bold;
+                }
+                .report-info {
+                    margin-bottom: 20px;
+                    padding-bottom: 10px;
+                    border-bottom: 1px solid #ddd;
+                    font-size: 12pt; /* 修改报告信息字体大小 */
+                }
+                .report-info p {
+                    margin: 5px 0;
+                }
+                .system-title {
+                    margin-top: 30px;
+                    color: #d32f2f;
+                    border-bottom: 1px solid #d32f2f;
+                    padding-bottom: 5px;
+                    font-size: 14pt; /* 修改系统标题字体大小 */
+                }
+                .cma-prefix {
+                    color: green !important;
+                    font-weight: bold;
+                }
+                .device-number {
+                    color: #d32f2f;
+                    font-weight: bold;
+                }
+            </style>
+                </head>
+                <body>
+                    <h1>${currentProject.name} - 消防設備報表</h1>
+                    
+                    <div class="report-info">
+                        <h2>基本資料</h2>
+                        <p><strong>案件名稱:</strong> ${currentProject.name}</p>
+                        <p><strong>設備類型:</strong> ${panelType === 'cma' ? '中繼器CMA' : '使用總機型號'}</p>
+                        <p><strong>${panelType === 'cma' ? 'CMA編號:' : '總機型號:'}</strong> ${panelModel}</p>
+                        <p><strong>系統分區數量:</strong> ${currentProject.systems.length}</p>
+                        <p><strong>編號方式:</strong> ${document.getElementById('result-numbering-method').options[document.getElementById('result-numbering-method').selectedIndex].text}</p>
+                        <p><strong>生成日期:</strong> ${fullDateTime}</p>
+                    </div>
+                    
+                    <h2>設備數量統計</h2>
+                    ${document.getElementById('summary-container').innerHTML}
+                    
+                    <h2>消防設備編碼報表</h2>
+                    ${document.getElementById('result-container').innerHTML}
+                </body>
+                </html>
+                `;
+                
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showSaveStatus('HTML報表導出成功');
+            });
+
+            // 面板類型變化
+            document.getElementById('panel-type').addEventListener('change', function() {
+                const panelType = this.value;
+                const label = document.getElementById('panel-model-label');
+                const input = document.getElementById('panel-model');
+                const helpText = document.getElementById('panel-model-help');
+                const systemCountInput = document.getElementById('system-count');
+                const systemCountSelect = document.getElementById('system-count-cma');
+                
+                if (panelType === 'cma') {
+                    label.textContent = 'CMA編號:';
+                    input.placeholder = 'CMA編號';
+                    helpText.textContent = '例如: 1~63';
+                    systemCountInput.classList.add('hidden');
+                    systemCountSelect.classList.remove('hidden');
+                    systemCountSelect.value = '2'; // 默认选择2
+                } else {
+                    label.textContent = '總機型號:';
+                    input.placeholder = 'HRR-AAS510';
+                    helpText.textContent = '例如: HRR-AAS510';
+                    systemCountInput.classList.remove('hidden');
+                    systemCountSelect.classList.add('hidden');
+                }
+                
+                currentProject.hasUnsavedChanges = true;
+                scheduleAutoSave();
+            });
+            
+            // 清除所有數據
+            document.getElementById('clear-data').addEventListener('click', clearAllData);
+            
+            // 上一步/下一步按鈕
+            document.getElementById('prev-to-basic').addEventListener('click', function() {
+                document.querySelector('.tab-button[data-tab="basic-info"]').click();
+            });
+            
+            document.getElementById('prev-to-system').addEventListener('click', function() {
+                document.querySelector('.tab-button[data-tab="system-config"]').click();
+            });
+            
+            document.getElementById('prev-to-device').addEventListener('click', function() {
+                document.querySelector('.tab-button[data-tab="device-config"]').click();
+            });
+            
+            document.getElementById('prev-to-summary').addEventListener('click', function() {
+                document.querySelector('.tab-button[data-tab="device-summary"]').click();
+            });
+            
+            document.getElementById('next-to-result').addEventListener('click', function() {
+                document.querySelector('.tab-button[data-tab="result"]').click();
+            });
+            
+            // 編號方式變化
+            document.getElementById('numbering-method').addEventListener('change', function() {
+                currentProject.numberingMethod = this.value;
+                
+                if (currentProject.numberingMethod === 'mixed') {
+                    const container = document.getElementById('device-selection');
+                    container.querySelectorAll('.vertical-numbering-checkbox').forEach(checkbox => {
+                        checkbox.style.display = 'inline-block';
+                    });
+                } else {
+                    const container = document.getElementById('device-selection');
+                    container.querySelectorAll('.vertical-numbering-checkbox').forEach(checkbox => {
+                        checkbox.style.display = 'none';
+                    });
+                }
+                
+                currentProject.hasUnsavedChanges = true;
+                scheduleAutoSave();
+            });
+            
+            // 自動保存選項變化
+            document.getElementById('auto-save').addEventListener('change', function() {
+                if (this.checked && currentProject.hasUnsavedChanges) {
+                    saveToLocalStorage();
+                }
+            });
+        }
+        
+        // 初始化設備選擇列表
+        initializeDeviceSelection();
+        
+        // 頁面關閉前提示
+        window.addEventListener('beforeunload', function(e) {
+            if (currentProject.hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '您有未保存的變更，確定要離開嗎？';
+                return e.returnValue;
+            }
+        });
+        
+        // 原有的輔助函數保持不變
+        function updateFloorsPreview(systemIndex) {
+            const floors = document.getElementById(`floors-input-${systemIndex}`).value.split('\n')
+                .map(f => f.trim())
+                .filter(f => f.length > 0);
+            
+            document.getElementById(`floors-preview-${systemIndex}`).innerHTML = 
+                floors.map(f => `<span class="floor-tag">${f}</span>`).join('');
+        }
+        
+        function generateDeviceConfigUI() {
+            const tabsContent = document.getElementById('device-tabs-content');
+            tabsContent.innerHTML = '';
+            
+            currentProject.systems.forEach((system, index) => {
+                let systemTotal = 0;
+                if (system.devices && system.devices.length > 0) {
+                    systemTotal = system.devices.reduce((sum, d) => {
+                        const device = [...standardDeviceTypes, ...currentProject.additionalDevices].find(dev => dev.id === d.deviceId);
+                        return sum + (device && device.isK8 ? d.count * 2 : d.count);
+                    }, 0);
+                }
+                
+                const tabContent = document.createElement('div');
+                tabContent.id = `device-tab-${index}`;
+                tabContent.className = 'device-tab' + (index === 0 ? ' active' : '');
+                
+                let html = `
+                    <h4>系統分區: ${system.id} <span class="point-count">目前使用點數: (${systemTotal})</span></h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>設備類型</th>
+                                ${system.floors.map(floor => `<th>${floor}</th>`).join('')}
+                                <th>總數</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                currentProject.selectedDevices.forEach(device => {
+                    html += `
+                        <tr>
+                            <td>${device.name} (${device.code || 'CUS'})</td>
+                            ${system.floors.map(floor => `
+                                <td><input type="number" min="0" class="device-input" 
+                                     data-system="${index}" data-device="${device.id}" data-floor="${floor}" 
+                                     placeholder="0"></td>
+                            `).join('')}
+                            <td class="device-total" data-system="${index}" data-device="${device.id}">0</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+                
+                tabContent.innerHTML = html;
+                tabsContent.appendChild(tabContent);
+            });
+            
+            document.querySelectorAll('.device-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    updateDeviceTotal(this);
+                    currentProject.hasUnsavedChanges = true;
+                    scheduleAutoSave();
+                });
+                
+                const systemIndex = input.dataset.system;
+                const deviceId = input.dataset.device;
+                const floor = input.dataset.floor;
+                
+                const system = currentProject.systems[systemIndex];
+                if (system && system.devices) {
+                    const device = system.devices.find(d => d.deviceId == deviceId && d.floor === floor);
+                    if (device) input.value = device.count;
+                }
+            });
+            
+            currentProject.systems.forEach((system, systemIndex) => {
+                currentProject.selectedDevices.forEach(device => {
+                    const totalElement = document.querySelector(`.device-total[data-system="${systemIndex}"][data-device="${device.id}"]`);
+                    if (totalElement) {
+                        let total = 0;
+                        document.querySelectorAll(`.device-input[data-system="${systemIndex}"][data-device="${device.id}"]`).forEach(input => {
+                            total += parseInt(input.value) || 0;
+                        });
+                        totalElement.textContent = total;
+                    }
+                });
+                
+                updateSystemPointCount(systemIndex);
+            });
+            
+            updateAdditionalDevicesUI();
+        }
+        
+        function updateDeviceTotal(input) {
+            const systemIndex = parseInt(input.dataset.system);
+            const deviceId = parseInt(input.dataset.device);
+            const floor = input.dataset.floor;
+            
+            let total = 0;
+            document.querySelectorAll(`.device-input[data-system="${systemIndex}"][data-device="${deviceId}"]`).forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            
+            const totalElement = document.querySelector(`.device-total[data-system="${systemIndex}"][data-device="${deviceId}"]`);
+            if (totalElement) {
+                totalElement.textContent = total;
+                
+                if (total > 255) {
+                    totalElement.style.color = '#d32f2f';
+                    totalElement.style.fontWeight = 'bold';
+                    
+                    const warningElement = document.createElement('div');
+                    warningElement.className = 'warning';
+                    warningElement.textContent = `警告: 系統分區 ${systemIndex+1} 的設備總數超過255，可能超出總機容量限制！`;
+                    
+                    if (!document.querySelector(`.warning[data-system="${systemIndex}"]`)) {
+                        warningElement.dataset.system = systemIndex;
+                        const tabContent = document.getElementById(`device-tab-${systemIndex}`);
+                        if (tabContent) tabContent.insertBefore(warningElement, tabContent.firstChild);
+                    }
+                } else {
+                    totalElement.style.color = '';
+                    totalElement.style.fontWeight = '';
+                    
+                    const warningElement = document.querySelector(`.warning[data-system="${systemIndex}"]`);
+                    if (warningElement) warningElement.remove();
+                }
+            }
+            
+            updateSystemPointCount(systemIndex);
+        }
+        
+        function updateSystemPointCount(systemIndex) {
+            let systemTotal = 0;
+            
+            document.querySelectorAll(`.device-input[data-system="${systemIndex}"]`).forEach(input => {
+                const deviceId = parseInt(input.dataset.device);
+                const count = parseInt(input.value) || 0;
+                const device = [...standardDeviceTypes, ...currentProject.additionalDevices].find(d => d.id === deviceId);
+                
+                systemTotal += device && device.isK8 ? count * 2 : count;
+            });
+            
+            const pointCountElement = document.querySelector(`#device-tab-${systemIndex} .point-count`);
+            if (pointCountElement) {
+                pointCountElement.textContent = `目前使用點數: (${systemTotal})`;
+                
+                if (systemTotal > 255) pointCountElement.style.color = '#d32f2f';
+                else pointCountElement.style.color = '';
+            }
+        }
+        
+        function updateAdditionalDevicesUI() {
+            const container = document.getElementById('additional-devices-container');
+            container.innerHTML = '';
+            
+            currentProject.additionalDevices.forEach((device, index) => {
+                const div = document.createElement('div');
+                div.className = 'additional-device';
+                 div.innerHTML = `
+                    <input type="text" value="${device.name}" data-device-id="${device.id}" placeholder="設備名稱" style="width: 150px;">
+                    <input type="text" value="${device.code || ''}" data-device-id="${device.id}" placeholder="設備代碼" style="width: 100px;">
+                    <input type="text" value="${device.symbol || ''}" data-device-id="${device.id}" placeholder="代號" style="width: 60px;">
+                    <input type="number" step="0.1" value="${device.current || 0}" data-device-id="${device.id}" placeholder="消耗電流(mA)" style="width: 100px;">
+                    <button class="remove-device" data-device-id="${device.id}">刪除</button>
+                `;
+                container.appendChild(div);
+                
+                div.querySelector('.remove-device').addEventListener('click', function() {
+                    const deviceId = parseInt(this.dataset.deviceId);
+                    currentProject.additionalDevices = currentProject.additionalDevices.filter(d => d.id !== deviceId);
+                    currentProject.selectedDevices = currentProject.selectedDevices.filter(d => d.id !== deviceId);
+                    if (currentProject.deviceOrder) currentProject.deviceOrder = currentProject.deviceOrder.filter(id => id !== deviceId);
+                    initializeDeviceSelection();
+                    generateDeviceConfigUI();
+                    currentProject.hasUnsavedChanges = true;
+                    scheduleAutoSave();
+                });
+                
+                div.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('change', function() {
+                        const deviceId = parseInt(this.dataset.deviceId);
+                        const device = currentProject.additionalDevices.find(d => d.id === deviceId);
+                        if (device) {
+                            if (this.placeholder === "設備名稱") device.name = this.value.trim();
+                            else if (this.placeholder === "設備代碼") device.code = this.value.trim().toUpperCase();
+                            else if (this.placeholder === "代號") device.symbol = this.value.trim().toUpperCase();
+                            else if (this.placeholder === "消耗電流(mA)") device.current = parseFloat(this.value) || 0;
+                            
+                            const selectedDevice = currentProject.selectedDevices.find(d => d.id === deviceId);
+                            if (selectedDevice) {
+                                selectedDevice.name = device.name;
+                                selectedDevice.code = device.code;
+                                selectedDevice.symbol = device.symbol;
+                                selectedDevice.current = device.current;
+                            }
+                            initializeDeviceSelection();
+                            generateDeviceConfigUI();
+                            currentProject.hasUnsavedChanges = true;
+                            scheduleAutoSave();
+                        }
+                    });
+                });
+            });
+        }
+        
+        function collectDeviceData() {
+            const inputs = document.querySelectorAll('.device-input');
+            
+            currentProject.systems.forEach((system, systemIndex) => {
+                system.devices = [];
+                
+                inputs.forEach(input => {
+                    if (parseInt(input.dataset.system) === systemIndex) {
+                        const deviceId = parseInt(input.dataset.device);
+                        const floor = input.dataset.floor;
+                        const count = parseInt(input.value) || 0;
+                        
+                        if (count > 0) system.devices.push({ deviceId, floor, count });
+                    }
+                });
+            });
+        }
+        
+        function generateDeviceSummary() {
+            collectDeviceData();
+            
+            const container = document.getElementById('summary-container');
+            container.innerHTML = '';
+            
+            const allDevices = [...currentProject.selectedDevices];
+            
+            let html = `
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>設備類型</th>
+                            ${currentProject.systems.map(system => `<th>系統 ${system.id}</th>`).join('')}
+                            <th>總計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            const deviceTotals = {};
+            allDevices.forEach(device => {
+                deviceTotals[device.id] = {
+                    name: device.name,
+                    code: device.code,
+                    systemTotals: {},
+                    grandTotal: 0
+                };
+                
+                currentProject.systems.forEach(system => {
+                    const total = system.devices
+                        .filter(d => d.deviceId === device.id)
+                        .reduce((sum, d) => sum + d.count, 0);
+                    
+                    deviceTotals[device.id].systemTotals[system.id] = total;
+                    deviceTotals[device.id].grandTotal += total;
+                });
+            });
+            
+            allDevices.forEach(device => {
+                html += `
+                    <tr>
+                        <td>${device.name} (${device.code || 'CUS'})</td>
+                        ${currentProject.systems.map(system => `
+                            <td>${deviceTotals[device.id].systemTotals[system.id] || 0}</td>
+                        `).join('')}
+                        <td>${deviceTotals[device.id].grandTotal}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    <tr class="subtotal-row">
+                        <td>總計</td>
+                        ${currentProject.systems.map(system => {
+                            const systemTotal = allDevices.reduce((sum, device) => {
+                                return sum + (deviceTotals[device.id].systemTotals[system.id] || 0);
+                            }, 0);
+                            return `<td>${systemTotal}</td>`;
+                        }).join('')}
+                        <td>${allDevices.reduce((sum, device) => sum + deviceTotals[device.id].grandTotal, 0)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function generateResultTable() {
+            const resultDiv = document.getElementById('result-container');
+            let html = '';
+            
+            const panelType = document.getElementById('panel-type').value;
+            const panelModel = document.getElementById('panel-model').value.trim();
+            const isCMA = panelType === 'cma';
+            const numberingMethod = document.getElementById('result-numbering-method').value;
+            
+            // 第一部分：所有系統分區的總覽表格
+            html += `<h2>系統分區總覽</h2>`;
+            
+            // 先收集所有系統的數據
+            const systemData = [];
+            
+            currentProject.systems.forEach((system) => {
+                const originalFloors = [...system.floors];
+                const reversedFloors = [...system.floors].reverse();
+                
+                const floorData = {};
+                let nextNumber = 1;
+                const allDevices = [...currentProject.selectedDevices];
+                
+                // 根據編號方式處理設備編號
+                if (numberingMethod === "horizontal") {
+                    // 橫向編號：先編完一層樓的所有設備再往上一層
+                    reversedFloors.forEach(floor => {
+                        floorData[floor] = {};
+                        
+                        allDevices.forEach(device => {
+                            const deviceCount = system.devices
+                                .filter(d => d.floor === floor && d.deviceId === device.id)
+                                .reduce((sum, d) => sum + d.count, 0);
+                            
+                            if (deviceCount > 0) {
+                                if (device.isK8) {
+                                    // K8設備佔用2個點位
+                                    const start = nextNumber;
+                                    const end = start + (deviceCount * 2) - 1;
+                                    floorData[floor][device.id] = {
+                                        count: deviceCount,
+                                        range: `${formatNumberRange(start, end)} (${deviceCount}個設備)`,
+                                        start: start,
+                                        end: end,
+                                        name: device.name,
+                                        code: device.code,
+                                        isK8: true,
+                                        current: device.current || 0
+                                    };
+                                    nextNumber = end + 1;
+                                } else if (device.isK4 || device.isG4 || device.isS4 || device.isR4) {
+                                    // K4、G4、S4、R4設備
+                                    const start = nextNumber;
+                                    const end = start + deviceCount - 1;
+                                    floorData[floor][device.id] = {
+                                        count: deviceCount,
+                                        range: formatNumberRange(start, end), // 移除数量说明
+                                        start: start,
+                                        end: end,
+                                        name: device.name,
+                                        code: device.code,
+                                        current: device.current || 0
+                                    };
+                                    nextNumber = end + 1;
+                                } else {
+                                    // 普通設備
+                                    const start = nextNumber;
+                                    const end = start + deviceCount - 1;
+                                    floorData[floor][device.id] = {
+                                        count: deviceCount,
+                                        range: formatNumberRange(start, end),
+                                        start: start,
+                                        end: end,
+                                        name: device.name,
+                                        code: device.code,
+                                        current: device.current || 0
+                                    };
+                                    nextNumber = end + 1;
+                                }
+                            } else {
+                                floorData[floor][device.id] = {
+                                    count: '',
+                                    range: '',
+                                    start: nextNumber,
+                                    end: nextNumber - 1,
+                                    name: device.name,
+                                    code: device.code,
+                                    current: device.current || 0
+                                };
+                            }
+                        });
+                    });
+                } else if (numberingMethod === "vertical") {
+                    // 縱向編號：先編完一種設備的所有樓層再編下一種設備
+                    allDevices.forEach(device => {
+                        reversedFloors.forEach(floor => {
+                            if (!floorData[floor]) floorData[floor] = {};
+                            
+                            const deviceCount = system.devices
+                                .filter(d => d.floor === floor && d.deviceId === device.id)
+                                .reduce((sum, d) => sum + d.count, 0);
+                            
+                            if (deviceCount > 0) {
+                                if (device.isK8) {
+                                    // K8設備佔用2個點位
+                                    const start = nextNumber;
+                                    const end = start + (deviceCount * 2) - 1;
+                                    floorData[floor][device.id] = {
+                                        count: deviceCount,
+                                        range: `${formatNumberRange(start, end)} (${deviceCount}個設備)`,
+                                        start: start,
+                                        end: end,
+                                        name: device.name,
+                                        code: device.code,
+                                        isK8: true,
+                                        current: device.current || 0
+                                    };
+                                    nextNumber = end + 1;
+                                } else if (device.isK4 || device.isG4 || device.isS4 || device.isR4) {
+                                    // K4、G4、S4、R4設備
+                                    const start = nextNumber;
+                                    const end = start + deviceCount - 1;
+                                    floorData[floor][device.id] = {
+                                        count: deviceCount,
+                                    range: formatNumberRange(start, end), // 移除数量说明
+                                        start: start,
+                                        end: end,
+                                        name: device.name,
+                                        code: device.code,
+                                        current: device.current || 0
+                                    };
+                                    nextNumber = end + 1;
+                                } else {
+                                    // 普通設備
+                                    const start = nextNumber;
+                                    const end = start + deviceCount - 1;
+                                    floorData[floor][device.id] = {
+                                        count: deviceCount,
+                                        range: formatNumberRange(start, end),
+                                        start: start,
+                                        end: end,
+                                        name: device.name,
+                                        code: device.code,
+                                        current: device.current || 0
+                                    };
+                                    nextNumber = end + 1;
+                                }
+                            } else {
+                                floorData[floor][device.id] = {
+                                    count: '',
+                                    range: '',
+                                    start: nextNumber,
+                                    end: nextNumber - 1,
+                                    name: device.name,
+                                    code: device.code,
+                                    current: device.current || 0
+                                };
+                            }
+                        });
+                    });
+                } else if (numberingMethod === "mixed") {
+                    // 縱橫混合：先處理縱向設備，再處理橫向設備
+                    // 先處理縱向編號的設備
+                    allDevices.forEach(device => {
+                        if (currentProject.verticalNumberingDevices.includes(device.id)) {
+                            reversedFloors.forEach(floor => {
+                                if (!floorData[floor]) floorData[floor] = {};
+                                
+                                const deviceCount = system.devices
+                                    .filter(d => d.floor === floor && d.deviceId === device.id)
+                                    .reduce((sum, d) => sum + d.count, 0);
+                                
+                                if (deviceCount > 0) {
+                                    if (device.isK8) {
+                                        // K8設備佔用2個點位
+                                        const start = nextNumber;
+                                        const end = start + (deviceCount * 2) - 1;
+                                        floorData[floor][device.id] = {
+                                            count: deviceCount,
+                                            range: `${formatNumberRange(start, end)} (${deviceCount}個設備)`,
+                                            start: start,
+                                            end: end,
+                                            name: device.name,
+                                            code: device.code,
+                                            isK8: true,
+                                            current: device.current || 0
+                                        };
+                                        nextNumber = end + 1;
+                                    } else if (device.isK4 || device.isG4 || device.isS4 || device.isR4) {
+                                        // K4、G4、S4、R4設備
+                                        const start = nextNumber;
+                                        const end = start + deviceCount - 1;
+                                        floorData[floor][device.id] = {
+                                            count: deviceCount,
+                                            range: formatNumberRange(start, end), // 移除数量说明
+                                            start: start,
+                                            end: end,
+                                            name: device.name,
+                                            code: device.code,
+                                            current: device.current || 0
+                                        };
+                                        nextNumber = end + 1;
+                                    } else {
+                                        // 普通設備
+                                        const start = nextNumber;
+                                        const end = start + deviceCount - 1;
+                                        floorData[floor][device.id] = {
+                                            count: deviceCount,
+                                            range: formatNumberRange(start, end),
+                                            start: start,
+                                            end: end,
+                                            name: device.name,
+                                            code: device.code,
+                                            current: device.current || 0
+                                        };
+                                        nextNumber = end + 1;
+                                    }
+                                } else {
+                                    floorData[floor][device.id] = {
+                                        count: '',
+                                        range: '',
+                                        start: nextNumber,
+                                        end: nextNumber - 1,
+                                        name: device.name,
+                                        code: device.code,
+                                        current: device.current || 0
+                                    };
+                                }
+                            });
+                        }
+                    });
+
+                    // 再處理橫向編號的設備
+                    reversedFloors.forEach(floor => {
+                        if (!floorData[floor]) floorData[floor] = {};
+                        
+                        allDevices.forEach(device => {
+                            if (!currentProject.verticalNumberingDevices.includes(device.id)) {
+                                const deviceCount = system.devices
+                                    .filter(d => d.floor === floor && d.deviceId === device.id)
+                                    .reduce((sum, d) => sum + d.count, 0);
+                                
+                                if (deviceCount > 0) {
+                                    if (device.isK8) {
+                                        // K8設備佔用2個點位
+                                        const start = nextNumber;
+                                        const end = start + (deviceCount * 2) - 1;
+                                        floorData[floor][device.id] = {
+                                            count: deviceCount,
+                                            range: `${formatNumberRange(start, end)} (${deviceCount}個設備)`,
+                                            start: start,
+                                            end: end,
+                                            name: device.name,
+                                            code: device.code,
+                                            isK8: true,
+                                            current: device.current || 0
+                                        };
+                                        nextNumber = end + 1;
+                                    } else if (device.isK4 || device.isG4 || device.isS4 || device.isR4) {
+                                        // K4、G4、S4、R4設備
+                                        const start = nextNumber;
+                                        const end = start + deviceCount - 1;
+                                        floorData[floor][device.id] = {
+                                            count: deviceCount,
+                                            range: formatNumberRange(start, end), // 移除数量说明
+                                            start: start,
+                                            end: end,
+                                            name: device.name,
+                                            code: device.code,
+                                            current: device.current || 0
+                                        };
+                                        nextNumber = end + 1;
+                                    } else {
+                                        // 普通設備
+                                        const start = nextNumber;
+                                        const end = start + deviceCount - 1;
+                                        floorData[floor][device.id] = {
+                                            count: deviceCount,
+                                            range: formatNumberRange(start, end),
+                                            start: start,
+                                            end: end,
+                                            name: device.name,
+                                            code: device.code,
+                                            current: device.current || 0
+                                        };
+                                        nextNumber = end + 1;
+                                    }
+                                } else {
+                                    floorData[floor][device.id] = {
+                                        count: '',
+                                        range: '',
+                                        start: nextNumber,
+                                        end: nextNumber - 1,
+                                        name: device.name,
+                                        code: device.code,
+                                        current: device.current || 0
+                                    };
+                                }
+                            }
+                        });
+                    });
+                }
+                
+                // 計算系統總消耗電流
+                const systemDeviceTotals = {};
+                let totalCurrent = 0;
+                
+                allDevices.forEach(device => {
+                    const total = system.devices
+                        .filter(d => d.deviceId === device.id)
+                        .reduce((sum, d) => sum + d.count, 0);
+                    
+                    systemDeviceTotals[device.id] = total;
+                    totalCurrent += total * (device.current || 0);
+                });
+                
+                // 保存系統數據
+                systemData.push({
+                    system: system,
+                    floorData: floorData,
+                    systemDeviceTotals: systemDeviceTotals,
+                    totalCurrent: totalCurrent,
+                    allDevices: allDevices,
+                    originalFloors: originalFloors,
+                    reversedFloors: reversedFloors
+                });
+            });
+            
+            // 生成系統分區表格（按照原始格式）
+            systemData.forEach((data, index) => {
+                const { system, floorData, systemDeviceTotals, totalCurrent, allDevices, originalFloors } = data;
+                
+                const currentWarning = totalCurrent > 117 ? 
+                    `<span style="color: #d32f2f; font-weight: bold;">警告: 總消耗電流: ${totalCurrent.toFixed(2)} mA (⚠️超過8成負荷,注意NG147mA限制)</span>` : 
+                    `總消耗電流: ${totalCurrent.toFixed(2)} mA`;
+                
+                html += `
+                    <h3>系統分區: ${system.id}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">系統</th>
+                                <th rowspan="2">樓層</th>
+                                ${allDevices.map(device => `<th colspan="2">${device.name}<br>(${device.code})</th>`).join('')}
+                                <th rowspan="2">總數</th>
+                            </tr>
+                            <tr>
+                                ${allDevices.map(() => `<th>數量</th><th>編號</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                originalFloors.forEach(floor => {
+                    const total = system.devices
+                        .filter(d => d.floor === floor)
+                        .reduce((sum, d) => sum + d.count, 0);
+                    
+                    html += `
+                        <tr>
+                            <td>${system.id}</td>
+                            <td>${floor}</td>
+                            ${allDevices.map(device => `
+                                <td>${floorData[floor][device.id]?.count || ''}</td>
+                                <td class="device-number">${floorData[floor][device.id]?.range || ''}</td>
+                            `).join('')}
+                            <td>${total}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        <tr class="subtotal-row">
+                            <td colspan="2">小計</td>
+                            ${allDevices.map(device => `
+                                <td>${systemDeviceTotals[device.id] || ''}</td>
+                                <td></td>
+                            `).join('')}
+                            <td>${Object.values(systemDeviceTotals).reduce((sum, count) => sum + count, 0)}</td>
+                        </tr>
+                        <tr class="current-row">
+                            <td colspan="${2 + (allDevices.length * 2)}">${currentWarning}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                `;
+            });
+            
+            // 第二部分：各系統的詳細設備編號列表
+            html += `<h2>設備編號詳細列表</h2>`;
+            
+            systemData.forEach((data, index) => {
+                const { system, floorData, systemDeviceTotals, totalCurrent, allDevices, reversedFloors } = data;
+                
+                html += `<h3 class="system-title">系統分區: ${system.id}</h3>`;
+                html += `<table class="device-table">`;
+                html += `
+                    <thead>
+                        <tr>
+                            <th>序號</th>
+                            <th>系統</th>
+                            <th>樓層</th>
+                            <th>設備名稱</th>
+                            <th>代號</th>
+                            <th>設備編號</th>
+                            <th>區域名稱</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+
+                let sequence = 1;
+                reversedFloors.forEach(floor => {
+                    allDevices.forEach(device => {
+                        const deviceData = floorData[floor][device.id];
+                        if (deviceData && deviceData.count > 0) {
+                            // 生成設備編號
+                        for (let i = 0; i < deviceData.count; i++) {
+                            let deviceNumber;
+                            
+                            if (device.isK8) {
+                                // K8設備每個設備佔用2個連續編號，每個編號有4個子編號
+                                const baseNum1 = deviceData.start + (i * 2);
+                                const baseNum2 = baseNum1 + 1;
+                                
+                                // 輸出8個子編號
+                                for (let j = 1; j <= 4; j++) {
+                                    deviceNumber = isCMA ? 
+                                        `<span class="cma-prefix">${panelModel}</span>-${system.id}-${baseNum1.toString().padStart(3, '0')}-${j}` : 
+                                        `${system.id}-${baseNum1.toString().padStart(3, '0')}-${j}`;
+                                    
+                                    html += `
+                                        <tr>
+                                            <td>${sequence++}</td>
+                                            <td>${system.id}</td>
+                                            <td>${floor}</td>
+                                            <td>${device.name} (${device.code}) 設備${i+1}</td>
+                                            <td>${device.symbol || ''}</td>
+                                            <td class="device-number">${deviceNumber}</td>
+                                            <td></td>
+                                        </tr>
+                                    `;
+                                }
+                                
+                                for (let j = 1; j <= 4; j++) {
+                                    deviceNumber = isCMA ? 
+                                        `<span class="cma-prefix">${panelModel}</span>-${system.id}-${baseNum2.toString().padStart(3, '0')}-${j}` : 
+                                        `${system.id}-${baseNum2.toString().padStart(3, '0')}-${j}`;
+                                    
+                                    html += `
+                                        <tr>
+                                            <td>${sequence++}</td>
+                                            <td>${system.id}</td>
+                                            <td>${floor}</td>
+                                            <td>${device.name} (${device.code}) 設備${i+1}</td>
+                                            <td>${device.symbol || ''}</td>
+                                            <td class="device-number">${deviceNumber}</td>
+                                            <td></td>
+                                        </tr>
+                                    `;
+                                }
+                            } else if (device.isK4 || device.isG4 || device.isS4 || device.isR4) {
+                                // K4、G4、S4、R4設備每個設備有4個子編號
+                                const baseNum = deviceData.start + i;
+                                
+                                for (let j = 1; j <= 4; j++) {
+                                    deviceNumber = isCMA ? 
+                                        `<span class="cma-prefix">${panelModel}</span>-${system.id}-${baseNum.toString().padStart(3, '0')}-${j}` : 
+                                        `${system.id}-${baseNum.toString().padStart(3, '0')}-${j}`;
+                                    
+                                    html += `
+                                        <tr>
+                                            <td>${sequence++}</td>
+                                            <td>${system.id}</td>
+                                            <td>${floor}</td>
+                                            <td>${device.name} (${device.code}) 設備${i+1}</td>
+                                            <td>${device.symbol || ''}</td>
+                                            <td class="device-number">${deviceNumber}</td>
+                                            <td></td>
+                                        </tr>
+                                    `;
+                                }
+                            } else {
+                                // 普通設備只有主編號，沒有子編號
+                                const baseNum = deviceData.start + i;
+                                deviceNumber = isCMA ? 
+                                    `<span class="cma-prefix">${panelModel}</span>-${system.id}-${baseNum.toString().padStart(3, '0')}` : 
+                                    `${system.id}-${baseNum.toString().padStart(3, '0')}`;
+                                
+                                html += `
+                                    <tr>
+                                        <td>${sequence++}</td>
+                                        <td>${system.id}</td>
+                                        <td>${floor}</td>
+                                        <td>${device.name} (${device.code})</td>
+                                        <td>${device.symbol || ''}</td>
+                                        <td class="device-number">${deviceNumber}</td>
+                                        <td></td>
+                                    </tr>
+                                `;
+                            }
+                        }
+                        }
+                    });
+                });
+
+                html += `</tbody></table>`;
+                
+                html += `<div class="page-break"></div>`;
+            });
+            
+            resultDiv.innerHTML = html;
+        }
+
+        // 輔助函數：格式化數字範圍
+        function formatNumberRange(start, end) {
+            return start === end ? start.toString().padStart(3, '0') : 
+                `${start.toString().padStart(3, '0')}-${end.toString().padStart(3, '0')}`;
+        }
+
+        function extractFloorNumber(floorStr) {
+            if (floorStr.includes('B')) {
+                const num = parseInt(floorStr.replace('B', '').replace('F', ''));
+                return -num;
+            }
+            return parseInt(floorStr.replace('F', '')) || 0;
+        }
+    </script>
+	
+    <!-- 返回按鈕應該在這裡 -->
+    <button onclick="window.location.href='index.html'" 
+            style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 9999;">
+        返回主選單
+    </button>
+	
+	
+</body>
+</html>

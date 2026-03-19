@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireNET L@titude 系統配置查看器  </title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .upload-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px dashed #dee2e6;
+        }
+        
+        .file-input {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .btn-toggle {
+            background-color: #9b59b6;
+        }
+        
+        .btn-toggle:hover {
+            background-color: #8e44ad;
+        }
+        
+        .btn-toggle.active {
+            background-color: #8e44ad;
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #9b59b6;
+        }
+        
+        .search-section {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .data-section {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+            table-layout: fixed;
+        }
+        
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            font-weight: bold;
+        }
+        
+        .col-network { width: 100px; }
+        .col-addr { width: 100px; }
+        .col-name { width: 250px; }
+        .col-type { width: 150px; }
+        .col-location { width: 300px; }
+        .col-category { width: 80px; }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .device-component {
+            background-color: #f8f9fa;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .panel-info {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .section-title {
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        
+        .device-count {
+            background-color: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .cause-effects-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #9b59b6;
+        }
+        
+        .cause-effects-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .cause-effect-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 6px;
+            border: 1px solid #e1e1e1;
+        }
+        
+        .cause-effect-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .cause-effect-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .causes-list, .effects-list {
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .causes-title, .effects-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .cause-item, .effect-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #e1e1e1;
+            font-size: 13px;
+        }
+        
+        .cause-location, .effect-location {
+            font-size: 12px;
+            color: #666;
+            margin-left: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #3498db;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .page-info {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .case-info-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .case-info-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .version-info {
+            text-align: right;
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+            
+            .search-section {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: 100%;
+            }
+            
+            .cause-effect-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .col-network { width: 80px; }
+            .col-addr { width: 80px; }
+            .col-name { width: 200px; }
+            .col-type { width: 120px; }
+            .col-location { width: 250px; }
+            .col-category { width: 70px; }
+            
+            .case-info-section {
+                flex-direction: column;
+            }
+            
+            .case-info-input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="version-info">Ver.2 2025/11/25 HTBO/Jim - R2ML修正版</div>  
+        <h1>FireNET L@titude 系統配置查看器 </h1>
+       
+        <div class="case-info-section">
+            <input type="text" id="caseName" class="case-info-input" placeholder="案件名稱">
+            <input type="text" id="dataSetter" class="case-info-input" placeholder="資料設定者">
+        </div>
+        
+        <div class="upload-section">
+            <h2>上傳CSV檔案</h2>
+            <p>請選擇FireNET L@titude系統導出的CSV配置檔案</p>
+            <input type="file" id="csvFile" class="file-input" accept=".csv">
+            <button id="loadBtn" class="btn">載入檔案</button>
+        </div>
+        
+        <div id="statusArea"></div>
+        <div id="progressArea" style="display: none;"></div>
+        
+        <div id="searchSection" class="search-section" style="display: none;">
+            <button id="exportHtmlBtn" class="btn">匯出為HTML表格</button>
+            <button id="toggleCauseEffectsBtn" class="btn btn-toggle">顯示 Cause and Effects</button>
+            <button id="toggleCategoryBtn" class="btn btn-toggle">顯示設備類別</button>
+        </div>
+        
+        <div id="dataSection" class="data-section"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const csvFileInput = document.getElementById('csvFile');
+            const loadBtn = document.getElementById('loadBtn');
+            const searchSection = document.getElementById('searchSection');
+            const exportHtmlBtn = document.getElementById('exportHtmlBtn');
+            const toggleCauseEffectsBtn = document.getElementById('toggleCauseEffectsBtn');
+            const toggleCategoryBtn = document.getElementById('toggleCategoryBtn');
+            const dataSection = document.getElementById('dataSection');
+            const statusArea = document.getElementById('statusArea');
+            const progressArea = document.getElementById('progressArea');
+            const caseNameInput = document.getElementById('caseName');
+            const dataSetterInput = document.getElementById('dataSetter');
+            
+            let panelsData = [];
+            let causeEffectsData = [];
+            let showCauseEffects = false;
+            let showCategory = false;
+            let allDevices = [];
+            let displayDevices = [];
+            const MAX_DISPLAY_DEVICES = 5000;
+
+            // 顯示進度條
+            function showProgress(current, total, message) {
+                const percent = Math.round((current / total) * 100);
+                progressArea.innerHTML = `
+                    <div class="status info">
+                        <div>${message}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percent}%"></div>
+                        </div>
+                        <div class="progress-text">${current} / ${total} (${percent}%)</div>
+                    </div>
+                `;
+                progressArea.style.display = 'block';
+            }
+
+            function hideProgress() {
+                progressArea.style.display = 'none';
+                progressArea.innerHTML = '';
+            }
+
+            // 顯示狀態資訊
+            function showStatus(message, type) {
+                statusArea.innerHTML = `<div class="status ${type}">${message}</div>`;
+                
+                const timeout = type === 'error' ? 8000 : 5000;
+                setTimeout(() => {
+                    if (statusArea.innerHTML.includes(message)) {
+                        statusArea.innerHTML = '';
+                    }
+                }, timeout);
+            }
+
+            // 載入CSV檔案
+            loadBtn.addEventListener('click', function() {
+                const file = csvFileInput.files[0];
+                if (!file) {
+                    showStatus('請選擇CSV檔案', 'error');
+                    return;
+                }
+                
+                loadBtn.disabled = true;
+                loadBtn.textContent = '載入中...';
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const text = e.target.result;
+                        parseCSV(text);
+                    } catch (error) {
+                        console.error('解析CSV時出錯:', error);
+                        showStatus('解析CSV檔案時出錯: ' + error.message, 'error');
+                        loadBtn.disabled = false;
+                        loadBtn.textContent = '載入檔案';
+                        hideProgress();
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showStatus('讀取檔案時出錯，請確保檔案格式正確', 'error');
+                    loadBtn.disabled = false;
+                    loadBtn.textContent = '載入檔案';
+                    hideProgress();
+                };
+                
+                reader.readAsText(file, 'UTF-8');
+            });
+
+            // 改進的CSV解析函數 - 修正R2ML模組處理
+            function parseCSV(text) {
+                panelsData = [];
+                causeEffectsData = [];
+                allDevices = [];
+                displayDevices = [];
+                dataSection.innerHTML = '';
+                
+                const lines = text.split(/\r?\n/);
+                console.log('總行數:', lines.length);
+                
+                let currentPanel = null;
+                let devices = [];
+                let inDeviceSection = false;
+                let currentSection = '';
+                let sectionDeviceCount = 0;
+                let inCauseEffectsSection = false;
+                let currentCauseEffect = null;
+                let readingCauses = false;
+                let readingEffects = false;
+
+                showProgress(0, lines.length, '正在解析檔案...');
+
+                let processedLines = 0;
+                const BATCH_SIZE = 2000;
+
+                function processBatch() {
+                    const startTime = performance.now();
+                    const endIndex = Math.min(processedLines + BATCH_SIZE, lines.length);
+                    
+                    for (let i = processedLines; i < endIndex; i++) {
+                        let line = lines[i].trim();
+                        if (line === '') continue;
+                        
+                        // 1. 改進的Panel檢測邏輯
+                        if (line.includes('"Panel","')) {
+                            const panelMatch = line.match(/"Panel","([^"]+)"/);
+                            if (panelMatch) {
+                                const panelName = panelMatch[1].trim();
+                                console.log('✅ 檢測到Panel:', panelName);
+                                
+                                // 儲存前一個Panel
+                                if (currentPanel) {
+                                    currentPanel.devices = [...devices];
+                                    const shouldSavePanel = currentPanel.devices.length > 0 || currentPanel.networkAddress;
+                                    
+                                    if (shouldSavePanel) {
+                                        panelsData.push(currentPanel);
+                                        allDevices = allDevices.concat(currentPanel.devices);
+                                        console.log('💾💾💾💾 儲存Panel:', currentPanel.name, 
+                                            '網路地址:', currentPanel.networkAddress, 
+                                            '設備數:', currentPanel.devices.length);
+                                    } else {
+                                        console.log('❌❌❌❌ 跳過空Panel:', currentPanel.name);
+                                    }
+                                    devices = [];
+                                }
+                                
+                                // 創建新Panel
+                                currentPanel = {
+                                    name: panelName,
+                                    networkAddress: '',
+                                    devices: []
+                                };
+                                
+                                console.log('🆕🆕🆕🆕🆕🆕🆕🆕🆕 創建新Panel:', panelName);
+                                inDeviceSection = false;
+                                currentSection = '';
+                                sectionDeviceCount = 0;
+                                
+                                // 立即查找Network Address
+                                let addressFound = false;
+                                for (let j = i + 1; j < Math.min(i + 20, lines.length); j++) {
+                                    const nextLine = lines[j].trim();
+                                    if (nextLine.includes('"Network Address"')) {
+                                        const addressMatch = nextLine.match(/"Network Address","([^"]+)"/);
+                                        if (addressMatch) {
+                                            currentPanel.networkAddress = addressMatch[1].trim();
+                                            addressFound = true;
+                                            console.log('🔗🔗🔗🔗 找到Network Address:', currentPanel.networkAddress, 'for', currentPanel.name);
+                                            break;
+                                        }
+                                    }
+                                    // 如果遇到下一個Panel或重要區段，停止查找
+                                    if (nextLine.includes('"Panel","') || 
+                                        nextLine.includes(' - Loop') ||
+                                        nextLine.includes('Cause and Effects')) {
+                                        break;
+                                    }
+                                }
+                                
+                                if (!addressFound) {
+                                    console.log('⚠️ 未找到Network Address for', currentPanel.name);
+                                }
+                                continue;
+                            }
+                        }
+                        
+                        // 2. 獨立的Network Address解析
+                        if (line.includes('"Network Address"') && currentPanel) {
+                            const addressMatch = line.match(/"Network Address","([^"]+)"/);
+                            if (addressMatch && !currentPanel.networkAddress) {
+                                currentPanel.networkAddress = addressMatch[1].trim();
+                                console.log('🔗🔗🔗🔗 補充Network Address:', currentPanel.networkAddress, 'for', currentPanel.name);
+                                continue;
+                            }
+                        }
+                        
+                        // 3. Cause and Effects檢測
+                        if (line.includes('Cause and Effects') && !line.includes('Cause and Effect Flags')) {
+                            inCauseEffectsSection = true;
+                            inDeviceSection = false;
+                            readingCauses = false;
+                            readingEffects = false;
+                            
+                            if (currentCauseEffect && currentCauseEffect.name) {
+                                causeEffectsData.push(currentCauseEffect);
+                                currentCauseEffect = null;
+                            }
+                            continue;
+                        }
+                        
+                        // 4. 解析Cause and Effects資料
+                        if (inCauseEffectsSection) {
+                            if (line.startsWith('"Name","')) {
+                                if (currentCauseEffect && currentCauseEffect.name) {
+                                    causeEffectsData.push(currentCauseEffect);
+                                }
+                                
+                                const nameMatch = line.match(/"Name","([^"]+)"/);
+                                if (nameMatch) {
+                                    currentCauseEffect = {
+                                        name: nameMatch[1],
+                                        type: '',
+                                        operator: '',
+                                        effect: '',
+                                        causes: [],
+                                        effects: []
+                                    };
+                                    readingCauses = false;
+                                    readingEffects = false;
+                                }
+                                continue;
+                            }
+                            
+                            if (currentCauseEffect) {
+                                if (line.startsWith('"Type","')) {
+                                    const typeMatch = line.match(/"Type","([^"]+)"/);
+                                    if (typeMatch) currentCauseEffect.type = typeMatch[1];
+                                    continue;
+                                }
+                                if (line.startsWith('"Operator","')) {
+                                    const operatorMatch = line.match(/"Operator","([^"]+)"/);
+                                    if (operatorMatch) currentCauseEffect.operator = operatorMatch[1];
+                                    continue;
+                                }
+                                if (line.startsWith('"Effect","')) {
+                                    const effectMatch = line.match(/"Effect","([^"]+)"/);
+                                    if (effectMatch) currentCauseEffect.effect = effectMatch[1];
+                                    continue;
+                                }
+                                if (line.startsWith('"Causes","Location Text"')) {
+                                    readingCauses = true;
+                                    readingEffects = false;
+                                    continue;
+                                }
+                                if (line.startsWith('"Effects","Location Text"')) {
+                                    readingCauses = false;
+                                    readingEffects = true;
+                                    continue;
+                                }
+                                
+                                if ((readingCauses || readingEffects) && line.startsWith('" P')) {
+                                    try {
+                                        const cleanLine = line.replace(/^" /, '').replace(/"$/, '');
+                                        const parts = cleanLine.split('","');
+                                        if (parts.length >= 2) {
+                                            const item = {
+                                                device: parts[0].trim(),
+                                                location: parts[1].trim()
+                                            };
+                                            if (readingCauses) {
+                                                currentCauseEffect.causes.push(item);
+                                            } else {
+                                                currentCauseEffect.effects.push(item);
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.warn('解析Cause/Effect行時出錯:', line, error);
+                                    }
+                                    continue;
+                                }
+                            }
+                            
+                            if (line.includes('Cause and Effect Flags') || 
+                                line.includes('L@titude User Accounts') ||
+                                line.includes('Network Notes:')) {
+                                inCauseEffectsSection = false;
+                                readingCauses = false;
+                                readingEffects = false;
+                                if (currentCauseEffect && currentCauseEffect.name) {
+                                    causeEffectsData.push(currentCauseEffect);
+                                    currentCauseEffect = null;
+                                }
+                                continue;
+                            }
+                        }
+                        
+                        // 5. 改進的設備區段檢測
+                        const loopSectionMatch = line.match(/(.+?)\s+-\s+Loop\s+(\d+)\s*\(.*?(\d+).*?Devices?\)/i);
+                        if (loopSectionMatch && currentPanel) {
+                            currentSection = line;
+                            inDeviceSection = true;
+                            sectionDeviceCount = parseInt(loopSectionMatch[3]) || 0;
+                            console.log(`🔍🔍🔍🔍 檢測到設備區段: ${currentSection}, 設備數量: ${sectionDeviceCount}`);
+                            
+                            // 特別標記Network#1的區段
+                            if (currentPanel.networkAddress === '1') {
+                                console.log('🎯🎯🎯🎯 Network#1 設備區段檢測成功:', currentSection);
+                            }
+                            continue;
+                        }
+                        
+                        // 6. 改進的設備資料解析 - 修正R2ML模組處理
+                        if (inDeviceSection && currentPanel) {
+                            // 更寬鬆的設備行檢測
+                            const isDeviceLine = line.match(/^"\d+\.\d+/); // 地址格式: "001.00"
+                            const isAlternativeDeviceLine = line.match(/^"\d+/); // 備選格式: "001"
+                            const isNotHeader = !line.includes('Panel') &&
+                                               !line.includes('Addr","Name"') &&
+                                               !line.includes('"Addr","Name","Zone","Type"') &&
+                                               !line.includes('Zone'); // 新增：排除包含Zone的行
+                            
+                            if ((isDeviceLine || isAlternativeDeviceLine) && isNotHeader) {
+                                try {
+                                    const rowData = parseCSVLine(line);
+                                    if (rowData.length >= 2) {
+                                        const deviceAddr = rowData[0] || '';
+                                        const deviceName = rowData[1] || '';
+                                        const deviceType = rowData[3] || ''; // 跳过Zone列(索引2)
+                                        
+                                        // 檢查是否是Zone數據行（Zone列有值但其他關鍵列為空）
+                                        const isZoneData = rowData[2] && rowData[2].trim() && 
+                                                         (!rowData[1] || !rowData[1].trim()) &&
+                                                         (!rowData[3] || !rowData[3].trim());
+                                        
+                                        if (isZoneData) {
+                                            console.log('❌ 跳過Zone數據:', line.substring(0, 50));
+                                            continue; // 跳过Zone数据
+                                        }
+                                        
+                                        // 改進的模組組件判斷邏輯：保留所有設備但標記類型
+                                        let deviceCategory = 'main'; // main-主設備, component-子組件
+                                        
+                                        if (deviceAddr.includes('.')) {
+                                            const decimalPart = deviceAddr.split('.')[1];
+                                            if (decimalPart === '00' || decimalPart === '0') {
+                                                deviceCategory = 'main'; // 主設備
+                                            } else {
+                                                deviceCategory = 'component'; // 子組件
+                                            }
+                                        }
+                                        
+                                        // 改進的Location Text處理 - 跳过Zone列
+                                        let locationText = '';
+                                        if (rowData.length >= 9) {
+                                            locationText = rowData[8] || ''; // 跳过Zone列(索引2)
+                                        } else if (rowData.length > 4) {
+                                            locationText = rowData[4] || ''; // 调整索引
+                                        }
+                                        
+                                        // 清除Location Text中的雜亂數據
+                                        if (locationText && 
+                                            (locationText.includes('Flags') || 
+                                             locationText.includes('Action') ||
+                                             locationText.includes('Delay') ||
+                                             locationText.includes('Zone'))) { // 新增：排除Zone相关
+                                            locationText = '';
+                                        }
+                                        
+                                        const device = {
+                                            addr: deviceAddr,
+                                            name: deviceName,
+                                            type: deviceType,
+                                            location: locationText,
+                                            category: deviceCategory, // 新增：設備類別
+                                            section: currentSection,
+                                            sectionDeviceCount: sectionDeviceCount,
+                                            panelNetworkAddress: currentPanel.networkAddress,
+                                            panelName: currentPanel.name
+                                        };
+                                        devices.push(device);
+                                        
+                                        // 調試：顯示所有R2ML設備
+                                        if (deviceName.includes('R2ML')) {
+                                            console.log('🔧🔧 R2ML 設備:', device.addr, device.category, device.name, device.location);
+                                        }
+                                        
+                                        // 調試：顯示Network#1的設備
+                                        if (currentPanel.networkAddress === '1') {
+                                            console.log('🎯🎯🎯🎯 Network#1 設備:', device.addr, device.category, device.name, device.location);
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.warn('解析設備行時出錯:', line, error);
+                                }
+                                continue;
+                            }
+                        }
+                        
+                        // 7. 設備區段結束檢測
+                        if (inDeviceSection) {
+                            const isNewSection = line.includes(' - Loop') || 
+                                               line.includes('"Panel","') ||
+                                               line.includes('Cause and Effects') ||
+					   
+					   line.includes(' - Network Interface') ||
+                            line.includes(' - I/O Module -') ||
+                            line.match(/^[A-Z]/); // 新的大寫字母開頭行
+                            
+                            if (isNewSection) {
+                                inDeviceSection = false;
+                                console.log('🔚🔚🔚🔚 設備區段結束，轉到:', line.substring(0, 50));
+                            }
+                        }
+                    }
+                    
+                    processedLines = endIndex;
+                    
+                    const batchTime = performance.now() - startTime;
+                    const estimatedRemaining = ((lines.length - processedLines) / BATCH_SIZE) * batchTime;
+                    
+                    showProgress(
+                        processedLines, 
+                        lines.length, 
+                        `正在解析檔案... (已處理 ${processedLines} 行，預計剩餘: ${Math.round(estimatedRemaining / 1000)} 秒)`
+                    );
+                    
+                    if (processedLines < lines.length) {
+                        setTimeout(processBatch, 10);
+                    } else {
+                        finishParsing();
+                    }
+                }
+                
+                function finishParsing() {
+                    console.log('=== 完成解析，開始最終處理 ===');
+                    
+                    // 改進的最後一個Panel保存邏輯
+                    if (currentPanel) {
+                        currentPanel.devices = [...devices];
+                        const shouldSavePanel = currentPanel.devices.length > 0 || currentPanel.networkAddress;
+                        
+                        if (shouldSavePanel) {
+                            panelsData.push(currentPanel);
+                            allDevices = allDevices.concat(currentPanel.devices);
+                            console.log('💾💾💾💾 保存最後一個Panel:', currentPanel.name, 
+                                '設備數:', currentPanel.devices.length, 
+                                '網路地址:', currentPanel.networkAddress);
+                        } else {
+                            console.log('❌❌❌❌ 跳過最後一個空Panel:', currentPanel.name);
+                        }
+                    }
+                    
+                    // 保存最後一個Cause and Effect
+                    if (currentCauseEffect && currentCauseEffect.name) {
+                        causeEffectsData.push(currentCauseEffect);
+                        console.log('💾💾💾💾 保存最後一個Cause and Effect:', currentCauseEffect.name);
+                    }
+                    
+                    // 計算主設備數量（統計用）
+                    const mainDeviceCount = countMainDevices(allDevices);
+                    const totalEntries = allDevices.length;
+                    
+                    // 設定顯示設備
+                    displayDevices = allDevices.slice(0, MAX_DISPLAY_DEVICES);
+                    
+                    hideProgress();
+                    
+                    // 詳細的調試信息輸出
+                    console.log('=== 解析結果總結 ===');
+                    console.log('Panel 數量:', panelsData.length);
+                    console.log('設備總數（主設備）:', mainDeviceCount);
+                    console.log('設備條目總數（含子組件）:', totalEntries);
+                    console.log('Cause and Effects 數量:', causeEffectsData.length);
+                    
+                    console.log('=== 所有解析的Panel ===');
+                    panelsData.forEach((panel, index) => {
+                        const panelMainDevices = countMainDevices(panel.devices);
+                        console.log(`Panel ${index}:`, {
+                            name: panel.name,
+                            networkAddress: panel.networkAddress,
+                            deviceCount: panelMainDevices,
+                            totalEntries: panel.devices.length
+                        });
+                        
+                        // 特別顯示Network#1的信息
+                        if (panel.networkAddress === '1') {
+                            console.log('🎯🎯🎯🎯🎯🎯🎯🎯 === NETWORK#1 PANEL 找到啦! ===');
+                            console.log('設備示例:', panel.devices.slice(0, 5));
+                        }
+                    });
+                    
+                    if (panelsData.length === 0) {
+                        showStatus('解析完成但未找到任何Panel資料', 'error');
+                    } else {
+                        let statusMessage = `檔案載入成功！找到 ${panelsData.length} 個控制盤，${mainDeviceCount} 個主設備`;
+                        
+                        if (totalEntries > mainDeviceCount) {
+                            statusMessage += ` (包含 ${totalEntries - mainDeviceCount} 個子組件，總計 ${totalEntries} 個條目)`;
+                        }
+                        
+                        // 特別顯示Network#1信息
+                        const network1Panel = panelsData.find(p => p.networkAddress === '1');
+                        if (network1Panel && network1Panel.devices.length > 0) {
+                            const network1MainDevices = countMainDevices(network1Panel.devices);
+                            statusMessage += ` (包含 Network ${network1Panel.networkAddress}: ${network1MainDevices} 主設備)`;
+                        }
+                        
+                        if (totalEntries > MAX_DISPLAY_DEVICES) {
+                            statusMessage += ` (網頁僅顯示前 ${MAX_DISPLAY_DEVICES} 筆設備資料)`;
+                        }
+                        
+                        if (causeEffectsData.length > 0) {
+                            statusMessage += `，${causeEffectsData.length} 個 Cause and Effects 項目`;
+                        }
+                        
+                        showStatus(statusMessage, 'success');
+                    }
+                    
+                    searchSection.style.display = 'flex';
+                    loadBtn.disabled = false;
+                    loadBtn.textContent = '載入檔案';
+                    
+                    // 顯示資料
+                    displayData();
+                }
+
+                // 開始處理
+                processBatch();
+            }
+
+            // 計算主設備數量
+            function countMainDevices(devices) {
+                return devices.filter(device => device.category === 'main').length;
+            }
+
+            // 改進的CSV行解析函數
+            function parseCSVLine(line) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                let quoteCount = 0;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    
+                    if (char === '"') {
+                        quoteCount++;
+                        if (!inQuotes) {
+                            inQuotes = true;
+                        } else {
+                            // 檢查是否為結束引號（後面是逗號或行結束）
+                            if (i === line.length - 1 || line[i + 1] === ',') {
+                                inQuotes = false;
+                            }
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        let cleanCell = current.trim();
+                        // 只有在確實被引號包圍時才移除引號
+                        if (quoteCount >= 2 && cleanCell.startsWith('"') && cleanCell.endsWith('"')) {
+                            cleanCell = cleanCell.slice(1, -1);
+                        }
+                        result.push(cleanCell);
+                        current = '';
+                        quoteCount = 0;
+                    } else {
+                        current += char;
+                    }
+                }
+                
+                let cleanCell = current.trim();
+                // 只有在確實被引號包圍時才移除引號
+                if (quoteCount >= 2 && cleanCell.startsWith('"') && cleanCell.endsWith('"')) {
+                    cleanCell = cleanCell.slice(1, -1);
+                }
+                result.push(cleanCell);
+                
+                return result;
+            }
+
+            // 顯示資料（使用分頁）
+            function displayData() {
+                console.log('🔍🔍🔍🔍 displayData 被呼叫');
+                console.log('📊📊📊📊 displayDevices 數量:', displayDevices.length);
+                
+                dataSection.innerHTML = '';
+                
+                if (displayDevices.length === 0 && causeEffectsData.length === 0) {
+                    dataSection.innerHTML = '<div class="status info">沒有資料可顯示，請上傳CSV檔案</div>';
+                    return;
+                }
+                
+                // 顯示統計資訊
+                const statsDiv = document.createElement('div');
+                statsDiv.className = 'status info';
+                
+                const mainDeviceCount = countMainDevices(allDevices);
+                const totalEntries = allDevices.length;
+                
+                let statsHTML = `<div>共載入 ${panelsData.length} 個控制盤，總計 ${mainDeviceCount} 個主設備</div>`;
+                
+                if (totalEntries > mainDeviceCount) {
+                    statsHTML += `<div>包含 ${totalEntries - mainDeviceCount} 個子組件，總計 ${totalEntries} 個設備條目</div>`;
+                }
+                
+                // 特別顯示 Network#1 信息
+                const network1Panel = panelsData.find(p => p.networkAddress === '1');
+                if (network1Panel && network1Panel.devices.length > 0) {
+                    const network1MainDevices = countMainDevices(network1Panel.devices);
+                    statsHTML += `<div style="color: #27ae60; font-weight: bold;">
+                        ✅ 已成功載入 Network ${network1Panel.networkAddress} Panel: ${network1MainDevices} 個主設備
+                    </div>`;
+                    console.log('🎯🎯🎯🎯 Network#1 Panel 主設備數:', network1MainDevices);
+                }
+                
+                if (allDevices.length > MAX_DISPLAY_DEVICES) {
+                    statsHTML += `<div style="color: #e74c3c; font-weight: bold;">
+                        ⚠⚠⚠️ 資料量較大，網頁僅顯示前 ${MAX_DISPLAY_DEVICES} 筆設備資料
+                    </div>`;
+                    statsHTML += `<div>使用搜尋功能查找特定設備，或點擊「匯出為HTML表格」取得完整資料</div>`;
+                }
+                
+                statsDiv.innerHTML = statsHTML;
+                dataSection.appendChild(statsDiv);
+                
+                // 分頁設定
+                const pageSize = 100;
+                let currentPage = 1;
+                const totalPages = Math.ceil(displayDevices.length / pageSize);
+                
+                console.log('📄📄📄📄 分頁資訊 - 總頁數:', totalPages, '每頁:', pageSize, '總設備:', displayDevices.length);
+                
+                function renderPage(page) {
+                    const startIndex = (page - 1) * pageSize;
+                    const endIndex = Math.min(startIndex + pageSize, displayDevices.length);
+                    const pageDevices = displayDevices.slice(startIndex, endIndex);
+                    
+                    console.log('🔄🔄🔄🔄 渲染頁面:', page, '設備範圍:', startIndex, '-', endIndex);
+                    
+                    // 清除現有表格內容
+                    const existingTable = dataSection.querySelector('table');
+                    const existingPageInfo = dataSection.querySelector('.page-info');
+                    if (existingTable) existingTable.remove();
+                    if (existingPageInfo) existingPageInfo.remove();
+                    
+                    // 顯示頁面資訊
+                    const pageInfo = document.createElement('div');
+                    pageInfo.className = 'page-info status info';
+                    pageInfo.innerHTML = `顯示第 ${startIndex + 1} - ${endIndex} 筆資料，頁數: ${page} / ${totalPages}`;
+                    dataSection.appendChild(pageInfo);
+                    
+                    // 渲染表格
+                    if (pageDevices.length > 0) {
+                        const table = document.createElement('table');
+                        
+                        // 表頭
+                        const thead = document.createElement('thead');
+                        const headerRow = document.createElement('tr');
+                        
+                        const headers = [
+                            { text: '網路地址', class: 'col-network' },
+                            { text: '設備地址', class: 'col-addr' },
+                            { text: '設備名稱', class: 'col-name' },
+                            { text: '設備類型', class: 'col-type' }, // 新增設備類型列
+                            { text: '位置描述', class: 'col-location' }
+                        ];
+                        
+                        // 如果顯示類別，添加類別列
+                        if (showCategory) {
+                            headers.push({ text: '類別', class: 'col-category' });
+                        }
+                        
+                        headers.forEach(header => {
+                            const th = document.createElement('th');
+                            th.textContent = header.text;
+                            th.className = header.class;
+                            th.style.cssText = 'padding: 10px 12px; border: 1px solid #ddd; background-color: #f2f2f2;';
+                            headerRow.appendChild(th);
+                        });
+                        
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+                        
+                        // 表格內容
+                        const tbody = document.createElement('tbody');
+                        pageDevices.forEach(device => {
+                            const tr = document.createElement('tr');
+                            
+                            // 為子組件添加特殊樣式
+                            if (device.category === 'component') {
+                                tr.className = 'device-component';
+                            }
+                            
+                            const rowData = [
+                                device.panelNetworkAddress,
+                                device.addr,
+                                device.name,
+                                device.type, // 顯示設備類型
+                                device.location
+                            ];
+                            
+                            // 如果顯示類別，添加類別信息
+                            if (showCategory) {
+                                rowData.push(device.category === 'main' ? '主設備' : '子組件');
+                            }
+                            
+                            rowData.forEach((text, index) => {
+                                const td = document.createElement('td');
+                                td.textContent = text || '';
+                                td.className = headers[index].class;
+                                td.style.cssText = 'padding: 8px 12px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+                                tr.appendChild(td);
+                            });
+                            
+                            tbody.appendChild(tr);
+                        });
+                        table.appendChild(tbody);
+                        
+                        dataSection.appendChild(table);
+                        console.log('✅ 表格渲染完成，行數:', pageDevices.length);
+                    } else {
+                        console.log('❌❌❌❌ 本頁無設備資料');
+                    }
+                    
+                    // 更新分頁控制
+                    updatePaginationControls(page, totalPages);
+                }
+                
+                function updatePaginationControls(current, total) {
+                    let controls = dataSection.querySelector('.pagination-controls');
+                    if (!controls) {
+                        controls = document.createElement('div');
+                        controls.className = 'pagination-controls';
+                        controls.style.cssText = 'display: flex; justify-content: center; align-items: center; margin: 15px 0; gap: 10px; flex-wrap: wrap;';
+                        dataSection.appendChild(controls);
+                    }
+                    
+                    controls.innerHTML = `
+                        <button class="btn" ${current === 1 ? 'disabled' : ''}>首頁</button>
+                        <button class="btn" ${current === 1 ? 'disabled' : ''}>上一頁</button>
+                        <span>第 ${current} 頁，共 ${total} 頁</span>
+                        <button class="btn" ${current === total ? 'disabled' : ''}>下一頁</button>
+                        <button class="btn" ${current === total ? 'disabled' : ''}>末頁</button>
+                        <select style="padding: 5px;">
+                            ${Array.from({length: total}, (_, i) => 
+                                `<option value="${i + 1}" ${current === i + 1 ? 'selected' : ''}>第 ${i + 1} 頁</option>`
+                            ).join('')}
+                        </select>
+                    `;
+                    
+                    // 綁定事件
+                    setTimeout(() => {
+                        controls.querySelector('button:nth-child(1)').addEventListener('click', () => {
+                            currentPage = 1;
+                            renderPage(currentPage);
+                        });
+                        
+                        controls.querySelector('button:nth-child(2)').addEventListener('click', () => {
+                            if (currentPage > 1) {
+                                currentPage--;
+                                renderPage(currentPage);
+                            }
+                        });
+                        
+                        controls.querySelector('button:nth-child(4)').addEventListener('click', () => {
+                            if (currentPage < totalPages) {
+                                currentPage++;
+                                renderPage(currentPage);
+                            }
+                        });
+                        
+                        controls.querySelector('button:nth-child(5)').addEventListener('click', () => {
+                            currentPage = totalPages;
+                            renderPage(currentPage);
+                        });
+                        
+                        controls.querySelector('select').addEventListener('change', (e) => {
+                            currentPage = parseInt(e.target.value);
+                            renderPage(currentPage);
+                        });
+                    }, 0);
+                }
+                
+                // 初始渲染
+                renderPage(currentPage);
+                
+                // 顯示 Cause and Effects（如果啟用）
+                if (showCauseEffects && causeEffectsData.length > 0) {
+                    displayCauseEffects();
+                }
+            }
+
+            // 顯示 Cause and Effects
+            function displayCauseEffects() {
+                const section = document.createElement('div');
+                section.className = 'cause-effects-section';
+                
+                const title = document.createElement('div');
+                title.className = 'cause-effects-title';
+                title.textContent = `Cause and Effects (${causeEffectsData.length} 項目)`;
+                section.appendChild(title);
+                
+                causeEffectsData.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'cause-effect-item';
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'cause-effect-name';
+                    nameDiv.textContent = item.name;
+                    itemDiv.appendChild(nameDiv);
+                    
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'cause-effect-details';
+                    
+                    // Causes 列表
+                    const causesDiv = document.createElement('div');
+                    causesDiv.className = 'causes-list';
+                    
+                    const causesTitle = document.createElement('div');
+                    causesTitle.className = 'causes-title';
+                    causesTitle.textContent = `Causes (${item.causes.length})`;
+                    causesDiv.appendChild(causesTitle);
+                    
+                    item.causes.forEach(cause => {
+                        const causeItem = document.createElement('div');
+                        causeItem.className = 'cause-item';
+                        causeItem.innerHTML = `
+                            <div>${escapeHtml(cause.device)}</div>
+                            ${cause.location ? `<div class="cause-location">位置: ${escapeHtml(cause.location)}</div>` : ''}
+                        `;
+                        causesDiv.appendChild(causeItem);
+                    });
+                    
+                    // Effects 列表
+                    const effectsDiv = document.createElement('div');
+                    effectsDiv.className = 'effects-list';
+                    
+                    const effectsTitle = document.createElement('div');
+                    effectsTitle.className = 'effects-title';
+                    effectsTitle.textContent = `Effects (${item.effects.length})`;
+                    effectsDiv.appendChild(effectsTitle);
+                    
+                    item.effects.forEach(effect => {
+                        const effectItem = document.createElement('div');
+                        effectItem.className = 'effect-item';
+                        effectItem.innerHTML = `
+                            <div>${escapeHtml(effect.device)}</div>
+                            ${effect.location ? `<div class="effect-location">位置: ${escapeHtml(effect.location)}</div>` : ''}
+                        `;
+                        effectsDiv.appendChild(effectItem);
+                    });
+                    
+                    detailsDiv.appendChild(causesDiv);
+                    detailsDiv.appendChild(effectsDiv);
+                    itemDiv.appendChild(detailsDiv);
+                    
+                    // 其他信息
+                    const infoDiv = document.createElement('div');
+                    infoDiv.style.cssText = 'font-size: 14px; color: #666; margin-top: 10px;';
+                    infoDiv.innerHTML = `
+                        <strong>Type:</strong> ${escapeHtml(item.type)} | 
+                        <strong>Operator:</strong> ${escapeHtml(item.operator)} | 
+                        <strong>Effect:</strong> ${escapeHtml(item.effect)}
+                    `;
+                    itemDiv.appendChild(infoDiv);
+                    
+                    section.appendChild(itemDiv);
+                });
+                
+                dataSection.appendChild(section);
+            }
+            
+            // 切換 Cause and Effects 顯示
+            toggleCauseEffectsBtn.addEventListener('click', function() {
+                showCauseEffects = !showCauseEffects;
+                if (showCauseEffects) {
+                    toggleCauseEffectsBtn.textContent = '隱藏 Cause and Effects';
+                    toggleCauseEffectsBtn.classList.add('active');
+                    showStatus('已顯示 Cause and Effects 表格', 'info');
+                } else {
+                    toggleCauseEffectsBtn.textContent = '顯示 Cause and Effects';
+                    toggleCauseEffectsBtn.classList.remove('active');
+                    showStatus('已隱藏 Cause and Effects 表格', 'info');
+                }
+                displayData();
+            });
+            
+            // 切換設備類別顯示
+            toggleCategoryBtn.addEventListener('click', function() {
+                showCategory = !showCategory;
+                if (showCategory) {
+                    toggleCategoryBtn.textContent = '隱藏設備類別';
+                    toggleCategoryBtn.classList.add('active');
+                    showStatus('已顯示設備類別欄位', 'info');
+                } else {
+                    toggleCategoryBtn.textContent = '顯示設備類別';
+                    toggleCategoryBtn.classList.remove('active');
+                    showStatus('已隱藏設備類別欄位', 'info');
+                }
+                displayData();
+            });
+            
+		// 修改匯出按鈕的事件處理
+exportHtmlBtn.addEventListener('click', function() {
+    if (panelsData.length === 0 && causeEffectsData.length === 0) {
+        showStatus('沒有資料可匯出', 'error');
+        return;
+    }
+    
+    let exportMessage = '正在生成完整HTML檔案...';
+    if (showCauseEffects && causeEffectsData.length > 0) {
+        exportMessage += ' (包含 Cause and Effects)';
+    } else {
+        exportMessage += ' (不包含 Cause and Effects)';
+    }
+    
+    showStatus(exportMessage, 'info');
+    
+    setTimeout(() => {
+        let htmlContent = generateHtmlContent();
+        
+        // 生成檔案名稱（包含Cause and Effects狀態）
+        const caseName = caseNameInput.value.trim() || '未命名案件';
+        const today = new Date();
+        const dateStr = `${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+        let fileName = `${caseName} latitude 設定 ${dateStr}`;
+        
+        if (showCauseEffects) {
+            fileName += ' (含Cause and Effects)';
+        } else {
+            fileName += ' (不含Cause and Effects)';
+        }
+        fileName += '.html';
+        
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        const mainDeviceCount = countMainDevices(allDevices);
+        const totalEntries = allDevices.length;
+        let successMessage = `完整資料已匯出為HTML檔案 (${mainDeviceCount} 個主設備`;
+        
+        if (totalEntries > mainDeviceCount) {
+            successMessage += `，包含 ${totalEntries - mainDeviceCount} 個子組件`;
+        }
+        
+        if (showCauseEffects && causeEffectsData.length > 0) {
+            successMessage += `，包含 ${causeEffectsData.length} 個 Cause and Effects 項目`;
+        } else {
+            successMessage += `，不包含 Cause and Effects`;
+        }
+        
+        successMessage += `)`;
+        
+        showStatus(successMessage, 'success');
+    }, 100);
+});
+            
+function generateHtmlContent() {
+    const mainDeviceCount = countMainDevices(allDevices);
+    const totalEntries = allDevices.length;
+    const caseName = caseNameInput.value.trim() || '未命名案件';
+    const dataSetter = dataSetterInput.value.trim() || '未設定';
+    
+    let htmlContent = `
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>${caseName} - FireNET L@titude 完整設備清單</title>
+    <style>
+        body { 
+            font-family: Microsoft JhengHei, Arial, sans-serif; 
+            margin: 25px; 
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 25px; 
+            font-size: 13px;
+            table-layout: fixed;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 12px 15px; 
+            text-align: left; 
+            word-wrap: break-word;
+        }
+        th { 
+            background-color: #f2f2f2; 
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .col-network { width: 120px; }
+        .col-addr { width: 120px; }
+        .col-name { width: 300px; }
+        .col-type { width: 150px; }
+        .col-location { width: 350px; }
+        .col-category { width: 100px; }
+        .device-component { 
+            background-color: #f8f9fa; 
+            font-style: italic;
+            color: #666;
+        }
+        .panel { 
+            background-color: #e8f4fd; 
+            padding: 20px; 
+            margin-bottom: 25px; 
+            border-radius: 8px; 
+            border-left: 5px solid #3498db;
+            font-size: 15px;
+        }
+        .section { 
+            margin: 25px 0; 
+        }
+        .cause-effects-section {
+            margin: 35px 0;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #9b59b6;
+        }
+        .cause-effects-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .cause-effect-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #e1e1e1;
+            font-size: 14px;
+        }
+        .cause-effect-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        .cause-effect-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .causes-list, .effects-list {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .causes-title, .effects-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+        .cause-item, .effect-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e1e1e1;
+            font-size: 13px;
+        }
+        .cause-location, .effect-location {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+        h1 { 
+            color: #2c3e50; 
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        h2 { 
+            color: #2c3e50; 
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+        h3 { 
+            color: #3498db; 
+            margin: 20px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+            font-size: 18px;
+        }
+        .stats {
+            background-color: #d1ecf1;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .case-info {
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        .export-status {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+            border: 1px solid #ffeaa7;
+        }
+        @media print {
+            body { margin: 15px; font-size: 12px; }
+            .panel { page-break-inside: avoid; }
+            .cause-effect-item { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="case-info">
+        <strong>案件名稱:</strong> ${escapeHtml(caseName)} | 
+        <strong>資料設定者:</strong> ${escapeHtml(dataSetter)}
+    </div>
+    <h1>FireNET L@titude 完整設備清單</h1>
+    <div class="stats">
+        共載入 ${panelsData.length} 個控制盤，總計 ${mainDeviceCount} 個主設備<br>
+        ${totalEntries > mainDeviceCount ? `包含 ${totalEntries - mainDeviceCount} 個子組件，總計 ${totalEntries} 個設備條目<br>` : ''}
+        ${showCauseEffects && causeEffectsData.length > 0 ? `Cause and Effects 項目: ${causeEffectsData.length}<br>` : ''}
+        匯出時間: ${new Date().toLocaleString('zh-TW')}
+    </div>
+    
+    <div class="export-status">
+        ${showCauseEffects ? '✓ 已包含 Cause and Effects 資料' : '✗ 未包含 Cause and Effects 資料'}
+    </div>
+`;
+
+    // 添加設備資料
+    panelsData.forEach(panel => {
+        const panelMainDevices = countMainDevices(panel.devices);
+        const panelTotalEntries = panel.devices.length;
+        
+        htmlContent += `
+    <div class="panel">
+        <h2>${panel.name} - 網路地址: ${panel.networkAddress}</h2>
+        <p>主設備數量: ${panelMainDevices} 個${panelTotalEntries > panelMainDevices ? ` (包含 ${panelTotalEntries - panelMainDevices} 個子組件，總計 ${panelTotalEntries} 個條目)` : ''}</p>
+    </div>
+`;
+
+        // 按區段分組設備
+        const sections = {};
+        if (panel.devices) {
+            panel.devices.forEach(device => {
+                if (!sections[device.section]) {
+                    sections[device.section] = [];
+                }
+                sections[device.section].push(device);
+            });
+        }
+        
+        Object.keys(sections).forEach(sectionName => {
+            const sectionDevices = sections[sectionName];
+            htmlContent += `
+    <div class="section">
+        <h3>${sectionName}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-network">網路地址</th>
+                    <th class="col-addr">設備地址</th>
+                    <th class="col-name">設備名稱</th>
+                    <th class="col-type">設備類型</th>
+                    <th class="col-location">位置描述</th>
+                    <th class="col-category">類別</th>
+                </tr>
+            </thead>
+            <tbody>
+`;
+            
+            sectionDevices.forEach(device => {
+                const rowClass = device.category === 'component' ? 'class="device-component"' : '';
+                htmlContent += `
+                <tr ${rowClass}>
+                    <td class="col-network">${escapeHtml(device.panelNetworkAddress)}</td>
+                    <td class="col-addr">${escapeHtml(device.addr)}</td>
+                    <td class="col-name">${escapeHtml(device.name)}</td>
+                    <td class="col-type">${escapeHtml(device.type)}</td>
+                    <td class="col-location">${escapeHtml(device.location)}</td>
+                    <td class="col-category">${device.category === 'main' ? '主設備' : '子組件'}</td>
+                </tr>
+`;
+            });
+            
+            htmlContent += `
+            </tbody>
+        </table>
+    </div>
+`;
+        });
+    });
+    
+    // 根據showCauseEffects變數決定是否包含Cause and Effects
+    if (showCauseEffects && causeEffectsData.length > 0) {
+        htmlContent += `
+    <div class="cause-effects-section">
+        <div class="cause-effects-title">Cause and Effects (${causeEffectsData.length} 項目)</div>
+`;
+        
+        causeEffectsData.forEach(item => {
+            htmlContent += `
+        <div class="cause-effect-item">
+            <div class="cause-effect-name">${escapeHtml(item.name)}</div>
+            <div class="cause-effect-details">
+                <div class="causes-list">
+                    <div class="causes-title">Causes (${item.causes.length})</div>
+`;
+            
+            item.causes.forEach(cause => {
+                htmlContent += `
+                    <div class="cause-item">
+                        <div>${escapeHtml(cause.device)}</div>
+                        ${cause.location ? `<div class="cause-location">位置: ${escapeHtml(cause.location)}</div>` : ''}
+                    </div>
+`;
+            });
+            
+            htmlContent += `
+                </div>
+                <div class="effects-list">
+                    <div class="effects-title">Effects (${item.effects.length})</div>
+`;
+            
+            item.effects.forEach(effect => {
+                htmlContent += `
+                    <div class="effect-item">
+                        <div>${escapeHtml(effect.device)}</div>
+                        ${effect.location ? `<div class="effect-location">位置: ${escapeHtml(effect.location)}</div>` : ''}
+                    </div>
+`;
+            });
+            
+            htmlContent += `
+                </div>
+            </div>
+            <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                <strong>Type:</strong> ${escapeHtml(item.type)} | 
+                <strong>Operator:</strong> ${escapeHtml(item.operator)} | 
+                <strong>Effect:</strong> ${escapeHtml(item.effect)}
+            </div>
+        </div>
+`;
+        });
+        
+        htmlContent += `
+    </div>
+`;
+    }
+    
+    htmlContent += `
+</body>
+</html>`;
+    
+    return htmlContent;
+}
+
+            
+            // HTML轉義函數
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            // 初始顯示提示
+            showStatus('請上傳FireNET L@titude導出的CSV檔案', 'info');
+        });
+    </script>
+	
+		<!-- 在每個工具的HTML檔案中，body結束前加入 -->
+<button onclick="window.location.href='index.html'" 
+        style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    返回主選單
+</button>	
+	
+	
+</body>
+</html>		

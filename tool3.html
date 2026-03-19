@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消防文件處理工具整合版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --background-color: #f5f7fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: #e9ecef;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .case-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .case-info h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .case-info input {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 300px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .instructions {
+            background-color: #e7f3ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 12px;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+        
+        .instructions ul, .instructions ol {
+            padding-left: 25px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #f8f9ff;
+            margin: 20px 0;
+        }
+        
+        .upload-area:hover {
+            background-color: #eef2ff;
+            border-color: var(--secondary-color);
+        }
+        
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .file-list {
+            margin-top: 20px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .file-name {
+            font-weight: 500;
+        }
+        
+        .file-size {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .file-remove {
+            color: var(--danger-color);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .preview-section {
+            margin-top: 25px;
+        }
+        
+        .preview-container {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .preview-table th, .preview-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .preview-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .preview-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .preview-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .radio-input {
+            margin-right: 5px;
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .stats {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: #555;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .file-info {
+            background-color: #f0f8ff;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: center;
+            display: none;
+        }
+        
+        .destinations-row {
+            background-color: #f9f9f9;
+        }
+        
+        .destinations-row td {
+            border-top: none;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+        
+        .preview-note {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+            
+            .case-info input {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-fire-extinguisher"></i> 消防文件處理工具整合版</h1>
+			 <div class="version-info">Ver.1  2025/11/28 HTBO/Jim </div>
+            <p class="description">合併HRR/HRU消防文件與開啟連動檔處理功能於一體</p>
+        </header>
+        
+        <div class="case-info">
+            <h3>案件資訊：</h3>
+            <div>
+                <label for="caseName">案件名稱：</label>
+                <input type="text" id="caseName" placeholder="請輸入案件名稱">
+            </div>
+            <div>
+                <label for="modelNumber">總機型號：</label>
+                <input type="text" id="modelNumber" placeholder="請輸入總機型號">
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="merge-tool">HRR/HRU文件合併工具</div>
+            <div class="tab" data-tab="link-tool">開啟連動檔處理工具</div>
+        </div>
+        
+        <!-- HRR/HRU文件合併工具 -->
+        <div id="merge-tool" class="tab-content active">
+            <div class="instructions">
+                <h3>使用說明：</h3>
+                <ol>
+                    <li>填寫案件名稱和總機型號</li>
+                    <li>點擊或拖拽CSV文件到上傳區域</li>
+                    <li>點擊"處理文件"按鈕</li>
+                    <li>工具將：
+                        <ul>
+                            <li>合併所有CSV文件資料</li>
+                            <li>只保留前四列(A-D)資料</li>
+                            <li>自動過濾特殊字符</li>
+                            <li>自動翻譯D列日文為中文</li>
+                            <li>按照A列排序</li>
+                        </ul>
+                    </li>
+                    <li>預覽處理結果並選擇下載格式</li>
+                </ol>
+                <p><strong>注意：</strong>上傳Shouken資料夾內的所有檔案，除了Shouken.xls！</p>
+            </div>
+            
+            <div class="upload-area" id="merge-uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p class="upload-text">點擊或拖拽CSV文件到這裡</p>
+                <p>支援多文件選擇，僅處理前四列(A-D)，自動過濾特殊字符</p>
+                <input type="file" id="merge-fileInput" class="hidden" accept=".csv" multiple>
+            </div>
+            
+            <div class="file-list" id="merge-fileList"></div>
+            
+            <div class="action-buttons">
+                <button class="btn" id="merge-processBtn">
+                    <i class="fas fa-cogs"></i> 處理文件
+                </button>
+                <button class="btn btn-warning" id="merge-downloadHtmlBtn" disabled>
+                    <i class="fas fa-file-code"></i> 匯出HTML表格
+                </button>
+                <button class="btn btn-secondary" id="merge-clearBtn">
+                    <i class="fas fa-trash"></i> 清除文件
+                </button>
+            </div>
+            
+            <div id="merge-statusMessage" class="status" style="display: none;"></div>
+            
+            <div id="merge-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>正在處理文件，請稍候...</p>
+            </div>
+            
+            <div id="merge-previewSection" class="preview-section hidden">
+                <div class="preview-options">
+                    <h3>預覽結果：</h3>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="merge-previewFormat" class="radio-input" value="original" checked>
+                            原始格式
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="merge-previewFormat" class="radio-input" value="formatted">
+                            格式化A列
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="preview-container">
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th>編號</th>
+                                <th>棟別區號</th>
+                                <th>地區名稱</th>
+                                <th>種別</th>
+                            </tr>
+                        </thead>
+                        <tbody id="merge-previewBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px;">
+                                    <i class="fas fa-info-circle" style="font-size: 2rem; color: #6c757d; margin-bottom: 15px;"></i>
+                                    <p>處理後的數據將在這裡顯示</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="preview-note" id="merge-previewNote"></div>
+            </div>
+        </div>
+        
+        <!-- 開啟連動檔處理工具 -->
+        <div id="link-tool" class="tab-content">
+            <div class="instructions">
+                <h3>使用說明</h3>
+                <ul>
+                    <li>點擊「選擇CSV檔案」按鈕，選擇HRR/HRU系統的CSV檔案</li>
+                    <li>系統會自動解析檔案並顯示轉換後的表格</li>
+                    <li>原始資料的兩行會合併為一行，方便閱讀</li>
+                    <li>編號格式會自動轉換為 00-01-074-1 格式</li>
+                    <li>連動先2及以後的資料會顯示在下一行，提高可讀性</li>
+                    <li>點擊「輸出HTML報告」按鈕，可將表格匯出為HTML檔案</li>
+                </ul>
+            </div>
+            
+            <div class="upload-area" id="link-uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p class="upload-text">點擊或拖拽CSV文件到這裡</p>
+                <p>支援單一CSV文件處理，自動解析連動檔資料</p>
+                <input type="file" id="link-csvFile" class="hidden" accept=".csv">
+            </div>
+            
+            <div class="file-list" id="link-fileList"></div>
+            
+            <div class="action-buttons">
+                <button class="btn" id="link-processBtn">
+                    <i class="fas fa-cogs"></i> 處理文件
+                </button>
+                <button id="link-exportButton" class="btn btn-success" disabled>
+                    <i class="fas fa-download"></i> 輸出HTML報告
+                </button>
+                <button class="btn btn-secondary" id="link-clearBtn">
+                    <i class="fas fa-trash"></i> 清除文件
+                </button>
+            </div>
+            
+            <div id="link-successMessage" class="success-message">
+                ✅ 檔案解析成功！資料已載入表格中
+            </div>
+            
+            <div class="stats" id="link-fileStats" style="display: none;">
+                ✅ 資料載入完成！共 <span id="link-rowCount" style="font-weight: bold; color: var(--primary-color);">0</span> 筆資料
+            </div>
+            
+            <div id="link-previewSection" class="preview-section hidden">
+                <div class="preview-options">
+                    <h3>預覽結果：</h3>
+                </div>
+                
+                <div class="preview-container">
+                    <div id="link-noData" class="no-data">
+                        📊 尚未載入資料。請選擇CSV檔案。
+                    </div>
+                    <table id="link-csvTable" style="display: none;">
+                        <thead id="link-tableHeader"></thead>
+                        <tbody id="link-tableBody"></tbody>
+                    </table>
+                </div>
+                <div class="preview-note" id="link-previewNote"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 標籤頁切換功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // 移除所有active類
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // 添加active類到當前選中的標籤和內容
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // 初始化兩個工具
+            initMergeTool();
+            initLinkTool();
+        });
+        
+        // HRR/HRU文件合併工具
+        function initMergeTool() {
+            const fileInput = document.getElementById('merge-fileInput');
+            const uploadArea = document.getElementById('merge-uploadArea');
+            const fileList = document.getElementById('merge-fileList');
+            const processBtn = document.getElementById('merge-processBtn');
+            const clearBtn = document.getElementById('merge-clearBtn');
+            const downloadHtmlBtn = document.getElementById('merge-downloadHtmlBtn');
+            const previewBody = document.getElementById('merge-previewBody');
+            const statusMessage = document.getElementById('merge-statusMessage');
+            const previewFormatRadios = document.querySelectorAll('input[name="merge-previewFormat"]');
+            const loadingDiv = document.getElementById('merge-loading');
+            const previewSection = document.getElementById('merge-previewSection');
+            const previewNote = document.getElementById('merge-previewNote');
+            
+            let uploadedFiles = [];
+            let processedData = [];
+            let currentPreviewFormat = 'original';
+            
+            // 上傳區域點擊事件
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // 拖放功能
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#eef2ff';
+                uploadArea.style.borderColor = '#2575fc';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.backgroundColor = '#f8f9ff';
+                uploadArea.style.borderColor = '#6a11cb';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#f8f9ff';
+                uploadArea.style.borderColor = '#6a11cb';
+                
+                const files = Array.from(e.dataTransfer.files).filter(file => 
+                    file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')
+                );
+                
+                handleFiles(files);
+            });
+            
+            // 文件選擇事件
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                handleFiles(files);
+            });
+            
+            // 預覽格式選擇事件
+            previewFormatRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    currentPreviewFormat = e.target.value;
+                    updatePreview();
+                });
+            });
+            
+            // 處理上傳的文件
+            function handleFiles(files) {
+                if (files.length === 0) {
+                    showStatus('請選擇有效的CSV文件', 'error');
+                    return;
+                }
+                
+                files.forEach(file => {
+                    if (!uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                        uploadedFiles.push(file);
+                    }
+                });
+                
+                updateFileList();
+                showStatus(`已添加 ${files.length} 個文件，共 ${uploadedFiles.length} 個文件待處理`, 'info');
+            }
+            
+            // 更新文件列表顯示
+            function updateFileList() {
+                fileList.innerHTML = '';
+                
+                if (uploadedFiles.length === 0) {
+                    fileList.innerHTML = '<p style="text-align: center; color: #6c757d;">暫無文件</p>';
+                    return;
+                }
+                
+                uploadedFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    const fileInfo = document.createElement('div');
+                    fileInfo.innerHTML = `
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    `;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'file-remove';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.addEventListener('click', () => {
+                        uploadedFiles.splice(index, 1);
+                        updateFileList();
+                    });
+                    
+                    fileItem.appendChild(fileInfo);
+                    fileItem.appendChild(removeBtn);
+                    fileList.appendChild(fileItem);
+                });
+            }
+            
+            // 處理按鈕點擊事件
+            processBtn.addEventListener('click', processFiles);
+            
+            // 清除按鈕點擊事件
+            clearBtn.addEventListener('click', () => {
+                uploadedFiles = [];
+                processedData = [];
+                updateFileList();
+                clearPreview();
+                downloadHtmlBtn.disabled = true;
+                previewSection.classList.add('hidden');
+                showStatus('已清除所有文件', 'info');
+            });
+            
+            // 下載按鈕點擊事件
+            downloadHtmlBtn.addEventListener('click', downloadHtmlResult);
+            
+            // 處理CSV文件
+            function processFiles() {
+                if (uploadedFiles.length === 0) {
+                    showStatus('請先上傳CSV文件', 'error');
+                    return;
+                }
+                
+                processedData = [];
+                let processedCount = 0;
+                
+                // 顯示載入動畫
+                loadingDiv.classList.remove('hidden');
+                previewSection.classList.add('hidden');
+                showStatus('正在處理文件...', 'info');
+                
+                uploadedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        try {
+                            const arrayBuffer = e.target.result;
+                            processArrayBuffer(arrayBuffer, file)
+                                .then(csvText => {
+                                    const rows = parseCSV(csvText);
+                                    
+                                    // 保留A~D列（前4列）
+                                    const filteredRows = rows.map(row => row.slice(0, 4));
+                                    
+                                    // 應用翻譯功能
+                                    const translatedRows = processCSVWithTranslation(filteredRows);
+                                    
+                                    // 跳過表頭（第一個文件保留表頭，其他文件跳過）
+                                    if (processedData.length === 0) {
+                                        // 使用新的中文標頭
+                                        processedData.push(['編號', '棟別區號', '地區名稱', '種別']);
+                                        // 跳過原始標頭，只加入數據行
+                                        if (filteredRows.length > 1) {
+                                            processedData.push(...filteredRows.slice(1));
+                                        }
+                                    } else {
+                                        processedData.push(...translatedRows.slice(1));
+                                    }
+                                    
+                                    processedCount++;
+                                    
+                                    if (processedCount === uploadedFiles.length) {
+                                        // 所有文件處理完成，進行排序
+                                        sortData();
+                                        
+                                        // 隱藏載入動畫，顯示預覽
+                                        loadingDiv.classList.add('hidden');
+                                        updatePreview();
+                                        previewSection.classList.remove('hidden');
+                                        downloadHtmlBtn.disabled = false;
+                                        showStatus(`成功處理 ${uploadedFiles.length} 個文件，共 ${processedData.length} 行數據`, 'success');
+                                    }
+                                })
+                                .catch(error => {
+                                    loadingDiv.classList.add('hidden');
+                                    showStatus(`處理文件 ${file.name} 時出錯: ${error.message}`, 'error');
+                                });
+                        } catch (error) {
+                            loadingDiv.classList.add('hidden');
+                            showStatus(`處理文件 ${file.name} 時出錯: ${error.message}`, 'error');
+                        }
+                    };
+                    
+                    reader.onerror = function() {
+                        loadingDiv.classList.add('hidden');
+                        showStatus(`讀取文件 ${file.name} 時出錯`, 'error');
+                    };
+                    
+                    // 讀取為ArrayBuffer以便進行編碼檢測
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+            
+            // 處理ArrayBuffer並轉換為文本（使用Shift-JIS編碼）
+            function processArrayBuffer(arrayBuffer, file) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        let decoder;
+                        let text;
+                        
+                        // 使用Shift-JIS編碼
+                        try {
+                            decoder = new TextDecoder('Shift-JIS');
+                            text = decoder.decode(arrayBuffer);
+                        } catch (e) {
+                            // 如果Shift-JIS失敗，嘗試使用UTF-8
+                            decoder = new TextDecoder('UTF-8');
+                            text = decoder.decode(arrayBuffer);
+                        }
+                        
+                        resolve(text);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+            
+            // 解析CSV文本
+            function parseCSV(text) {
+                const rows = [];
+                const lines = text.split(/\r?\n/);
+                
+                for (let line of lines) {
+                    if (line.trim() === '') continue;
+                    
+                    // 簡單的CSV解析，處理帶引號的字段
+                    const row = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            // 過濾特殊字符
+                            current = filterSpecialCharacters(current);
+                            row.push(current);
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    
+                    // 過濾最後一個字段的特殊字符
+                    current = filterSpecialCharacters(current);
+                    row.push(current);
+                    rows.push(row);
+                }
+                
+                return rows;
+            }
+            
+            // 過濾特殊字符（自動啟用）
+            function filterSpecialCharacters(text) {
+                let filteredText = text;
+                
+                // 自動過濾 "=" 字符
+                filteredText = filteredText.replace(/=/g, '');
+                
+                // 自動過濾 " " " 字符（雙引號）
+                filteredText = filteredText.replace(/"/g, '');
+                
+                return filteredText;
+            }
+            
+            // 日文翻譯功能
+            function translateJapaneseToChinese(text) {
+                if (!text || typeof text !== 'string') return text;
+                
+                // 日文詞彙對照表
+                const japaneseDict = {
+                    // 常用日文詞彙
+                    'ありがとう': '謝謝',
+                    'こんにちは': '你好',
+                    'さようなら': '再見',
+                    'はい': '是',
+                    'いいえ': '不是',
+                    'お願いします': '請',
+                    'すみません': '對不起',
+                    '了解': '了解',
+                    '確認': '確認',
+                    '完了': '完成',
+                    '未完了': '未完成',
+                    '処理中': '處理中',
+                    'エラー': '錯誤',
+                    '警告': '警告',
+                    '情報': '資訊',
+                    
+                    // 技術相關詞彙
+                    'システム': '系統',
+                    '設定': '設定',
+                    '操作': '操作',
+                    '機能': '功能',
+                    '項目': '項目',
+                    '詳細': '詳細',
+                    '基本': '基本',
+                    '詳細設定': '詳細設定',
+                    '初期設定': '初始設定',
+                    '保存': '保存',
+                    '取消': '取消',
+                    '適用': '適用',
+                    'リセット': '重置',
+                    '更新': '更新',
+                    '登録': '登錄',
+                    '削除': '刪除',
+                    '修正': '修正',
+                    '変更': '變更',
+                    'ガス漏れ': '瓦斯洩漏',
+                    '熱ｱﾅﾛｸﾞ': '熱類比',
+                    '光電ｱﾅﾛｸﾞ': '光電類比',
+                    '地区警報': '地區警報',
+                    'AD発信機': '定址發信機',					
+                    '火報': '火警',
+                    '単': '單',
+                    '差動AD': '差動定址',
+                    
+                    // 日期時間
+                    '月': '月',
+                    '火': '火',
+                    '水': '水',
+                    '木': '木',
+                    '金': '金',
+                    '土': '土',
+                    '日': '日',
+                    '時': '時',
+                    '分': '分',
+                    '秒': '秒',
+                    '今日': '今天',
+                    '明日': '明天',
+                    '昨日': '昨天',
+                    
+                    // 數字
+                    '一': '一', '二': '二', '三': '三', '四': '四', '五': '五',
+                    '六': '六', '七': '七', '八': '八', '九': '九', '十': '十',
+                    '百': '百', '千': '千', '万': '萬',
+                    
+                    // 商務用語
+                    '株式会社': '股份有限公司',
+                    '有限会社': '有限公司',
+                    '事務所': '事務所',
+                    '営業部': '營業部',
+                    '技術部': '技術部',
+                    '開発部': '開發部',
+                    '製造': '製造',
+                    '検査': '檢查',
+                    '品質': '品質',
+                    '管理': '管理',
+                    
+                    // 狀態詞彙
+                    '正常': '正常',
+                    '異常': '異常',
+                    '停止': '停止',
+                    '開始': '開始',
+                    '終了': '結束',
+                    '実行': '執行',
+                    '待機': '待機',
+                    '準備': '準備',
+                    '実行中': '執行中'
+                };
+                
+                // 檢測是否包含日文字符
+                const hasJapanese = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text);
+                if (!hasJapanese) return text;
+                
+                let translated = text;
+                
+                // 先替換完整的詞組（長詞優先）
+                Object.keys(japaneseDict)
+                    .sort((a, b) => b.length - a.length)
+                    .forEach(jpWord => {
+                        const regex = new RegExp(jpWord, 'g');
+                        translated = translated.replace(regex, japaneseDict[jpWord]);
+                    });
+                
+                return translated;
+            }
+
+            // 處理CSV的函數，加入翻譯功能
+            function processCSVWithTranslation(rows) {
+                return rows.map((row, index) => {
+                    // 跳過表頭
+                    if (index === 0) return row;
+                    
+                    // 只處理D列（索引3）
+                    if (row.length > 3 && row[3]) {
+                        const newRow = [...row];
+                        newRow[3] = translateJapaneseToChinese(row[3]);
+                        return newRow;
+                    }
+                    
+                    return row;
+                });
+            }
+            
+            // 按A列排序數據
+            function sortData() {
+                if (processedData.length <= 1) return;
+                
+                const header = processedData[0];
+                const dataRows = processedData.slice(1);
+                
+                // 按A列排序
+                dataRows.sort((a, b) => {
+                    const aVal = a[0] || '';
+                    const bVal = b[0] || '';
+                    
+                    // 嘗試數值比較
+                    if (!isNaN(aVal) && !isNaN(bVal)) {
+                        return parseFloat(aVal) - parseFloat(bVal);
+                    }
+                    
+                    // 字符串比較
+                    return aVal.localeCompare(bVal);
+                });
+                
+                processedData = [header, ...dataRows];
+            }
+            
+            // 格式化A列數據
+            function formatAColumn(value) {
+                // 如果是8位數字，格式為: 01-01-001-1 (修改後的格式)
+                if (/^\d{8}$/.test(value)) {
+                    return `${value.substring(0, 2)}-${value.substring(2, 4)}-${value.substring(4, 7)}-${value.substring(7, 8)}`;
+                }
+                // 如果是6位數字，格式為: 01-001-1
+                else if (/^\d{6}$/.test(value)) {
+                    return `${value.substring(0, 2)}-${value.substring(2, 5)}-${value.substring(5, 6)}`;
+                }
+                // 其他情況保持原樣
+                return value;
+            }
+            
+            // 更新預覽表格
+            function updatePreview() {
+                previewBody.innerHTML = '';
+                
+                if (processedData.length === 0) {
+                    previewBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 40px;">
+                                <i class="fas fa-info-circle" style="font-size: 2rem; color: #6c757d; margin-bottom: 15px;"></i>
+                                <p>處理後的數據將在這裡顯示</p>
+                            </td>
+                        </tr>
+                    `;
+                    previewNote.textContent = '';
+                    return;
+                }
+                
+                // 創建表頭
+                const headerRow = document.createElement('tr');
+                ['編號', '棟別區號', '地區名稱', '種別'].forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+                previewBody.appendChild(headerRow);
+                
+                // 添加數據行（跳過第一行，因為我們已經手動創建了表頭）
+                const displayData = processedData.slice(1, 201); // 只顯示前200筆
+                
+                displayData.forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    
+                    // 複製行數據，避免修改原始數據
+                    const displayRow = [...row];
+                    
+                    // 如果是格式化模式，格式化A列
+                    if (currentPreviewFormat === 'formatted') {
+                        displayRow[0] = formatAColumn(displayRow[0]);
+                    }
+                    
+                    displayRow.forEach((cell, cellIndex) => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+                    
+                    // 如果列數不足4列，補充空單元格
+                    while (tr.cells.length < 4) {
+                        const td = document.createElement('td');
+                        tr.appendChild(td);
+                    }
+                    
+                    previewBody.appendChild(tr);
+                });
+                
+                // 更新預覽提示
+                if (processedData.length > 201) {
+                    previewNote.textContent = `僅顯示前 200 筆資料，共 ${processedData.length - 1} 筆資料`;
+                } else {
+                    previewNote.textContent = `共 ${processedData.length - 1} 筆資料`;
+                }
+            }
+            
+            // 清除預覽
+            function clearPreview() {
+                previewBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-info-circle" style="font-size: 2rem; color: #6c757d; margin-bottom: 15px;"></i>
+                            <p>處理後的數據將在這裡顯示</p>
+                        </td>
+                    </tr>
+                `;
+                previewNote.textContent = '';
+            }
+            
+            // 下載HTML結果
+            function downloadHtmlResult() {
+                if (processedData.length === 0) {
+                    showStatus('沒有可下載的數據', 'error');
+                    return;
+                }
+                
+                const caseNameInput = document.getElementById('caseName');
+                const modelNumberInput = document.getElementById('modelNumber');
+                
+                // 根據預覽格式決定是否格式化A列
+                const exportData = currentPreviewFormat === 'formatted' 
+                    ? processedData.map((row, index) => {
+                          if (index === 0) return row; // 表頭保持原樣
+                          const newRow = [...row];
+                          newRow[0] = formatAColumn(newRow[0]);
+                          return newRow;
+                      })
+                    : processedData;
+
+                // 創建HTML表格內容
+                let htmlContent = `
+                <!DOCTYPE html>
+                <html lang="zh-TW">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${caseNameInput.value || '未命名案件'}設定資料</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                        }
+                        .case-info {
+                            margin-bottom: 20px;
+                            padding: 10px;
+                            background-color: #f0f8ff;
+                            border-radius: 5px;
+                        }
+                        .case-info h2 {
+                            margin-top: 0;
+                            color: #2c3e50;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 15px;
+                        }
+                        th, td {
+                            border: 1px solid #ddd;
+                            padding: 10px;
+                            text-align: left;
+                        }
+                        th {
+                            background-color: #4CAF50;
+                            color: white;
+                            font-weight: bold;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f2f2f2;
+                        }
+                        tr:hover {
+                            background-color: #e9f7fe;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="case-info">
+                        <h2>案件名稱: ${caseNameInput.value || '未填寫'}</h2>
+                        <h3>總機型號: ${modelNumberInput.value || '未填寫'}</h3>
+                        <p>生成時間: ${new Date().toLocaleString()}</p>
+                        <p>數據行數: ${exportData.length - 1}</p>
+                        <p>預覽格式: ${currentPreviewFormat === 'formatted' ? '格式化A列' : '原始格式'}</p>
+                    </div>
+                    <table>
+                        <tr>
+                            <th>編號</th>
+                            <th>棟別區號</th>
+                            <th>地區名稱</th>
+                            <th>種別</th>
+                        </tr>
+                `;
+                
+                // 添加表格數據行（跳過第一行表頭）
+                exportData.slice(1).forEach((row, index) => {
+                    htmlContent += '<tr>';
+                    row.forEach((cell, cellIndex) => {
+                        htmlContent += `<td>${cell}</td>`;
+                    });
+                    // 如果列數不足4列，補充空單元格
+                    for (let i = row.length; i < 4; i++) {
+                        htmlContent += '<td></td>';
+                    }
+                    htmlContent += '</tr>';
+                });
+                
+                htmlContent += `
+                    </table>
+                </body>
+                </html>
+                `;
+                
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                
+                const fileName = `${caseNameInput.value || '未命名案件'}設定資料${new Date().toISOString().slice(0, 10)}.html`;
+                link.setAttribute('href', url);
+                link.setAttribute('download', fileName);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showStatus('HTML文件下載成功', 'success');
+            }
+            
+            // 顯示狀態消息
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status ' + type;
+                statusMessage.style.display = 'block';
+                
+                // 5秒後自動隱藏
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+            
+            // 格式化文件大小
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // 初始化
+            updateFileList();
+        }
+        
+        // 開啟連動檔處理工具
+        function initLinkTool() {
+            const fileInput = document.getElementById('link-csvFile');
+            const uploadArea = document.getElementById('link-uploadArea');
+            const fileList = document.getElementById('link-fileList');
+            const processBtn = document.getElementById('link-processBtn');
+            const clearBtn = document.getElementById('link-clearBtn');
+            const exportButton = document.getElementById('link-exportButton');
+            const successMessage = document.getElementById('link-successMessage');
+            const fileStats = document.getElementById('link-fileStats');
+            const rowCount = document.getElementById('link-rowCount');
+            const noData = document.getElementById('link-noData');
+            const csvTable = document.getElementById('link-csvTable');
+            const tableHeader = document.getElementById('link-tableHeader');
+            const tableBody = document.getElementById('link-tableBody');
+            const previewSection = document.getElementById('link-previewSection');
+            const previewNote = document.getElementById('link-previewNote');
+            
+            let currentData = [];
+            let uploadedFile = null;
+            
+            // 上傳區域點擊事件
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // 拖放功能
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#eef2ff';
+                uploadArea.style.borderColor = '#2575fc';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.backgroundColor = '#f8f9ff';
+                uploadArea.style.borderColor = '#6a11cb';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#f8f9ff';
+                uploadArea.style.borderColor = '#6a11cb';
+                
+                const files = Array.from(e.dataTransfer.files).filter(file => 
+                    file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')
+                );
+                
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+            
+            // 文件選擇事件
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFile(file);
+                }
+            });
+            
+            // 處理按鈕點擊事件
+            processBtn.addEventListener('click', processFile);
+            
+            // 清除按鈕點擊事件
+            clearBtn.addEventListener('click', () => {
+                uploadedFile = null;
+                currentData = [];
+                updateFileList();
+                clearPreview();
+                exportButton.disabled = true;
+                previewSection.classList.add('hidden');
+                fileStats.style.display = 'none';
+                successMessage.style.display = 'none';
+            });
+            
+            // 下載按鈕點擊事件
+            exportButton.addEventListener('click', exportToHTML);
+            
+            // 處理上傳的文件
+            function handleFile(file) {
+                uploadedFile = file;
+                updateFileList();
+                successMessage.style.display = 'none';
+            }
+            
+            // 更新文件列表顯示
+            function updateFileList() {
+                fileList.innerHTML = '';
+                
+                if (!uploadedFile) {
+                    fileList.innerHTML = '<p style="text-align: center; color: #6c757d;">暫無文件</p>';
+                    return;
+                }
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileInfoDiv = document.createElement('div');
+                fileInfoDiv.innerHTML = `
+                    <div class="file-name">${uploadedFile.name}</div>
+                    <div class="file-size">${formatFileSize(uploadedFile.size)}</div>
+                `;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'file-remove';
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.addEventListener('click', () => {
+                    uploadedFile = null;
+                    updateFileList();
+                });
+                
+                fileItem.appendChild(fileInfoDiv);
+                fileItem.appendChild(removeBtn);
+                fileList.appendChild(fileItem);
+            }
+            
+            // 處理CSV文件
+            function processFile() {
+                if (!uploadedFile) {
+                    alert('請先上傳CSV文件');
+                    return;
+                }
+                
+                // 解析CSV檔案
+                parseCSVFile(uploadedFile);
+            }
+            
+            function parseCSVFile(file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        // 使用Shift_JIS編碼讀取檔案
+                        const text = e.target.result;
+                        
+                        // 清理="XXXX"格式
+                        const cleanedText = cleanFormulaFormat(text);
+                        
+                        // 使用PapaParse解析CSV
+                        Papa.parse(cleanedText, {
+                            encoding: 'Shift_JIS',
+                            complete: function(results) {
+                                processCSVData(results.data);
+                            },
+                            error: function(error) {
+                                console.error('CSV解析錯誤:', error);
+                                alert(`CSV檔案解析錯誤: ${error.message}`);
+                            }
+                        });
+                    } catch (error) {
+                        console.error('檔案讀取錯誤:', error);
+                        alert(`檔案讀取錯誤: ${error.message}`);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    alert('檔案讀取失敗。');
+                };
+                
+                // 以Shift_JIS編碼讀取檔案
+                reader.readAsText(file, 'Shift_JIS');
+            }
+            
+            // 清理="XXXX"格式
+            function cleanFormulaFormat(text) {
+                return text.replace(/="([^"]*)"/g, '$1');
+            }
+            
+            // 處理CSV資料
+            function processCSVData(data) {
+                // 處理資料行
+                const processedData = processDataRows(data);
+                
+                // 儲存當前資料
+                currentData = processedData;
+                
+                // 顯示處理後的資料
+                displayProcessedData(processedData);
+            }
+            
+            // 處理資料行
+            function processDataRows(data) {
+                const processedData = [];
+                
+                // 尋找真正的資料開始位置
+                let dataStartIndex = 3; // 預設從第4行開始
+                
+                // 尋找包含數字的行作為資料開始
+                for (let i = 3; i < Math.min(20, data.length); i++) {
+                    if (data[i] && data[i].length > 0 && data[i][0] && !isNaN(parseInt(data[i][0]))) {
+                        dataStartIndex = i;
+                        break;
+                    }
+                }
+                
+                // 從資料開始位置處理
+                for (let i = dataStartIndex; i < data.length; i += 2) {
+                    // 確保有足夠的行數
+                    if (i + 1 >= data.length) break;
+                    
+                    const row1 = data[i];     // 第一行（編號行）
+                    const row2 = data[i + 1]; // 第二行（名稱行）
+                    
+                    // 檢查是否為有效資料行
+                    if (!row1 || row1.length === 0 || !row1[0]) {
+                        continue;
+                    }
+                    
+                    // 檢查第一行第一個欄位是否為數字（通番）
+                    const sequence = parseInt(row1[0]);
+                    if (isNaN(sequence)) {
+                        continue;
+                    }
+                    
+                    // 建立合併後的資料物件
+                    const mergedRow = {
+                        sequence: row1[0] || "", // 通番
+                        number: formatNumber(row1[1] || ""), // 番号（格式化後）
+                        name: row2[1] || "", // 名称
+                        detailType: row1[2] || "", // 詳細種別
+                        building: row1[3] || "", // 棟
+                        floor: row1[4] || "", // 階
+                        area: row1[5] || "", // 地区
+                        soft: row1[6] || "", // ｿﾌﾄ
+                        panelNo: row1[7] || "", // 盤No.
+                        linkType: row2[6] || "", // 連動元種別
+                        destinations: [] // 連動先情報
+                    };
+                    
+                    // 處理連動先情報（最多10個）
+                    for (let j = 0; j < 10; j++) {
+                        const baseIndex = 8 + j * 2; // 連動先的起始索引
+                        
+                        // 檢查是否有連動先資料
+                        if (baseIndex < row1.length && row1[baseIndex] && row1[baseIndex].trim() !== '') {
+                            mergedRow.destinations.push({
+                                number: formatNumber(row1[baseIndex] || ""), // 番号（格式化後）
+                                detailType: row1[baseIndex + 1] || "", // 詳細種別
+                                message: row2[baseIndex] || "" // 地区メッセージ・R/P出力番号
+                            });
+                        }
+                    }
+                    
+                    processedData.push(mergedRow);
+                }
+                
+                return processedData;
+            }
+            
+            // 格式化編號為 00-01-074-1 格式
+            function formatNumber(numberStr) {
+                if (!numberStr) return "";
+                
+                // 移除所有非數字字符
+                const cleanNumber = numberStr.replace(/\D/g, '');
+                
+                // 確保是8位數字
+                if (cleanNumber.length !== 8) return numberStr;
+                
+                // 格式化為 00-01-074-1
+                return `${cleanNumber.substring(0, 2)}-${cleanNumber.substring(2, 4)}-${cleanNumber.substring(4, 7)}-${cleanNumber.substring(7, 8)}`;
+            }
+            
+            // 顯示處理後的資料
+            function displayProcessedData(data) {
+                // 清空表格
+                tableHeader.innerHTML = '';
+                tableBody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    noData.style.display = 'block';
+                    csvTable.style.display = 'none';
+                    fileStats.style.display = 'none';
+                    successMessage.style.display = 'none';
+                    exportButton.disabled = true;
+                    previewSection.classList.add('hidden');
+                    return;
+                }
+                
+                // 更新統計資訊
+                rowCount.textContent = data.length;
+                fileStats.style.display = 'block';
+                successMessage.style.display = 'block';
+                exportButton.disabled = false;
+                previewSection.classList.remove('hidden');
+                
+                // 建立表頭
+                const headerRow = document.createElement('tr');
+                const headers = [
+                    "通番", "番号", "名称", "詳細種別",
+                    "棟", "階", "地区", "ｿﾌﾄ", "盤No.", "連動元種別", "連動先1番号", "連動先1詳細種別", "連動先1地区メッセージ"
+                ];
+                
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                
+                tableHeader.appendChild(headerRow);
+                
+                // 建立資料行
+                const displayData = data.slice(0, 200); // 只顯示前200筆
+                
+                displayData.forEach(row => {
+                    // 主要資料行
+                    const mainRow = document.createElement('tr');
+                    
+                    // 添加基本資訊和第一個連動先
+                    const basicData = [
+                        row.sequence, row.number, row.name, row.detailType,
+                        row.building, row.floor, row.area, row.soft, row.panelNo, row.linkType
+                    ];
+                    
+                    basicData.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        mainRow.appendChild(td);
+                    });
+                    
+                    // 添加第一個連動先資訊
+                    if (row.destinations.length > 0) {
+                        const dest = row.destinations[0];
+                        const destData = [dest.number, dest.detailType, dest.message];
+                        
+                        destData.forEach(cell => {
+                            const td = document.createElement('td');
+                            td.textContent = cell;
+                            mainRow.appendChild(td);
+                        });
+                    } else {
+                        // 添加空單元格
+                        for (let j = 0; j < 3; j++) {
+                            const td = document.createElement('td');
+                            mainRow.appendChild(td);
+                        }
+                    }
+                    
+                    tableBody.appendChild(mainRow);
+                    
+                    // 添加額外的連動先行（從第二個開始）
+                    if (row.destinations.length > 1) {
+                        for (let i = 1; i < row.destinations.length; i++) {
+                            const destRow = document.createElement('tr');
+                            destRow.className = 'destinations-row';
+                            
+                            // 添加空單元格，對齊到連動先1的位置
+                            for (let j = 0; j < 10; j++) {
+                                const td = document.createElement('td');
+                                if (j === 0) {
+                                    td.textContent = ""; // 通番留空
+                                }
+                                destRow.appendChild(td);
+                            }
+                            
+                            // 添加連動先資訊
+                            const dest = row.destinations[i];
+                            const destData = [dest.number, dest.detailType, dest.message];
+                            
+                            destData.forEach(cell => {
+                                const td = document.createElement('td');
+                                td.textContent = cell;
+                                destRow.appendChild(td);
+                            });
+                            
+                            tableBody.appendChild(destRow);
+                        }
+                    }
+                });
+                
+                // 顯示表格
+                noData.style.display = 'none';
+                csvTable.style.display = 'table';
+                
+                // 更新預覽提示
+                if (data.length > 200) {
+                    previewNote.textContent = `僅顯示前 200 筆資料，共 ${data.length} 筆資料`;
+                } else {
+                    previewNote.textContent = `共 ${data.length} 筆資料`;
+                }
+            }
+            
+            // 清除預覽
+            function clearPreview() {
+                noData.style.display = 'block';
+                csvTable.style.display = 'none';
+                previewNote.textContent = '';
+            }
+            
+            // 匯出HTML報告
+            function exportToHTML() {
+                const caseNameInput = document.getElementById('caseName');
+                const modelNumberInput = document.getElementById('modelNumber');
+                
+                // 建立HTML內容
+                let htmlContent = `
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${caseNameInput.value || '未命名案件'}連動資料</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 20px;
+        }
+        h1 {
+            color: #4a6fa5;
+            margin-bottom: 10px;
+        }
+        .case-info {
+            background-color: #f0f8ff;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #4a6fa5;
+        }
+        .case-info h3 {
+            margin-bottom: 12px;
+            color: #4a6fa5;
+            font-size: 18px;
+        }
+        .stats {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+            color: #555;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #4a6fa5;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .destinations-row {
+            background-color: #f9f9f9;
+        }
+        .destinations-row td {
+            border-top: none;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>${caseNameInput.value || '未命名案件'}連動資料</h1>
+            <p>生成時間: ${new Date().toLocaleString()}</p>
+        </header>
+        
+        <div class="case-info">
+            <h3>案件資訊</h3>
+            <p><strong>案件名稱:</strong> ${caseNameInput.value || '未填寫'}</p>
+            <p><strong>總機型號:</strong> ${modelNumberInput.value || '未填寫'}</p>
+        </div>
+        
+        <div class="stats">
+            資料載入完成！共 <span style="font-weight: bold; color: #4a6fa5;">${currentData.length}</span> 筆資料
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>通番</th>
+                        <th>番号</th>
+                        <th>名称</th>
+                        <th>詳細種別</th>
+                        <th>棟</th>
+                        <th>階</th>
+                        <th>地区</th>
+                        <th>ｿﾌﾄ</th>
+                        <th>盤No.</th>
+                        <th>連動元種別</th>
+                        <th>連動先1番号</th>
+                        <th>連動先1詳細種別</th>
+                        <th>連動先1地区メッセージ</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+                
+                // 添加所有資料行到HTML輸出
+                currentData.forEach(row => {
+                    // 主要資料行
+                    htmlContent += '<tr>';
+                    const basicData = [
+                        row.sequence, row.number, row.name, row.detailType,
+                        row.building, row.floor, row.area, row.soft, row.panelNo, row.linkType
+                    ];
+                    
+                    basicData.forEach(cell => {
+                        htmlContent += `<td>${cell}</td>`;
+                    });
+                    
+                    // 添加第一個連動先資訊
+                    if (row.destinations.length > 0) {
+                        const dest = row.destinations[0];
+                        const destData = [dest.number, dest.detailType, dest.message];
+                        
+                        destData.forEach(cell => {
+                            htmlContent += `<td>${cell}</td>`;
+                        });
+                    } else {
+                        // 添加空單元格
+                        for (let j = 0; j < 3; j++) {
+                            htmlContent += '<td></td>';
+                        }
+                    }
+                    htmlContent += '</tr>';
+                    
+                    // 添加額外的連動先行（從第二個開始）
+                    if (row.destinations.length > 1) {
+                        for (let i = 1; i < row.destinations.length; i++) {
+                            htmlContent += '<tr class="destinations-row">';
+                            
+                            // 添加空單元格，對齊到連動先1的位置
+                            for (let j = 0; j < 10; j++) {
+                                if (j === 0) {
+                                    htmlContent += '<td></td>'; // 通番留空
+                                } else {
+                                    htmlContent += '<td></td>';
+                                }
+                            }
+                            
+                            // 添加連動先資訊
+                            const dest = row.destinations[i];
+                            const destData = [dest.number, dest.detailType, dest.message];
+                            
+                            destData.forEach(cell => {
+                                htmlContent += `<td>${cell}</td>`;
+                            });
+                            
+                            htmlContent += '</tr>';
+                        }
+                    }
+                });
+                
+                htmlContent += `
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p>此報告由 HRR系統CSV轉換工具生成</p>
+        </div>
+    </div>
+</body>
+</html>`;
+                
+                // 建立Blob和下載連結
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const fileName = `${caseNameInput.value || '未命名案件'}連動資料${new Date().toISOString().slice(0, 10)}.html`;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            
+            // 格式化文件大小
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        }
+    </script>
+	<!-- 在每個工具的HTML檔案中，body結束前加入 -->
+<button onclick="window.location.href='index.html'" 
+        style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    返回主選單
+</button>		
+	
+</body>
+</html>
