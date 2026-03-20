@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .formula {
+            font-style: italic;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .add-row {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        .remove-row {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="section-title">壓力配管用碳鋼管(CNS4626) STPG (SCH40) 管之內徑絕對值(cm)</div>
+<table id="diameterTable">
+    <thead>
+        <tr>
+            <th>口徑</th>
+            <th>25</th>
+            <th>32</th>
+            <th>40</th>
+            <th>50</th>
+            <th>65</th>
+            <th>80</th>
+            <th>100</th>
+            <th>125</th>
+            <th>150</th>
+            <th>200</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>(內徑)</td>
+            <td>2.72</td>
+            <td>3.55</td>
+            <td>4.12</td>
+            <td>5.27</td>
+            <td>6.59</td>
+            <td>7.81</td>
+            <td>10.23</td>
+            <td>12.66</td>
+            <td>15.1</td>
+            <td>20.32</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="section-title">壓力配管用碳鋼管(CNS4626) STPG 每100M之摩擦損失</div>
+
+<div class="formula">
+    1.2 × (Q<sub>k</sub><sup>1.85</sup> / D<sub>k</sub><sup>4.87</sup>)
+</div>
+
+<div style="margin-bottom: 10px;">
+    Q<sub>k</sub>: 標稱管徑K配管之流量(L/min)<br>
+    D<sub>k</sub>: 標稱管徑K管之內徑絕對值(cm)
+</div>
+
+<table id="calculationTable">
+    <thead>
+        <tr>
+            <th>徑管 (A)</th>
+            <th>流量 (L/min)</th>
+            <th>內徑 (cm)</th>
+            <th>計算過程</th>
+            <th>每100M之損失</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><input type="number" class="pipe-size" value="100" min="25" step="1"></td>
+            <td><input type="number" class="flow-rate" value="2800" min="0" step="1"></td>
+            <td class="inner-diameter">10.23</td>
+            <td class="calculation-process">1.2 × (2800<sup>1.85</sup> / 10.23<sup>4.87</sup>) = 34.54</td>
+            <td class="friction-loss">0.3454</td>
+            <td><button class="button remove-row" onclick="removeRow(this)">-</button></td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="6" style="text-align: center;">
+                <button class="button add-row" onclick="addRow()">+ 增加一行</button>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+<script>
+    // 管徑對應表
+    const diameterMap = {
+        25: 2.72,
+        32: 3.55,
+        40: 4.12,
+        50: 5.27,
+        65: 6.59,
+        80: 7.81,
+        100: 10.23,
+        125: 12.66,
+        150: 15.1,
+        200: 20.32
+    };
+
+    // 計算摩擦損失
+    function calculateFrictionLoss(flowRate, diameter) {
+        const numerator = Math.pow(flowRate, 1.85);
+        const denominator = Math.pow(diameter, 4.87);
+        const result = 1.2 * (numerator / denominator);
+        return result;
+    }
+
+    // 更新行計算
+    function updateRow(row) {
+        const pipeSize = parseFloat(row.querySelector('.pipe-size').value);
+        const flowRate = parseFloat(row.querySelector('.flow-rate').value);
+        
+        if (isNaN(pipeSize) || isNaN(flowRate)) {
+            return;
+        }
+
+        const diameter = diameterMap[pipeSize] || 0;
+        const frictionLoss = calculateFrictionLoss(flowRate, diameter);
+        const formattedLoss = (frictionLoss / 100).toFixed(4);
+        
+        row.querySelector('.inner-diameter').textContent = diameter.toFixed(2);
+        row.querySelector('.calculation-process').innerHTML = 
+            `1.2 × (${flowRate}<sup>1.85</sup> / ${diameter.toFixed(2)}<sup>4.87</sup>) = ${frictionLoss.toFixed(2)}`;
+        row.querySelector('.friction-loss').textContent = formattedLoss;
+    }
+
+    // 為所有輸入添加事件監聽器
+    function addEventListeners() {
+        const inputs = document.querySelectorAll('.pipe-size, .flow-rate');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                updateRow(this.closest('tr'));
+            });
+        });
+    }
+
+    // 添加新行
+    function addRow() {
+        const tbody = document.querySelector('#calculationTable tbody');
+        const newRow = document.createElement('tr');
+        
+        newRow.innerHTML = `
+            <td><input type="number" class="pipe-size" value="100" min="25" step="1"></td>
+            <td><input type="number" class="flow-rate" value="2800" min="0" step="1"></td>
+            <td class="inner-diameter">10.23</td>
+            <td class="calculation-process">1.2 × (2800<sup>1.85</sup> / 10.23<sup>4.87</sup>) = 34.54</td>
+            <td class="friction-loss">0.3454</td>
+            <td><button class="button remove-row" onclick="removeRow(this)">-</button></td>
+        `;
+        
+        tbody.appendChild(newRow);
+        addEventListeners();
+        updateRow(newRow);
+    }
+
+    // 刪除行
+    function removeRow(button) {
+        const row = button.closest('tr');
+        if (document.querySelectorAll('#calculationTable tbody tr').length > 1) {
+            row.remove();
+        } else {
+            alert("至少需要保留一行數據。");
+        }
+    }
+
+    // 初始化事件監聽器
+    document.addEventListener('DOMContentLoaded', function() {
+        addEventListeners();
+        
+        // 初始化計算所有現有行
+        const rows = document.querySelectorAll('#calculationTable tbody tr');
+        rows.forEach(row => {
+            updateRow(row);
+        });
+    });
+</script>
+
+</body>
+</html>
