@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <title>設備詢價系統 | 測試中 | 新增認可文件功能</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Noto Sans TC', Roboto, 'Helvetica Neue', sans-serif;
+            background: #eef2f7;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-layout {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* 左側導覽欄 */
+        .sidebar-nav {
+            width: 280px;
+            background: linear-gradient(180deg, #1a2c3e 0%, #0f212f 100%);
+            color: #eef4ff;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 28px 20px 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header h2:before {
+            content: "📋";
+            font-size: 1.6rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 8px;
+        }
+
+        .nav-categories {
+            flex: 1;
+            padding: 0 12px 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #cddfe7;
+            font-weight: 500;
+            font-size: 1rem;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: #2c6e9e;
+            color: white;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+        }
+
+        .nav-label {
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .nav-badge {
+            background: rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .cart-mini {
+            margin: 20px 12px 24px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 24px;
+            padding: 16px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .cart-mini-title {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .cart-mini-total {
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .view-cart-btn {
+            background: #ffb347;
+            border: none;
+            width: 100%;
+            padding: 8px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #1e2f3c;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .view-cart-btn:hover {
+            background: #ff9f1a;
+            transform: scale(0.98);
+        }
+
+        /* 右側內容區 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f4f8fe;
+        }
+
+        .content-header {
+            background: white;
+            padding: 18px 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e2edf2;
+        }
+
+        .current-category h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1f4662;
+        }
+
+        .current-category p {
+            color: #6c86a3;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .cart-quick-info {
+            background: #eef2fa;
+            padding: 8px 20px;
+            border-radius: 40px;
+            display: flex;
+            gap: 24px;
+            font-weight: 600;
+        }
+
+        .cart-quick-info span:first-child {
+            color: #2c5f8a;
+        }
+
+        .cart-quick-info span:last-child {
+            color: #c44536;
+            font-size: 1.2rem;
+        }
+
+        /* 產品區域 */
+        .products-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+        }
+
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-main-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e9f0f5;
+            transition: all 0.1s;
+        }
+
+        .main-category-title {
+            background: #f0f6fd;
+            padding: 16px 24px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #1f4e7a;
+            border-bottom: 2px solid #dce9f2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sub-items-list {
+            padding: 8px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 重點修改: 當數量>0 時深藍底 */
+        .sub-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f4fa;
+            transition: background 0.2s, box-shadow 0.1s;
+            flex-wrap: wrap;
+            border-radius: 12px;
+            margin: 2px 8px;
+        }
+
+        /* 被選中(數量>0)的高亮樣式 */
+        .sub-item-row.selected-highlight {
+            background: #1e4d73 !important;
+            border-left: 6px solid #ffb347;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .sub-item-row.selected-highlight .sub-item-name,
+        .sub-item-row.selected-highlight .sub-item-desc,
+        .sub-item-row.selected-highlight .item-code {
+            color: white !important;
+        }
+        .sub-item-row.selected-highlight .item-code {
+            background: #2c6e9e;
+            color: #f0f6fd;
+        }
+        .sub-item-row.selected-highlight .catalog-btn,
+        .sub-item-row.selected-highlight .approval-btn {
+            background: #f3f9ff;
+            border-color: #ffd966;
+            color: #0f3b5c;
+        }
+        .sub-item-row.selected-highlight .qty-control {
+            background: #2e6a8e;
+        }
+        .sub-item-row.selected-highlight .qty-control button {
+            background: #f9c35c;
+            border-color: #fff0c0;
+            color: #1e3b4f;
+        }
+        .sub-item-row.selected-highlight .qty-number-input {
+            background: #fff4e0;
+            border-color: #ffbc6e;
+            font-weight: bold;
+        }
+
+        .sub-item-row:hover {
+            background: #fafdff;
+        }
+        .sub-item-row.selected-highlight:hover {
+            background: #1b5a85 !important;
+        }
+
+        .sub-item-info {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .sub-item-name {
+            font-weight: 700;
+            color: #1f3b4c;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .item-code {
+            background: #e9ecef;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #2c5f8a;
+            font-family: monospace;
+        }
+
+        .sub-item-desc {
+            font-size: 0.9rem;
+            color: #1f4662;
+            margin-top: 6px;
+            line-height: 1.5;
+			font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* 共用按鈕基礎樣式 */
+        .catalog-btn, .approval-btn {
+            background: #f0f3f8;
+            border: 1px solid #bdd4e4;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .catalog-btn {
+            color: #1f4e7a;
+        }
+        .approval-btn {
+            color: #2d6a4f;
+            background: #e9f5ef;
+            border-color: #9ec5b0;
+        }
+        .catalog-btn:hover {
+            background: #e2eaf3;
+            border-color: #2c6e9e;
+        }
+        .approval-btn:hover {
+            background: #d4e9df;
+            border-color: #2d6a4f;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f1f5f9;
+            padding: 4px 8px 4px 12px;
+            border-radius: 48px;
+            min-width: 140px;
+            justify-content: flex-end;
+        }
+
+        .qty-control button {
+            background: white;
+            border: 1px solid #cbdde9;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            color: #2c5f8a;
+            transition: 0.1s;
+        }
+
+        .qty-number-input {
+            width: 70px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            border: 1px solid #cbdde9;
+            border-radius: 30px;
+            padding: 6px 0;
+            background: white;
+            font-family: monospace;
+            outline: none;
+        }
+
+        /* 自訂項目區塊 (I類別) */
+        .custom-request-area {
+            background: white;
+            border-radius: 24px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+        .custom-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e9f0f5;
+            padding-bottom: 12px;
+        }
+        .custom-header h4 {
+            font-size: 1.3rem;
+            color: #1f4662;
+        }
+        .add-custom-btn {
+            background: #2c6e9e;
+            border: none;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .custom-item-card {
+            background: #fafdff;
+            border: 1px solid #e2edf2;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+        .custom-field {
+            flex: 2;
+            min-width: 180px;
+        }
+        .custom-field label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #2c5f8a;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .custom-field input, .custom-field textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbdde9;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .custom-field textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .del-custom-btn {
+            background: #fff0f0;
+            border: 1px solid #e0b4b4;
+            padding: 8px 14px;
+            border-radius: 40px;
+            color: #b91c1c;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .empty-custom-msg {
+            text-align: center;
+            color: #8aa0b5;
+            padding: 20px;
+        }
+
+        /* 詢價車抽屜 */
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: -520px;
+            width: 520px;
+            max-width: 92vw;
+            height: 100vh;
+            background: white;
+            box-shadow: -8px 0 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            display: flex;
+            flex-direction: column;
+            border-radius: 28px 0 0 28px;
+        }
+
+        .cart-drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 20px 24px;
+            background: #1f3e54;
+            color: white;
+            border-radius: 28px 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-drawer {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        .project-name-area {
+            padding: 16px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2edf2;
+        }
+
+        .cart-items-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafcff;
+            border-radius: 20px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e9eff5;
+        }
+
+        .cart-item-info {
+            flex: 2;
+        }
+
+        .cart-item-name {
+            font-weight: 700;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 5px 12px;
+            border-radius: 40px;
+        }
+
+        .remove-item-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #b91c1c;
+            margin-left: 8px;
+        }
+
+        .cart-footer {
+            padding: 20px 24px;
+            border-top: 2px solid #eef2f8;
+            background: white;
+            border-radius: 0 0 0 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .export-btn {
+            flex: 1;
+            background: #2c6e9e;
+            border: none;
+            padding: 10px;
+            border-radius: 48px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: #2c6b2f;
+            border: none;
+            padding: 12px;
+            border-radius: 48px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            display: none;
+        }
+
+        .drawer-overlay.show {
+            display: block;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a5f;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            z-index: 1100;
+            transition: 0.2s;
+            white-space: nowrap;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 800px) {
+            .sidebar-nav { width: 240px; }
+            .sub-item-row { flex-direction: column; align-items: stretch; }
+            .action-buttons { justify-content: flex-end; }
+            .qty-control { align-self: flex-end; }
+        }
+
+/* 新增：禁用按鈕樣式 */
+.catalog-btn:disabled,
+.approval-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+/* 確保滑鼠懸停時禁用狀態不變 */
+.catalog-btn:disabled:hover,
+.approval-btn:disabled:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    transform: none;
+}	
+		
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <div class="sidebar-nav">
+        <div class="sidebar-header">
+            <h2>設備詢價系統</h2>
+            <p>型錄 / 認可文件測試中 / Jim</p>
+        </div>
+        <div class="nav-categories" id="navCategories"></div>
+        <div class="cart-mini">
+            <div class="cart-mini-title">📋 詢價明細</div>
+            <div class="cart-mini-total"><span>總品項數</span><span id="sidebarTotalQty">0</span></div>
+            <div class="cart-mini-total"><span>設備種類</span><span id="sidebarUniqueCount">0</span></div>
+            <button class="view-cart-btn" id="openCartDrawerBtn">📄 檢視詢價單</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-header">
+            <div class="current-category" id="currentCategoryHeader">
+                <h3 id="activeCatTitle">A類 · 日規火警系統</h3>
+                <p id="activeCatDesc">火警總機 / 定址探測器 / 中繼器</p>
+            </div>
+            <div class="cart-quick-info"><span>總詢價數量</span><span id="quickTotalQty">0</span></div>
+        </div>
+
+        <div class="products-area" id="productsArea">
+            <div class="products-list" id="productsList"></div>
+        </div>
+    </div>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header"><h3>📄 詢價明細</h3><button class="close-drawer" id="closeDrawerBtn">✕</button></div>
+    <div class="project-name-area"><label>📌 案件名稱 (必填，存檔依據)</label><input type="text" id="projectNameInput" class="project-name-input" placeholder="請輸入專案名稱" value=""></div>
+    <div class="cart-items-list" id="drawerCartList"><div class="empty-cart-msg">目前詢價車為空</div></div>
+    <div class="cart-footer">
+        <div class="cart-total"><span>總品項數</span><span id="drawerTotalQtySpan">0</span></div>
+        <div class="export-buttons"><button class="export-btn" id="exportHtmlBtn">📄 匯出 HTML 詢價單</button><button class="export-btn json" id="exportJsonBtn">📁 匯出 Excel 檔</button></div>
+        <button class="checkout-btn" id="drawerCheckoutBtn">✅ 產生詢價單 (預覽)</button>
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg" style="opacity:0; visibility: hidden;"></div>
+
+<script>
+	    // ---------- 新增：檔案可訪問性狀態管理 ----------
+    // 此物件定義每個產品ID對應的「型錄」和「認可文件」PDF是否存在。
+    // 鍵值為產品ID（如 "A101"），值為一個物件，包含 `catalog` 和 `approval` 兩個布林值。
+    // true 表示檔案存在，按鈕可點擊；false 表示檔案不存在，按鈕應禁用。
+	const fileAvailability = {
+    // A類 - 日規A型
+    "A101": { catalog: true, approval: true },
+    "A102": { catalog: false, approval: false },
+    "A103": { catalog: true, approval: false },
+    "A104": { catalog: false, approval: false },
+    "A105": { catalog: false, approval: false },
+    "A106": { catalog: false, approval: false },
+    "A107": { catalog: true, approval: true },
+    "A108": { catalog: false, approval: false },
+    "A109": { catalog: true, approval: false },
+    "A110": { catalog: false, approval: false },
+    "A111": { catalog: false, approval: false },
+    "A112": { catalog: false, approval: false },
+    "A113": { catalog: false, approval: false },
+    "A114": { catalog: false, approval: false },
+    "A115": { catalog: false, approval: false },
+    "A116": { catalog: true, approval: true },
+    "A117": { catalog: false, approval: false },
+    "A201": { catalog: true, approval: true },
+    "A202": { catalog: true, approval: true },
+    "A203": { catalog: true, approval: true },
+    "A204": { catalog: true, approval: true },
+    "A205": { catalog: true, approval: true },
+    "A206": { catalog: true, approval: false },
+    "A207": { catalog: true, approval: false },
+    "A301": { catalog: true, approval: true },
+    "A302": { catalog: true, approval: true },
+    "A303": { catalog: true, approval: true },
+    "A304": { catalog: true, approval: true },
+    "A305": { catalog: true, approval: true },
+    "A306": { catalog: true, approval: true },
+    "A307": { catalog: true, approval: true },
+    "A308": { catalog: true, approval: true },
+    "A309": { catalog: true, approval: true },
+    "A310": { catalog: true, approval: true },
+    "A311": { catalog: true, approval: true },
+    "A312": { catalog: true, approval: true },
+    "A313": { catalog: true, approval: false },
+    "A401": { catalog: true, approval: true },
+    "A402": { catalog: false, approval: false },
+    "A403": { catalog: false, approval: false },
+    "A404": { catalog: false, approval: false },
+    "A405": { catalog: false, approval: false },
+    "A406": { catalog: true, approval: false },
+    "A407": { catalog: true, approval: false },
+    "A408": { catalog: false, approval: false },
+    "A409": { catalog: false, approval: false },
+    "A410": { catalog: false, approval: false },
+
+    // B類 - 美規R型
+    "B101": { catalog: true, approval: true },
+    "B102": { catalog: false, approval: false },
+    "B103": { catalog: false, approval: false },
+    "B104": { catalog: false, approval: false },
+    "B105": { catalog: false, approval: false },
+    "B106": { catalog: false, approval: false },
+    "B107": { catalog: false, approval: false },
+    "B108": { catalog: false, approval: false },
+    "B201": { catalog: true, approval: true },
+    "B202": { catalog: true, approval: true },
+    "B203": { catalog: true, approval: true },
+    "B204": { catalog: true, approval: false },
+    "B301": { catalog: true, approval: true },
+    "B302": { catalog: true, approval: true },
+    "B303": { catalog: true, approval: true },
+    "B304": { catalog: true, approval: true },
+    "B305": { catalog: true, approval: true },
+    "B401": { catalog: true, approval: false },
+    "B402": { catalog: true, approval: false },
+    "B403": { catalog: true, approval: false },
+    "B404": { catalog: true, approval: false },
+    "B405": { catalog: true, approval: false },
+    "B406": { catalog: true, approval: false },
+    "B407": { catalog: false, approval: false },
+
+    // C類 - 傳統P型
+    "C101": { catalog: true, approval: true },
+    "C102": { catalog: true, approval: true },
+    "C105": { catalog: true, approval: true },
+    "C106": { catalog: false, approval: false },
+    "C107": { catalog: true, approval: true },
+    "C108": { catalog: true, approval: false },
+    "C109": { catalog: true, approval: true },
+    "C110": { catalog: true, approval: false },
+    "C111": { catalog: true, approval: false },
+    "C112": { catalog: true, approval: false },
+    "C113": { catalog: true, approval: false },
+    "C114": { catalog: true, approval: false },
+    "C115": { catalog: true, approval: true },
+    "C116": { catalog: true, approval: false },
+    "C117": { catalog: true, approval: true },
+    "C118": { catalog: true, approval: false },
+    "C201": { catalog: true, approval: true },
+    "C202": { catalog: true, approval: true },
+    "C203": { catalog: true, approval: true },
+    "C204": { catalog: true, approval: false },
+    "C206": { catalog: true, approval: true },
+    "C207": { catalog: true, approval: false },
+    "C208": { catalog: true, approval: true },
+    "C209": { catalog: true, approval: false },
+    "C210": { catalog: true, approval: false },
+    "C301": { catalog: true, approval: true },
+    "C302": { catalog: true, approval: true },
+    "C303": { catalog: true, approval: false},
+    "C304": { catalog: true, approval: true },
+    "C305": { catalog: true, approval: false },
+    "C306": { catalog: true, approval: false },
+    "C307": { catalog: true, approval: false },
+    "C401": { catalog: true, approval: true },
+    "C402": { catalog: true, approval: true },
+    "C403": { catalog: true, approval: false },
+    "C404": { catalog: true, approval: false },
+    "C501": { catalog: true, approval: false },
+    "C502": { catalog: true, approval: false },
+    "C503": { catalog: true, approval: false },
+    "C504": { catalog: true, approval: false },
+    "C505": { catalog: true, approval: false },
+    "C506": { catalog: true, approval: false },
+    "C601": { catalog: true, approval: true },
+    "C602": { catalog: true, approval: true },
+    "C603": { catalog: true, approval: true },
+    "C604": { catalog: false, approval: false },
+    "C605": { catalog: true, approval: true },
+    "C606": { catalog: true, approval: true },
+    "C607": { catalog: true, approval: true },
+
+    // D類 - 美規氣體盤
+    "D101": { catalog: true, approval: true },
+    "D102": { catalog: true, approval: true },
+    "D103": { catalog: true, approval: true },
+    "D201": { catalog: true, approval: false },
+    "D202": { catalog: true, approval: false },
+    "D203": { catalog: true, approval: false },
+    "D207": { catalog: true, approval: false },
+    "D208": { catalog: true, approval: false },
+    "D301": { catalog: true, approval: true },
+    "D302": { catalog: true, approval: true },
+    "D303": { catalog: true, approval: true },
+    "D304": { catalog: true, approval: false },
+
+    // E類 - 固定式系統
+    "E101": { catalog: true, approval: false },
+    "E102": { catalog: false, approval: false },
+    "E103": { catalog: false, approval: false },
+    "E104": { catalog: false, approval: false },
+    "E105": { catalog: false, approval: false },
+    "E106": { catalog: false, approval: false },
+    "E107": { catalog: false, approval: false },
+    "E108": { catalog: false, approval: false },
+    "E109": { catalog: false, approval: false },
+    "E110": { catalog: false, approval: false },
+    "E111": { catalog: false, approval: false },
+    "E112": { catalog: false, approval: false },
+    "E113": { catalog: false, approval: false },
+    "E114": { catalog: false, approval: false },
+    "E115": { catalog: false, approval: false },
+    "E116": { catalog: false, approval: false },
+    "E117": { catalog: false, approval: false },
+    "E118": { catalog: false, approval: false },
+    "E119": { catalog: false, approval: false },
+    "E120": { catalog: false, approval: false },
+    "E121": { catalog: false, approval: false },
+    "E122": { catalog: false, approval: false },
+    "E123": { catalog: false, approval: false },
+    "E124": { catalog: false, approval: false },
+    "E125": { catalog: false, approval: false },
+    "E126": { catalog: false, approval: false },
+    "E127": { catalog: false, approval: false },
+    "E128": { catalog: false, approval: false },
+    "E129": { catalog: false, approval: false },
+    "E130": { catalog: false, approval: false },
+    "E131": { catalog: false, approval: false },
+    "E132": { catalog: false, approval: false },
+    "E133": { catalog: false, approval: false },
+    "E134": { catalog: false, approval: false },
+    "E135": { catalog: false, approval: false },
+    "E136": { catalog: true, approval: false },
+    "E137": { catalog: true, approval: false },
+    "E138": { catalog: true, approval: false },
+    "E139": { catalog: true, approval: false },
+    "E140": { catalog: true, approval: false },
+    "E141": { catalog: true, approval: false },
+    "E201": { catalog: true, approval: false },
+    "E202": { catalog: true, approval: false },
+    "E203": { catalog: true, approval: false },
+    "E204": { catalog: true, approval: false },
+    "E205": { catalog: true, approval: false },
+    "E206": { catalog: true, approval: false },
+    "E207": { catalog: true, approval: false },
+    "E208": { catalog: true, approval: false },
+    "E209": { catalog: true, approval: false },
+    "E210": { catalog: true, approval: false },
+    "E211": { catalog: true, approval: false },
+    "E212": { catalog: true, approval: false },
+    "E213": { catalog: true, approval: false },
+    "E214": { catalog: true, approval: false },
+    "E215": { catalog: true, approval: false },
+    "E216": { catalog: true, approval: false },
+    "E217": { catalog: true, approval: false },
+    "E301": { catalog: true, approval: false },
+    "E302": { catalog: true, approval: false },
+    "E303": { catalog: true, approval: false },
+    "E304": { catalog: true, approval: false },
+    "E305": { catalog: true, approval: false },
+    "E306": { catalog: true, approval: false },
+    "E307": { catalog: true, approval: false },
+    "E308": { catalog: true, approval: false },
+
+    // F類 - 小規模系統
+    "F101": { catalog: true, approval: false },
+    "F102": { catalog: false, approval: false },
+    "F103": { catalog: false, approval: false },
+    "F104": { catalog: false, approval: false },
+    "F105": { catalog: false, approval: false },
+    "F106": { catalog: false, approval: false },
+    "F107": { catalog: false, approval: false },
+    "F108": { catalog: false, approval: false },
+    "F109": { catalog: true, approval: false },
+    "F110": { catalog: true, approval: false },
+    "F111": { catalog: true, approval: false },
+    "F201": { catalog: true, approval: false },
+    "F202": { catalog: true, approval: false },
+    "F203": { catalog: true, approval: false },
+    "F204": { catalog: true, approval: false },
+    "F205": { catalog: true, approval: false },
+    "F206": { catalog: true, approval: false },
+    "F207": { catalog: true, approval: false },
+    "F301": { catalog: true, approval: false },
+    "F302": { catalog: true, approval: false },
+    "F303": { catalog: true, approval: false },
+    "F304": { catalog: true, approval: false },
+    "F305": { catalog: true, approval: false },
+    "F306": { catalog: true, approval: false },
+    "F307": { catalog: true, approval: false },
+    "F308": { catalog: true, approval: false },
+    "F309": { catalog: true, approval: false },
+    "F310": { catalog: true, approval: false },
+
+    // G類 - 中規模系統
+    "G101": { catalog: true, approval: false },
+    "G102": { catalog: false, approval: false },
+    "G103": { catalog: false, approval: false },
+    "G104": { catalog: false, approval: false },
+    "G105": { catalog: false, approval: false },
+    "G106": { catalog: false, approval: false },
+    "G107": { catalog: false, approval: false },
+    "G108": { catalog: false, approval: false },
+    "G109": { catalog: true, approval: false },
+    "G110": { catalog: false, approval: false },
+    "G111": { catalog: false, approval: false },
+    "G112": { catalog: false, approval: false },
+    "G113": { catalog: false, approval: false },
+    "G114": { catalog: false, approval: false },
+    "G115": { catalog: false, approval: false },
+    "G116": { catalog: false, approval: false },
+    "G117": { catalog: true, approval: false },
+    "G118": { catalog: true, approval: false },
+    "G119": { catalog: true, approval: false },
+	"G120": { catalog: true, approval: false },
+	
+    "G201": { catalog: true, approval: false },
+    "G202": { catalog: true, approval: false },
+    "G203": { catalog: true, approval: false },
+    "G204": { catalog: true, approval: false },
+    "G205": { catalog: true, approval: false },
+	"G206": { catalog: true, approval: false },
+    "G301": { catalog: true, approval: false },
+    "G302": { catalog: true, approval: false },
+    "G303": { catalog: false, approval: false },
+	"G304": { catalog: false, approval: false },
+
+    // H類 - 大規模系統
+    "H101": { catalog: true, approval: false },
+    "H102": { catalog: true, approval: false },
+    "H103": { catalog: true, approval: false },
+    "H104": { catalog: true, approval: false },
+    "H105": { catalog: true, approval: false },
+    "H106": { catalog: true, approval: false },
+    "H107": { catalog: true, approval: false },
+    "H108": { catalog: true, approval: false },
+    "H109": { catalog: true, approval: false },
+    "H110": { catalog: true, approval: false },
+    "H111": { catalog: true, approval: false },
+    "H112": { catalog: true, approval: false },
+    "H113": { catalog: true, approval: false },
+    "H114": { catalog: true, approval: false },
+    "H115": { catalog: true, approval: false },
+    "H116": { catalog: true, approval: false },
+    "H117": { catalog: true, approval: false },
+    "H118": { catalog: true, approval: false },
+    "H119": { catalog: true, approval: false },
+	"H120": { catalog: true, approval: false },
+	"H121": { catalog: true, approval: false },
+    "H201": { catalog: true, approval: false },
+    "H202": { catalog: true, approval: false },
+    "H203": { catalog: true, approval: false },
+    "H204": { catalog: true, approval: false },
+    "H205": { catalog: true, approval: false },
+    "H301": { catalog: true, approval: false },
+    "H302": { catalog: true, approval: false },
+    "H303": { catalog: true, approval: false },
+	"H304": { catalog: true, approval: false },
+
+};
+    // 輔助函數：取得指定ID的檔案狀態
+    function getFileStatus(itemId) {
+        // 如果已明確定義，返回該狀態；否則返回預設值（兩者皆不可用）
+        return fileAvailability[itemId] || { catalog: false, approval: false };
+    }
+
+
+
+    // ---------- 設備資料庫 (與原內容相同，完整保留A~H) ----------
+	    const categoryAData = {
+        name: "日規R型", desc: "火警總機 / 定址探測器 / 中繼器",
+        mainGroups: [
+            { mainId: "A-1", mainName: "A-1 · 火警總機系列", icon: "🖥️", subItems: [
+                { id: "A101", name: "HRN-ABW510FGA(T)", desc: "壁掛式 2迴路" }, 
+			   { id: "A102", name: "HRN-ABW1020FGA(T)", desc: "壁掛式 4迴路" },
+                { id: "A103", name: "HRN-ABS510FGA(T)", desc: "自立式 2迴路" }, 
+				{ id: "A104", name: "HRN-ABS1020FGA(T)", desc: "自立式 4迴路" },
+                { id: "A105", name: "HRN-ABS2040FGA(T)", desc: "自立式 8迴路" }, 
+				{ id: "A106", name: "HRN-ABS2550FGA(T)", desc: "自立式 10迴路" },
+                { id: "A107", name: "HRR-AAW510", desc: "壁掛式 2迴路" }, { id: "A108", name: "HRR-AAW1020", desc: "壁掛式 4迴路" },
+                { id: "A109", name: "HRR-AAS510", desc: "自立式 2迴路" }, { id: "A110", name: "HRR-AAS1020", desc: "自立式 4迴路" },
+                { id: "A111", name: "HRR-AAS2040", desc: "自立式 8迴路" }, { id: "A112", name: "HRR-AAS2550", desc: "自立式 10迴路" },
+                { id: "A113", name: "HRR-AAS4080", desc: "自立式 16迴路" }, { id: "A114", name: "HRR-AAS5100", desc: "自立式 20迴路" },
+                { id: "A115", name: "HRR-AAS5610", desc: "自立式 22迴路" }, { id: "A116", name: "HRU-AAS510(OP)", desc: "自立式 2迴路 分散盤主機" },
+                { id: "A117", name: "HRR-AAS1020(OP)", desc: "自立式 4迴路 分散盤主機" }
+            ] },
+            { mainId: "A-2", mainName: "A-2 · 定址類比探測器", icon: "💾", subItems: [
+                { id: "A201", name: "ALK-NLYA", desc: "定址偵煙" },
+				{ id: "A202", name: "ASB-2LYA", desc: "定址差動" },
+                { id: "A203", name: "ATI-NWRLYA", desc: "定址定溫防水型、無需另購底座" },
+				{ id: "A204", name: "PRK-1A", desc: "定址發信機" },
+				{ id: "A205", name: "ABC-12YA", desc: "定址光電分離型" },
+				{ id: "A206", name: "YBN-R/1NA", desc: "定址底座" },
+				{ id: "A207", name: "YYT-9A", desc: "定址發信機專用排線" }
+            ] },
+            { mainId: "A-3", mainName: "A-3 · 中繼器", icon: "🔌", subItems: [
+                { id: "A301", name: "CHW-KL", desc: "火警單迴路中繼器" },
+				{ id: "A302", name: "CHW-K4P", desc: "火警4迴路中繼器" },
+                { id: "A303", name: "CHW-K8", desc: "火警8迴路中繼器" },
+				{ id: "A304", name: "CHW-BY", desc: "警鈴中繼器" },
+				{ id: "A305", name: "CHW-R4", desc: "'防排煙中繼器" },
+				{ id: "A306", name: "CHW-S4A", desc: "監視中繼器" },
+				{ id: "A307", name: "CHW-G4", desc: "瓦斯中繼器" },
+				{ id: "A308", name: "CHW-ADSCI2", desc: "信號短路隔離中繼器" },
+				{ id: "A309", name: "CHW-PSCI", desc: "電源短路中繼器" },
+				{ id: "A310", name: "CMA-ABW510(OP)", desc: "分散盤 2迴路" },
+				{ id: "A311", name: "CMA-ABW1020(OP)", desc: "分散盤 4迴路" },
+				{ id: "A312", name: "CMA-ABW2040(OP)", desc: "分散盤 8迴路" },
+				{ id: "A313", name: "TE-RH", desc: "KL、K4、K8終端電阻" }
+            ] },
+		   { mainId: "A-4", mainName: "A-4 · 其他附屬設備", icon: "💾", subItems: [
+                { id: "A401", name: "FBB-150ID", desc: "警鈴有極性" },
+				{ id: "A402", name: "R/P 移報板 HRN用", desc: "R/P 移報板" },
+				{ id: "A403", name: "R/P 移報板 HRR/HRU用", desc: "R/P 移報板" },
+                { id: "A404", name: "RS-232 串列基板 HRN用", desc: "RS-232 串列基板" },
+				{ id: "A405", name: "RS-232 串列基板 HRR用", desc: "RS-232 串列基板" },
+				{ id: "A406", name: "TCO-A100", desc: "手持設定器" },
+				{ id: "A407", name: "HEX-IPH", desc: "副機 表示盤 HRR/HRU" },
+				{ id: "A408", name: "NCD-3.50", desc: "電池 3.5AH" },
+				{ id: "A409", name: "NCD-6.00", desc: "電池 6AH" },
+				{ id: "A410", name: "NCD-10.00", desc: "電池 10A" }
+            ] }
+			
+        ]
+    };
+    
+    // 修正後的 B 類別 - 使用 mainGroups 結構 (B-1, B-2, B-3)
+    const categoryBData = {
+        name: "美規R型", 
+        desc: "火警總機 / 定址探測器 / 模組",
+        mainGroups: [
+            { mainId: "B-1", mainName: "B-1 · 火警總機系列", icon: "🔥", subItems: [
+                { id: "B101", name: "L@titude 2", desc: "壁掛式 2迴路" }, 
+                { id: "B102", name: "L@titude 4", desc: "壁掛式 4迴路" },
+                { id: "B103", name: "L@titude 6", desc: "壁掛式 6迴路" },
+				{ id: "B104", name: "L@titude 8", desc: "壁掛式 8迴路" },
+				{ id: "B105", name: "L@titude 10", desc: "壁掛式 10迴路" },
+				{ id: "B106", name: "L@titude 12", desc: "壁掛式 12迴路" },
+				{ id: "B107", name: "L@titude 14", desc: "壁掛式 14迴路" },
+				{ id: "B108", name: "L@titude 16", desc: "壁掛式 16迴路" }
+            ] },
+            { mainId: "B-2", mainName: "B-2 · 定址類比探測器", icon: "💾", subItems: [
+                { id: "B201", name: "ALO-V", desc: "定址偵煙" }, 
+                { id: "B202", name: "ATJ-EA", desc: "定址補償" },
+                { id: "B203", name: "ACC-V", desc: "定址煙熱複合式" },
+				{ id: "B204", name: "YBN-NSA-47", desc: "定址底座" }
+            ] },
+            { mainId: "B-3", mainName: "B-3 · 模組", icon: "🔌", subItems: [
+                { id: "B301", name: "DCP-CZM", desc: "火警單迴路模組" }, 
+                { id: "B302", name: "DCP-DIMM", desc: "監視模組" },
+                { id: "B303", name: "DCP-R2ML", desc: "接點輸出模組" },
+				{ id: "B304", name: "DCP-SCI", desc: "信號短路隔離模組" },
+				{ id: "B305", name: "DCP-AMS-LP", desc: "定址發信機" }
+            ] },
+		    { mainId: "B-4", mainName: "B-4 · 其他附屬設", icon: "🔌", subItems: [
+                { id: "B401", name: "Vison", desc: "副機" }, 
+                { id: "B402", name: "S408", desc: "10.25A 電源供給器" },
+                { id: "B403", name: "S406", desc: "5.25A 電源供給器" },
+				{ id: "B404", name: "S723", desc: "網路卡(總機連線用)" },
+				{ id: "B405", name: "S758", desc: "雙迴路卡" },
+				{ id: "B406", name: "S788", desc: "媒體介面卡(TCP/IP)" },
+				{ id: "B407", name: "圖控電腦", desc: "PC端圖形顯示介面" }
+            ] }
+			
+        ]
+    };
+    
+    // 其他類別 (C, )
+    const legacyEquipment = {
+
+		C: { 
+    name: "傳統P型", 
+    desc: "日、美、歐探測器 / 警鈴 / 船舶 / 住宅用警報器 / 撒水頭 / 閥體 ",
+    mainGroups: [
+        { 
+            mainId: "C-1", 
+            mainName: "C-1 · 日規P型探測器系列", 
+            icon: "🔥", 
+            subItems: [
+                { id: "C101", name: "SLV-2", desc: "光電式偵煙探測器 (配合台製底座)" },
+                { id: "C102", name: "DSC-2", desc: "差動式探測器 (配合台製底座)" },
+                { id: "C105", name: "DFS-1SE70RLB", desc: "定溫防水耐酸鹼 無須底座" },
+				{ id: "C106", name: "台製底座", desc: "台製底座" },
+				{ id: "C107", name: "DHA-2L", desc: "差動式分布型 (空氣管AK-M)" },
+				{ id: "C108", name: "AK-M", desc: "空氣管 100m" },
+				{ id: "C109", name: "DRC-13A", desc: "紅外線 火焰探測器" },
+				{ id: "C110", name: "YBR-RL/2(LG)", desc: "DRC-13 底座" },
+				{ id: "C111", name: "YZU-AA", desc: "萬向座 火焰探測器用" },
+				{ id: "C112", name: "YZU-B", desc: "轉向座  火焰探測器用" },
+				{ id: "C113", name: "YZU-C", desc: "遮光板  火焰探測器用通用款" },
+				{ id: "C114", name: "YZU-D", desc: "遮光板  火焰探測器用設計款" },
+				{ id: "C115", name: "PPH-1A", desc: "二合一發信機" },
+				{ id: "C116", name: "YYT-9A", desc: "二合一發信機 專用排線" },
+     			{ id: "C117", name: "FBB-150I", desc: "警鈴" },
+				{ id: "C118", name: "ARS-B104", desc: "自動閉鎖器" },
+				] 
+        },
+        { 
+            mainId: "C-2", 
+            mainName: "C-2 · 美規P型探測器系列", 
+            icon: "🔌", 
+            subItems: [
+                { id: "C201", name: "SOE-24V", desc: "光電式偵煙探測器" },
+                { id: "C202", name: "SOE-24H", desc: "煙熱複合式探測器" },
+                { id: "C203", name: "DCD-135", desc: "補償式探測器" },
+                { id: "C204", name: "NS4-100", desc: "標準底座" },
+				{ id: "C206", name: "DSC-EA", desc: "差動探測器 (台製底座)" },
+				{ id: "C207", name: "台製底座", desc: "台製底座" },
+				{ id: "C208", name: "SPC-24", desc: "光電式分離型" },
+				{ id: "C209", name: "HSC-224R", desc: "具備電驛接點底座" },
+				{ id: "C210", name: "HSC-4R", desc: "4線式底座" },
+            ] 
+        },
+        { 
+            mainId: "C-3", 
+            mainName: "C-3 · 歐規P型探測器系列", 
+            icon: "🔔", 
+            subItems: [
+                { id: "C301", name: "SOC-E-IS", desc: "本質安全光電偵煙" },
+                { id: "C302", name: "DCD-1E-IS", desc: "本質安全補償式" },
+                { id: "C303", name: "YBN-R/4(IS)", desc: "本質安全探測器底座" },
+                { id: "C304", name: "DRD-E", desc: "紅外線火焰探測器" },
+ 				{ id: "C305", name: "YZU-AA", desc: "萬向座 火焰探測器用" },
+				{ id: "C306", name: "YZU-B", desc: "轉向座  火焰探測器用" },
+				{ id: "C307", name: "YZU-C", desc: "遮光板  火焰探測器用通用款" },	
+            ] 
+	    },
+		      
+			  { 
+            mainId: "C-4", 
+            mainName: "C-4 · 住宅用、瓦斯警報器系列", 
+            icon: "🔔", 
+            subItems: [
+                { id: "C401", name: "SS-2LT-10HC", desc: "光電偵煙" },
+                { id: "C402", name: "SS-FL-10HC", desc: "定溫熱式" },
+                { id: "C403", name: "YF-517D", desc: "天然氣瓦斯警報器" },
+				{ id: "C404", name: "SH5910", desc: "瓦斯警報器底座" },
+            ] 
+	    },
+		        { 
+            mainId: "C-5", 
+            mainName: "C-5 · 船舶用P型探測器系列", 
+            icon: "🔔", 
+            subItems: [
+                { id: "C501", name: "SOC-E3NM", desc: "光電偵煙探測器" },
+                { id: "C502", name: "DCD-AE3M", desc: "定溫探測器" },
+                { id: "C503", name: "DCD-CE3M", desc: "定溫探測器" },
+                { id: "C504", name: "DRD-EM", desc: "火焰探測器" },
+                { id: "C505", name: "YBN-R/6M",desc: "船舶探測器用底座" },
+				{ id: "C506", name: "MBB-2",desc: "接線盒" }
+            ] 
+	    },
+		        { 
+            mainId: "C-6", 
+            mainName: "C-6 · 一般撒水頭、泡沫、閥體", 
+            icon: "🔔", 
+            subItems: [
+                { id: "C601", name: "GQH-FE72-2", desc: "撒水頭 72°C" },
+                { id: "C602", name: "GQH-FE98-2", desc: "撒水頭 98°C" },
+                { id: "C603", name: "GQH-GA72", desc: "撒水頭 72°C" },
+                { id: "C604", name: "Sealing Plate K", desc: "GQH-XX　Series修飾板" },
+                { id: "C605", name: "GFH-D35", desc: "泡沫頭" },
+				{ id: "C606", name: "GNA-FA100", desc: "100A自動警報逆止閥" },
+				{ id: "C607", name: "GNA-FA150", desc: "150A自動警報逆止閥" },
+				
+            ] 
+	    }
+		
+		
+		
+		
+    ]
+},
+
+    // 其他類別 (D)
+			D: { 
+    name: "美規氣體盤", 
+    desc: "氣體滅火系統 / 控制盤 / 釋放裝置",
+    mainGroups: [
+        { 
+            mainId: "D-1", 
+            mainName: "D-1 · 控制盤系列", 
+            icon: "🎛️", 
+            subItems: [
+                { id: "D101", name: "HCVR-3 110V", desc: "氣體控制盤 110V" },
+                { id: "D102", name: "HCVR-3 220V", desc: "氣體控制盤 220V" },
+				{ id: "D103", name: "K1821-19", desc: "遠端顯示具備啟動開關" },
+            ] 
+        },
+        { 
+            mainId: "D-2", 
+            mainName: "D-2 · 周邊配件", 
+            icon: "💨", 
+            subItems: [
+                { id: "D201", name: "HCVR-AS", desc: "緊急停止按鈕" },
+                { id: "D202", name: "K13470M10", desc: "緊急停止按鈕 旋鈕式可鎖定" },
+                { id: "D203", name: "HCVR-DS", desc: "維修用切斷啟動開關" },
+				{ id: "D207", name: "HPS-DAK-SR", desc: "拉桿式啟動開關" },
+				{ id: "D208", name: "HEC3-WR", desc: "閃燈蜂鳴器" },
+            ] 
+        },
+        { 
+            mainId: "D-3", 
+            mainName: "D-3 · 探測器", 
+            icon: "🔔", 
+            subItems: [
+                { id: "D301", name: "SOE-24V", desc: "光電偵煙探測器" },
+                { id: "D302", name: "SOE-24H", desc: "煙熱複合式探測器" },
+                { id: "D303", name: "DCD-135", desc: "補償式探測器" },
+				{ id: "D304", name: "NS4-100", desc: "探測器底座" }
+            ] 
+        }
+    ]
+},
+
+
+	    // 其他類別 (E)	
+				E: { 
+    name: "固定式系統", 
+    desc: "固定式消防設備 / 盤體 / 撒水頭 / 閥類 ",
+    mainGroups: [
+        { 
+            mainId: "E-1", 
+            mainName: "E-1 · 控制盤電氣類", 
+            icon: "💧", 
+            subItems: [
+                { id: "E101", name: "GEB-AAS01-1", desc: "固定式控制盤1區-連接1台手動盤" },
+				{ id: "E102", name: "GEB-AAS02-1", desc: "固定式控制盤2區-連接1台手動盤" },
+				{ id: "E103", name: "GEB-AAS02-2", desc: "固定式控制盤2區-連接2台手動盤" },
+				{ id: "E104", name: "GEB-AAS03-1", desc: "固定式控制盤3區-連接1台手動盤" },
+				{ id: "E105", name: "GEB-AAS03-2", desc: "固定式控制盤3區-連接2台手動盤" },
+				{ id: "E106", name: "GEB-AAS03-3", desc: "固定式控制盤3區-連接3台手動盤" },
+				{ id: "E107", name: "GEB-AAS04-1", desc: "固定式控制盤4區-連接1台手動盤" },
+				{ id: "E108", name: "GEB-AAS04-2", desc: "固定式控制盤4區-連接2台手動盤" },
+				{ id: "E109", name: "GEB-AAS04-3", desc: "固定式控制盤4區-連接3台手動盤" },
+				{ id: "E110", name: "GEB-AAS04-4", desc: "固定式控制盤4區-連接4台手動盤" },
+				{ id: "E111", name: "GEB-AAS05-1", desc: "固定式控制盤5區-連接1台手動盤" },
+				{ id: "E112", name: "GEB-AAS05-2", desc: "固定式控制盤5區-連接2台手動盤" },
+				{ id: "E113", name: "GEB-AAS05-3", desc: "固定式控制盤5區-連接3台手動盤" },
+				{ id: "E114", name: "GEB-AAS05-4", desc: "固定式控制盤5區-連接4台手動盤" },
+				{ id: "E115", name: "GEB-AAS05-5", desc: "固定式控制盤5區-連接5台手動盤" },
+				{ id: "E116", name: "GEB-AAS06-2", desc: "固定式控制盤6區-連接2台手動盤" },
+				{ id: "E117", name: "GEB-AAS06-3", desc: "固定式控制盤6區-連接3台手動盤" },
+				{ id: "E118", name: "GEB-AAS06-4", desc: "固定式控制盤6區-連接4台手動盤" },
+				{ id: "E119", name: "GEB-AAS06-5", desc: "固定式控制盤6區-連接5台手動盤" },
+				{ id: "E120", name: "GEB-AAS07-2", desc: "固定式控制盤7區-連接2台手動盤" },
+				{ id: "E121", name: "GEB-AAS07-3", desc: "固定式控制盤7區-連接3台手動盤" },
+				{ id: "E122", name: "GEB-AAS07-4", desc: "固定式控制盤7區-連接4台手動盤" },
+				{ id: "E123", name: "GEB-AAS07-5", desc: "固定式控制盤7區-連接5台手動盤" },				
+				{ id: "E124", name: "GEB-AAS08-2", desc: "固定式控制盤8區-連接2台手動盤" },
+				{ id: "E125", name: "GEB-AAS08-3", desc: "固定式控制盤8區-連接3台手動盤" },
+				{ id: "E126", name: "GEB-AAS08-4", desc: "固定式控制盤8區-連接4台手動盤" },
+				{ id: "E127", name: "GEB-AAS08-5", desc: "固定式控制盤8區-連接5台手動盤" },
+				{ id: "E128", name: "GEB-AAS09-2", desc: "固定式控制盤9區-連接2台手動盤" },
+				{ id: "E129", name: "GEB-AAS09-3", desc: "固定式控制盤9區-連接3台手動盤" },
+				{ id: "E130", name: "GEB-AAS09-4", desc: "固定式控制盤9區-連接4台手動盤" },
+				{ id: "E131", name: "GEB-AAS09-5", desc: "固定式控制盤9區-連接5台手動盤" },				
+				{ id: "E132", name: "GEB-AAS10-2", desc: "固定式控制盤10區-連接2台手動盤" },
+				{ id: "E133", name: "GEB-AAS10-3", desc: "固定式控制盤10區-連接3台手動盤" },
+				{ id: "E134", name: "GEB-AAS10-4", desc: "固定式控制盤10區-連接4台手動盤" },
+				{ id: "E135", name: "GEB-AAS10-5", desc: "固定式控制盤10區-連接5台手動盤" },	
+				{ id: "E136", name: "GEK-AAW1", desc: "固定式手動盤1區" },	
+				{ id: "E137", name: "GEK-AAW2", desc: "固定式手動盤2區" },	
+				{ id: "E138", name: "GEK-AAW3", desc: "固定式手動盤3區" },	
+				{ id: "E139", name: "GEK-AAW4", desc: "固定式手動盤4區" },	
+				{ id: "E140", name: "GEK-AAW5", desc: "固定式手動盤5區" },	
+				{ id: "E141", name: "GEK-BR", desc: "手動盤埋入箱" },	
+				
+            ] 
+        },
+        { 
+            mainId: "E-2", 
+            mainName: "E-2 · 撒水噴頭、閥類", 
+            icon: "🚰", 
+            subItems: [
+                { id: "E201", name: "GEH-BC23", desc: "天花板型" },
+                { id: "E202", name: "GEH-AC40", desc: "天花板型" },
+                { id: "E203", name: "GEH-AC50", desc: "天花板型" },
+                { id: "E204", name: "GEH-AC75", desc: "天花板型" },
+				{ id: "E205", name: "GEH-AC90", desc: "天花板型" },
+				{ id: "E206", name: "GEH-AWS", desc: "側壁式" },
+				{ id: "E207", name: "GEH-AWM", desc: "側壁式" },
+				{ id: "E208", name: "GEH-AWL", desc: "側壁式" },
+				{ id: "E209", name: "GEH-AW250", desc: "側壁式" },
+				{ id: "E210", name: "GEH-AW255", desc: "側壁式" },
+				{ id: "E211", name: "GEH-AW365", desc: "側壁式" },
+				{ id: "E212", name: "GEH-AW370", desc: "側壁式" },
+				{ id: "E213", name: "YDVK-65", desc: "加壓式一齊開放閥65A" },
+				{ id: "E214", name: "YDVK-80", desc: "加壓式一齊開放閥80A" },
+				{ id: "E215", name: "YDVK-100", desc: "加壓式一齊開放閥100A" },
+				{ id: "E216", name: "YDVK-125", desc: "加壓式一齊開放閥125A" },
+				{ id: "E217", name: "YDVK-150", desc: "加壓式一齊開放閥150A" },
+				
+            ] 
+        },
+        { 
+            mainId: "E-3", 
+            mainName: "E-3 · 配管周邊", 
+            icon: "🧼", 
+            subItems: [
+                { id: "E301", name: "YDR-15", desc: "自動排水閥" },
+                { id: "E302", name: "Y J0M04 1/2", desc: "Y型過濾器" },
+                { id: "E303", name: "GEV-AA15MV", desc: "遠隔啟動動閥" },
+				{ id: "E304", name: "KITZ-TKT-15A", desc: "手動啟動" },
+				{ id: "E305", name: "FN4-13-2.5", desc: "壓力錶" },
+				{ id: "E306", name: "SNS-C104MO1Q013", desc: "壓力開關" },
+				{ id: "E307", name: "CK3T-15A(10K)", desc: "蝶式逆止閥" },
+				{ id: "E308", name: "CK3T-40A(10K)", desc: "蝶式逆止閥" },
+			
+            ] 
+        }
+    ]
+},
+		
+	    // 其他類別 ( F)	
+		
+				F: { 
+    name: "小規模系統", 
+    desc: " 控制盤電氣類 / 鎗體、閥類 / 配管周邊",
+    mainGroups: [
+        { 
+            mainId: "F-1", 
+            mainName: "F-1 · 控制盤電氣類", 
+            icon: "💧", 
+            subItems: [
+                { id: "F101", name: "GDB-AAW1", desc: "小規模中央控制盤1區" },
+				{ id: "F102", name: "GDB-AAW2", desc: "小規模中央控制盤2區" },
+				{ id: "F103", name: "GDB-AAW3", desc: "小規模中央控制盤3區" },
+				{ id: "F104", name: "GDB-AAW4", desc: "小規模中央控制盤4區" },
+				{ id: "F105", name: "GDB-AAW5", desc: "小規模中央控制盤5區" },
+				{ id: "F106", name: "GDB-AAW6", desc: "小規模中央控制盤6區" },
+				{ id: "F107", name: "GDB-AAW7", desc: "小規模中央控制盤7區" },
+				{ id: "F108", name: "GDB-AAW8", desc: "小規模中央控制盤8區" },
+				{ id: "F109", name: "GDC-AAW", desc: "小規模單元控制盤" },
+				{ id: "F110", name: "GDL-AA", desc: "小規模現場手動操作盤" },
+				{ id: "F111", name: "GDL-SWC1", desc: "小規模手動操作盤埋入盒" },				
+ 
+            ] 
+        },
+        { 
+            mainId: "F-2", 
+            mainName: "F-2 · 鎗體、閥類", 
+            icon: "🚰", 
+            subItems: [
+                { id: "F201", name: "GDS-ABB", desc: "監視及放水單元盤 後方入水" },
+				{ id: "F202", name: "GDS-ABR", desc: "監視及放水單元盤 右側入水" },
+				{ id: "F203", name: "GDS-ABL", desc: "監視及放水單元盤 左側入水" },
+		        { id: "F204", name: "YDVK-65", desc: "加壓式一齊開放閥65A" },
+				{ id: "F205", name: "YDVK-80", desc: "加壓式一齊開放閥80A" },
+                { id: "F206", name: "10FCWI-LS-65A", desc: "點檢閥 附微動開關" },
+                { id: "F207", name: "10FCWI-LS-80A", desc: "點檢閥 附微動開關" }
+            ] 
+        },
+        { 
+            mainId: "F-3", 
+            mainName: "F-3 · 配管周邊", 
+            icon: "🧼", 
+            subItems: [
+                { id: "F301", name: "SNS-C104M01Q012", desc: "壓力開關" },
+                { id: "F302", name: "GNV-BD15", desc: "自動排水閥" },
+		        { id: "F303", name: "Y J0M04 1/2", desc: "Y型過濾器" },
+                { id: "F304", name: "GEV-AA15MV", desc: "遠隔啟動動閥" },
+				{ id: "F305", name: "KITZ-TKT-15A", desc: "手動啟動" },
+				{ id: "F306", name: "FN4-13-2.5", desc: "壓力錶" },
+				{ id: "F307", name: "CK3T-15A(10K)", desc: "蝶式逆止閥" },
+				{ id: "F308", name: "CK3T-40A(10K)", desc: "蝶式逆止閥" },
+				{ id: "F309", name: "HCG-R4　65A", desc: "定流量閥 65A" },
+				{ id: "F310", name: "HCG-R4　80A", desc: "定流量閥 80A" },
+            ] 
+        }
+    ]
+},
+
+
+    // 其他類別 ( G)
+
+				G: { 
+    name: "中規模系統", 
+    desc: "控制盤電氣類 / 鎗體、閥類 / 周邊",
+    mainGroups: [
+        { 
+            mainId: "G-1", 
+            mainName: "G-1 · 控制盤電氣類", 
+            icon: "💧", 
+            subItems: [
+                { id: "G101", name: "GMP-CBJ1", desc: "中規模放水銃中央操作桌 1鎗" },
+				{ id: "G102", name: "GMP-CBJ2", desc: "中規模放水銃中央操作桌 2鎗" },
+				{ id: "G103", name: "GMP-CBJ3", desc: "中規模放水銃中央操作桌 3鎗" },
+				{ id: "G104", name: "GMP-CBJ4", desc: "中規模放水銃中央操作桌 4鎗" },
+				{ id: "G105", name: "GMP-CBJ5", desc: "中規模放水銃中央操作桌 5鎗" },
+				{ id: "G106", name: "GMP-CBJ6", desc: "中規模放水銃中央操作桌 6鎗" },
+				{ id: "G107", name: "GMP-CBJ7", desc: "中規模放水銃中央操作桌 7鎗" },
+				{ id: "G108", name: "GMP-CBJ8", desc: "中規模放水銃中央操作桌 8鎗" },
+				{ id: "G109", name: "GLB-CBS S1", desc: "放水鎗中央監視盤 1鎗" },
+				{ id: "G110", name: "GLB-CBS S2", desc: "放水鎗中央監視盤 2鎗" },
+				{ id: "G111", name: "GLB-CBS S3", desc: "放水鎗中央監視盤 3鎗" },
+				{ id: "G112", name: "GLB-CBS S4", desc: "放水鎗中央監視盤 4鎗" },
+				{ id: "G113", name: "GLB-CBS S5", desc: "放水鎗中央監視盤 5鎗" },
+				{ id: "G114", name: "GLB-CBS S6", desc: "放水鎗中央監視盤 6鎗" },
+				{ id: "G115", name: "GLB-CBS S7", desc: "放水鎗中央監視盤 7鎗" },
+				{ id: "G116", name: "GLB-CBS S8", desc: "放水鎗中央監視盤 8鎗" },
+				{ id: "G117", name: "GMC-CAW", desc: "中規模放水鎗制御盤" },
+                { id: "G118", name: "GLS-CA", desc: "走査型火災検出器" },
+				{ id: "G119", name: "GLR-1", desc: "走査型火災検出器標準架台" },
+				{ id: "G120", name: "GML-CA J", desc: "放水鎗現場操作桌" },
+            ] 
+        },
+        { 
+            mainId: "G-2", 
+            mainName: "G-2 · 鎗體、閥類", 
+            icon: "🚰", 
+            subItems: [
+                { id: "G201", name: "GTNA15EJ", desc: "中規模放水鎗 15度" },
+				{ id: "G202", name: "GHGA", desc: "中規模放水鎗 架台" },
+                { id: "G203", name: "GJV-BA100", desc: "放水壓力制御閥 100A" },
+                { id: "G204", name: "GJV-AB150", desc: "放水壓力制御閥 150A" },
+                { id: "G205", name: "16SMBO", desc: "點檢閥" },
+                { id: "G206", name: "YADR-15", desc: "自動排水閥" },
+				
+            ] 
+        },
+        { 
+            mainId: "G-3", 
+            mainName: "G-3 · 周邊", 
+            icon: "🧼", 
+            subItems: [
+                { id: "G301", name: "VP-700", desc: "印表機" },
+                { id: "G302", name: "EV2450", desc: "液晶螢幕" },
+                { id: "G303", name: "GCBL-1", desc: "盤內用連接線" },
+				{ id: "G304", name: "3D 掃描", desc: "現場3D掃描建模" },
+            ] 
+        }
+    ]
+},		
+
+
+
+		
+	    // 其他類別 ( H)	
+
+				H: { 
+    name: "大規模系統", 
+    desc: "控制盤電氣類 / 鎗體、閥類 / 周邊",
+    mainGroups: [
+        { 
+            mainId: "H-1", 
+            mainName: "H-1 · 控制盤電氣類", 
+            icon: "💧", 
+            subItems: [
+                { id: "H101", name: "GLP-CBJ1", desc: "大規模放水銃中央操作桌 1鎗" },
+				{ id: "H102", name: "GLP-CBJ2", desc: "大規模放水銃中央操作桌 2鎗" },
+				{ id: "H103", name: "GLP-CBJ3", desc: "大規模放水銃中央操作桌 3鎗" },
+				{ id: "H104", name: "GLP-CBJ4", desc: "大規模放水銃中央操作桌 4鎗" },
+				{ id: "H105", name: "GLP-CBJ5", desc: "大規模放水銃中央操作桌 5鎗" },
+				{ id: "H106", name: "GLP-CBJ6", desc: "大規模放水銃中央操作桌 6鎗" },
+				{ id: "H107", name: "GLP-CBJ7", desc: "大規模放水銃中央操作桌 7鎗" },
+				{ id: "H108", name: "GLP-CBJ8", desc: "大規模放水銃中央操作桌 8鎗" },
+				{ id: "H109", name: "GLB-CBS S1", desc: "放水鎗中央監視盤 1鎗" },
+				{ id: "H110", name: "GLB-CBS S2", desc: "放水鎗中央監視盤 2鎗" },
+				{ id: "H111", name: "GLB-CBS S3", desc: "放水鎗中央監視盤 3鎗" },
+				{ id: "H112", name: "GLB-CBS S4", desc: "放水鎗中央監視盤 4鎗" },
+				{ id: "H113", name: "GLB-CBS S5", desc: "放水鎗中央監視盤 5鎗" },
+				{ id: "H114", name: "GLB-CBS S6", desc: "放水鎗中央監視盤 6鎗" },
+				{ id: "H115", name: "GLB-CBS S7", desc: "放水鎗中央監視盤 7鎗" },
+				{ id: "H116", name: "GLB-CBS S8", desc: "放水鎗中央監視盤 8鎗" },
+				{ id: "H117", name: "GLB-CBS S8", desc: "放水鎗中央監視盤 8鎗" },
+				{ id: "H118", name: "GLC-CAW", desc: "大規模放水鎗制御盤" },
+                { id: "H119", name: "GLS-CA", desc: "走査型火災検出器" },
+				{ id: "H120", name: "GLR-1", desc: "走査型火災検出器標準架台" },
+				{ id: "H121", name: "GLL-CA J", desc: "放水鎗現場操作桌" },				
+            ] 
+        },
+        { 
+            mainId: "H-2", 
+            mainName: "H-2 · 鎗體、閥類", 
+            icon: "🚰", 
+            subItems: [
+                { id: "H201", name: "GAS36", desc: "大規模放水鎗 15度" },
+                { id: "H202", name: "GJV-BA100", desc: "放水壓力制御閥 100A" },
+                { id: "H203", name: "GJV-BA150", desc: "放水壓力制御閥 150A" },
+                { id: "H204", name: "GGVA-10K100A", desc: "點檢閥" },
+                { id: "H205", name: "YADR-15", desc: "自動排水閥" },
+            ] 
+        },
+        { 
+            mainId: "H-3", 
+            mainName: "H-3 · 周邊", 
+            icon: "🧼", 
+            subItems: [
+                { id: "H301", name: "VP-700", desc: "印表機" },
+                { id: "H302", name: "EV2450", desc: "液晶螢幕" },
+                { id: "H303", name: "GCBL-1", desc: "盤內用連接線" },
+				{ id: "H304", name: "3D 掃描", desc: "現場3D掃描建模" },
+            ] 
+        }
+    ]
+},	
+	
+	 }	
+	
+    const equipmentDB = { A: categoryAData, B: categoryBData };
+    for (let key of ['C','D','E','F','G','H']) equipmentDB[key] = legacyEquipment[key];
+
+    let customRequests = [], nextCustomId = 1000;
+    let inquiryCart = new Map();
+    let currentCategory = 'A';
+
+    function showToast(msg, duration=1200) { let toast = document.getElementById('toastMsg'); toast.textContent = msg; toast.style.opacity='1'; toast.style.visibility='visible'; setTimeout(()=>{ toast.style.opacity='0'; toast.style.visibility='hidden'; }, duration); }
+    function openCatalogInNewTab(itemId, itemName) { window.open(`PDF/${itemId}.pdf`, '_blank'); showToast(`開啟型錄: ${itemName}`, 1000); }
+    function openApprovalInNewTab(itemId, itemName) { window.open(`PDF2/${itemId}.pdf`, '_blank'); showToast(`開啟認可文件: ${itemName}`, 1000); }
+    function generateFileName(projectName, extension) { const now=new Date(); const ds=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`; const safe=projectName.replace(/[\\/:*?"<>|]/g,'_'); return `${safe}_${ds}.${extension}`; }
+
+    function updateAllUI() { let totalQty=0; for(let v of inquiryCart.values()) totalQty+=v.quantity; document.getElementById('sidebarTotalQty').innerText=totalQty; document.getElementById('sidebarUniqueCount').innerText=inquiryCart.size; document.getElementById('quickTotalQty').innerText=totalQty; document.getElementById('drawerTotalQtySpan').innerText=totalQty; renderDrawerCart(); if(currentCategory === 'I') renderCustomCategoryView(); else renderProductsByCategory(currentCategory); }
+    function setQuantity(itemKey, newQty, itemDetail) { let qty=parseInt(newQty,10); if(isNaN(qty)||qty<0) qty=0; if(qty<=0) inquiryCart.delete(itemKey); else inquiryCart.set(itemKey, { ...itemDetail, quantity: qty }); updateAllUI(); }
+
+    function renderDrawerCart() { /* 同原本 */ const container=document.getElementById('drawerCartList'); if(inquiryCart.size===0){ container.innerHTML='<div class="empty-cart-msg">📭 暫無設備</div>'; return; } let html=''; for(let [key,item] of inquiryCart.entries()){ html+=`<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${escapeHtml(item.name)} ${item.code?`[${item.code}]`:''}</div><div style="font-size:0.7rem;">${item.category?item.category+'類':'自訂'}</div></div><div><div class="cart-item-controls"><button class="cart-dec" data-key="${key}">−</button><span>${item.quantity}</span><button class="cart-inc" data-key="${key}">+</button></div><button class="remove-item-btn" data-key="${key}">🗑️</button></div></div>`; } container.innerHTML=html; 
+		document.querySelectorAll('.cart-dec').
+		forEach(btn=>btn.addEventListener('click',()=>changeCartQty(btn.getAttribute('data-key'),-1)))
+		; document.querySelectorAll('.cart-inc').
+		forEach(btn=>btn.addEventListener('click',()=>changeCartQty(btn.getAttribute('data-key'),1)));
+		document.querySelectorAll('.remove-item-btn').
+		forEach(btn=>btn.addEventListener('click',()=>{ inquiryCart.delete(btn.getAttribute('data-key'));
+		updateAllUI(); })); }
+		
+		
+    function changeCartQty(key, delta) { if(!inquiryCart.has(key)) return; let item=inquiryCart.get(key); let newQty=item.quantity+delta; if(newQty<=0) inquiryCart.delete(key); else { item.quantity=newQty; inquiryCart.set(key,item); } updateAllUI(); }
+
+    function findSubItemById(id, cat) { const groups = equipmentDB[cat]?.mainGroups; if(groups) for(let g of groups) { let sub=g.subItems.find(s=>s.id===id); if(sub) return sub; } return null; }
+    function findSubItemGlobally(id) { for(let cat of ['A','B','C','D','E','F','G','H']){ let sub=findSubItemById(id,cat); if(sub) return { sub, cat }; } return null; }
+
+    // 核心修改: 渲染時根據數量添加高亮class，並且加上「認可文件」按鈕
+    function renderProductsByCategory(category) {
+        if(category === 'I') { renderCustomCategoryView(); return; }
+        const catData = equipmentDB[category];
+        if(!catData) return;
+        let html = '';
+        catData.mainGroups.forEach(group => {
+            html += `<div class="product-main-card"><div class="main-category-title"><span>${group.icon||'📦'}</span> ${escapeHtml(group.mainName)}</div><div class="sub-items-list">`;
+		// 在 renderProductsByCategory 函數內部，生成每個 subItem 的HTML時
+group.subItems.forEach(sub => {
+    const currentQty = inquiryCart.has(sub.id) ? inquiryCart.get(sub.id).quantity : 0;
+    const highlightClass = currentQty > 0 ? 'selected-highlight' : '';
+    // 取得該產品的檔案狀態
+    const fileStatus = getFileStatus(sub.id);
+    
+    html += `<div class="sub-item-row ${highlightClass}" data-item-id="${sub.id}">
+                <div class="sub-item-info">
+                    <div class="sub-item-name"><span class="item-code">${escapeHtml(sub.id)}</span>${escapeHtml(sub.name)}</div>
+                    <div class="sub-item-desc">${escapeHtml(sub.desc)}</div>
+                </div>
+                <div class="action-buttons">
+                    <button class="catalog-btn" data-id="${sub.id}" data-name="${sub.name}" ${!fileStatus.catalog ? 'disabled' : ''}>
+                        ${fileStatus.catalog ? '📄 型錄' : '📄 (無檔案)'}
+                    </button>
+                    <button class="approval-btn" data-id="${sub.id}" data-name="${sub.name}" ${!fileStatus.approval ? 'disabled' : ''}>
+                        ${fileStatus.approval ? '✅ 認可文件' : '✅ (無檔案)'}
+                    </button>
+                    <div class="qty-control">
+                        <button class="qty-dec" data-id="${sub.id}" data-cat="${category}">−</button>
+                        <input type="number" class="qty-number-input" id="qty-input-${sub.id}" value="${currentQty}" min="0" step="1">
+                        <button class="qty-inc" data-id="${sub.id}" data-cat="${category}">+</button>
+                    </div>
+                </div>
+            </div>`;
+});	
+            html += `</div></div>`;
+        });
+        document.getElementById('productsList').innerHTML = html;
+        // 綁定型錄按鈕
+		// 綁定型錄按鈕 - 僅在未禁用時綁定
+document.querySelectorAll('.catalog-btn').forEach(btn => {
+    // 檢查按鈕是否有 disabled 屬性
+    if (!btn.disabled) {
+        btn.addEventListener('click', () => {
+            openCatalogInNewTab(btn.getAttribute('data-id'), btn.getAttribute('data-name'));
+        });
+    }
+});
+
+// 綁定認可文件按鈕 - 僅在未禁用時綁定
+document.querySelectorAll('.approval-btn').forEach(btn => {
+    // 檢查按鈕是否有 disabled 屬性
+    if (!btn.disabled) {
+        btn.addEventListener('click', () => {
+            openApprovalInNewTab(btn.getAttribute('data-id'), btn.getAttribute('data-name'));
+        });
+    }
+});
+
+	   const attachQtyEvents = () => {
+            document.querySelectorAll('.qty-inc').forEach(btn=>btn.addEventListener('click',()=>{ const id=btn.getAttribute('data-id'), cat=btn.getAttribute('data-cat'); const sub=findSubItemById(id,cat); if(sub){ const input=document.getElementById(`qty-input-${id}`); let newVal=(parseInt(input.value,10)||0)+1; if(newVal<0)newVal=0; input.value=newVal; setQuantity(sub.id, newVal, { id:sub.id, name:sub.name, category:cat, code:sub.id, desc:sub.desc }); } }));
+            document.querySelectorAll('.qty-dec').forEach(btn=>btn.addEventListener('click',()=>{ const id=btn.getAttribute('data-id'), cat=btn.getAttribute('data-cat'); const sub=findSubItemById(id,cat); if(sub){ const input=document.getElementById(`qty-input-${id}`); let newVal=(parseInt(input.value,10)||0)-1; if(newVal<0)newVal=0; input.value=newVal; setQuantity(sub.id, newVal, { id:sub.id, name:sub.name, category:cat, code:sub.id, desc:sub.desc }); } }));
+            document.querySelectorAll('.qty-number-input').forEach(input=>{ input.addEventListener('change',function(){ const id=this.id.replace('qty-input-',''); let raw=parseInt(this.value,10); if(isNaN(raw)||raw<0) raw=0; this.value=raw; const found=findSubItemGlobally(id); if(found){ setQuantity(found.sub.id, raw, { id:found.sub.id, name:found.sub.name, category:found.cat, code:found.sub.id, desc:found.sub.desc }); } }); });
+        };
+        attachQtyEvents();
+    }
+
+    // 自訂項目部分保留原有功能
+    function renderCustomCategoryView() { /* 原邏輯，略為精簡保留完整性 */ let html=`<div class="custom-request-area"><div class="custom-header"><h4>✏️ 其他設備 / 自訂需求</h4><button class="add-custom-btn" id="addCustomBtn">+ 新增詢問項目</button></div>`; if(customRequests.length===0) html+=`<div class="empty-custom-msg">請點擊按鈕新增</div>`; else customRequests.forEach((req,idx)=>{ const qty=inquiryCart.has(`custom_${req.id}`)?inquiryCart.get(`custom_${req.id}`).quantity:req.quantity; html+=`<div class="custom-item-card" data-custom-id="${req.id}"><div class="custom-field"><label>設備名稱/型號</label><input type="text" class="custom-name" value="${escapeHtml(req.name)}"></div><div class="custom-field"><label>規格/備註</label><textarea class="custom-desc">${escapeHtml(req.description)}</textarea></div><div class="custom-field"><label>數量</label><input type="number" class="custom-qty" value="${qty}" min="0"></div><div><button class="del-custom-btn" data-id="${req.id}">🗑️ 刪除</button></div></div>`; }); html+=`</div>`; document.getElementById('productsList').innerHTML=html; document.getElementById('addCustomBtn')?.addEventListener('click',addNewCustomItem); document.querySelectorAll('.del-custom-btn').forEach(btn=>btn.addEventListener('click',(e)=>{ const id=parseInt(btn.getAttribute('data-id')); deleteCustomItem(id); })); document.querySelectorAll('.custom-item-card').forEach(card=>{ const cid=parseInt(card.getAttribute('data-custom-id')); const nameInp=card.querySelector('.custom-name'), descInp=card.querySelector('.custom-desc'), qtyInp=card.querySelector('.custom-qty'); const update=()=>{ const newName=nameInp.value.trim()||"未命名"; const newDesc=descInp.value; let newQty=parseInt(qtyInp.value,10); if(isNaN(newQty)||newQty<0)newQty=0; const idx=customRequests.findIndex(r=>r.id===cid); if(idx!==-1){ customRequests[idx].name=newName; customRequests[idx].description=newDesc; customRequests[idx].quantity=newQty; const mapKey=`custom_${cid}`; if(newQty<=0) inquiryCart.delete(mapKey); else inquiryCart.set(mapKey, { id:mapKey, name:`[自訂] ${newName}`, category:"I", code:`CUS-${cid}`, quantity:newQty, desc:newDesc }); updateAllUI(); } }; nameInp.addEventListener('change',update); descInp.addEventListener('change',update); qtyInp.addEventListener('change',update); }); }
+    function addNewCustomItem() { const newId=nextCustomId++; customRequests.push({ id:newId, name:"新設備需求", description:"請填寫規格", quantity:0 }); renderCustomCategoryView(); showToast("新增自訂項目",800); }
+    function deleteCustomItem(id) { const idx=customRequests.findIndex(r=>r.id===id); if(idx!==-1){ customRequests.splice(idx,1); inquiryCart.delete(`custom_${id}`); updateAllUI(); renderCustomCategoryView(); } }
+    function updateHeaderByCategory(cat) { if(cat==='I'){ document.getElementById('activeCatTitle').innerHTML=`I類 · 其他設備需求`; document.getElementById('activeCatDesc').innerHTML=`自由填寫`; } else { const data=equipmentDB[cat]; if(data){ document.getElementById('activeCatTitle').innerHTML=`${cat}類 · ${data.name}`; document.getElementById('activeCatDesc').innerHTML=data.desc; } } }
+    function getCategoryIcon(cat) { const icons={ A:'🖥️',B:'🔥',C:'🧯',D:'💨',E:'🏭',F:'🏠',G:'🏢',H:'🏭',I:'📝' }; return icons[cat]||'📦'; }
+    function buildSidebarNav() { const navContainer=document.getElementById('navCategories'); const categories=['A','B','C','D','E','F','G','H','I']; let btnsHtml=''; categories.forEach(cat=>{ const displayName=cat==='I'?'其他設備需求':(equipmentDB[cat]?equipmentDB[cat].name:cat); btnsHtml+=`<button class="nav-item" data-category="${cat}"><span class="nav-icon">${getCategoryIcon(cat)}</span><span class="nav-label">${cat} · ${displayName.substring(0,12)}</span><span class="nav-badge">${cat==='I'?customRequests.length:(equipmentDB[cat]?.mainGroups?.reduce((a,g)=>a+g.subItems.length,0)||0)}</span></button>`; }); navContainer.innerHTML=btnsHtml; document.querySelectorAll('.nav-item').forEach(btn=>{ btn.addEventListener('click',()=>{ currentCategory=btn.getAttribute('data-category'); document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); updateHeaderByCategory(currentCategory); if(currentCategory==='I') renderCustomCategoryView(); else renderProductsByCategory(currentCategory); }); }); document.querySelector('.nav-item[data-category="A"]')?.classList.add('active'); }
+
+    // 修改 HTML 匯出格式: 符合類別分頁要求 (設備代號、設備名稱、備註、數量)
+	function generateInquiryHtml(projectName) {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+    
+    // 分群組 by category
+    const groups = new Map();
+    for (let item of inquiryCart.values()) {
+        let cat = item.category || '自訂';
+        if (!groups.has(cat)) groups.set(cat, []);
+        groups.get(cat).push(item);
+    }
+    
+    let allTablesHtml = '';
+    let globalSerialNo = 1;  // 全域序號
+    
+    for (let [cat, items] of groups.entries()) {
+        let rows = '';
+        for (let it of items) {
+            rows += `<tr>
+                        <td style="text-align:center">${globalSerialNo++}</td>
+                        <td>${escapeHtml(it.code || it.id)}</td>
+                        <td>${escapeHtml(it.name)}</td>
+                        <td>${escapeHtml(it.desc || '')}</td>
+                        <td style="text-align:center">${it.quantity}</td>
+                      </tr>`;
+        }
+        allTablesHtml += `<div style="margin-bottom: 32px;">
+            <h3 style="background:#1f4662; color:white; padding:8px 12px; border-radius:12px;">📁 類別 ${cat} · ${cat === 'I' ? '其他設備需求' : (equipmentDB[cat]?.name || '設備')}</h3>
+            <table style="border-collapse:collapse; width:100%; margin-top:8px;">
+                <thead>
+                    <tr style="background:#eef2fa;">
+                        <th style="width:50px">序號</th>
+                        <th>設備代號</th>
+                        <th>設備名稱</th>
+                        <th>備註</th>
+                        <th style="width:80px">數量</th>
+                    </tr>
+                </thead>
+                <tbody>${rows || '<tr><td colspan="5">無項目</td></tr>'}</tbody>
+            </table>
+        </div>`;
+    }
+    
+    return `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>詢價單_${escapeHtml(projectName)}</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+                margin: 40px;
+                background: #f9fbfd;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            th, td {
+                border: 1px solid #ccc;
+                padding: 8px 12px;
+                text-align: left;
+                vertical-align: top;
+            }
+            th {
+                background: #eef2fa;
+                color: #1f4662;
+                font-weight: 600;
+            }
+            h2 {
+                color: #1f4662;
+                border-bottom: 3px solid #ffb347;
+                padding-bottom: 10px;
+            }
+            .info-section {
+                background: #eef2fa;
+                padding: 15px 20px;
+                border-radius: 12px;
+                margin-bottom: 25px;
+            }
+            .footer-note {
+                margin-top: 30px;
+                padding: 12px;
+                background: #fff8e7;
+                border-left: 4px solid #ffb347;
+                font-size: 0.9rem;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>📄 設備詢價單</h2>
+        <div class="info-section">
+            <p><strong>📌 案件名稱：</strong>${escapeHtml(projectName)}</p>
+            <p><strong>📅 產生日期：</strong>${dateStr}</p>
+            <p><strong>📊 總品項數：</strong>${Array.from(inquiryCart.values()).reduce((sum, item) => sum + item.quantity, 0)} 件</p>
+        </div>
+        ${allTablesHtml}
+        <div class="footer-note">
+            ※ 本文件為正式詢價依據，請確認規格及數量後回覆。
+        </div>
+    </body>
+    </html>`;
+}
+
+    function exportHtml() { let pjName=document.getElementById('projectNameInput').value.trim(); if(!pjName){ showToast('請填寫案件名稱',1500); return; } if(inquiryCart.size===0){ showToast('詢價車為空',1500); return; } const html=generateInquiryHtml(pjName); const blob=new Blob([html],{type:'text/html'}); const link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=generateFileName(pjName,'html'); link.click(); URL.revokeObjectURL(link.href); showToast('匯出完成',1000); }
+	function exportExcel() {
+    let pjName = document.getElementById('projectNameInput').value.trim();
+    if (!pjName) {
+        showToast('請填寫案件名稱', 1500);
+        return;
+    }
+    if (inquiryCart.size === 0) {
+        showToast('詢價車為空', 1500);
+        return;
+    }
+    
+    // 準備 Excel 資料
+    const exportData = [];
+    
+    // 加入標題行
+    exportData.push(['序號', '設備類別', '設備代號', '設備名稱', '規格/備註', '數量']);
+    
+    // 分組加入資料
+    const groups = new Map();
+    for (let item of inquiryCart.values()) {
+        let cat = item.category || '自訂';
+        if (!groups.has(cat)) groups.set(cat, []);
+        groups.get(cat).push(item);
+    }
+    
+    let globalSerialNo = 1;  // 全域序號
+    
+    for (let [cat, items] of groups.entries()) {
+        // 加入類別標題行（合併儲存格效果）
+        const catName = cat === 'I' ? '其他設備需求' : (equipmentDB[cat]?.name || cat);
+        exportData.push([`【${cat}類 - ${catName}】`, '', '', '', '', '']);
+        
+        for (let it of items) {
+            exportData.push([
+                globalSerialNo++,
+                cat,
+                it.code || it.id,
+                it.name,
+                it.desc || '',
+                it.quantity
+            ]);
+        }
+        
+        // 類別之間加入空行
+        exportData.push(['', '', '', '', '', '']);
+    }
+    
+    // 加入案件資訊（在資料上方）
+    const totalQty = Array.from(inquiryCart.values()).reduce((sum, item) => sum + item.quantity, 0);
+    exportData.unshift(['總詢價數量', totalQty, '', '', '', '']);
+    exportData.unshift(['產生日期', new Date().toLocaleString('zh-TW'), '', '', '', '']);
+    exportData.unshift(['案件名稱', pjName, '', '', '', '']);
+    exportData.unshift(['設備詢價單', '', '', '', '', '']);
+    exportData.unshift(['', '', '', '', '', '']); // 空行分隔
+    
+    // 建立工作表
+    const ws = XLSX.utils.aoa_to_sheet(exportData);
+    
+    // 設定欄寬
+    ws['!cols'] = [
+        { wch: 8 },   // 序號
+        { wch: 12 },  // 設備類別
+        { wch: 18 },  // 設備代號
+        { wch: 32 },  // 設備名稱
+        { wch: 40 },  // 規格/備註
+        { wch: 8 }    // 數量
+    ];
+    
+    // 建立工作簿並匯出
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '詢價單');
+    
+    // 產生檔案名稱並下載
+    const fileName = generateFileName(pjName, 'xlsx');
+    XLSX.writeFile(wb, fileName);
+    
+    showToast('匯出 Excel 完成', 1000);
+}
+    function previewAndAlert() { let pjName=document.getElementById('projectNameInput').value.trim(); if(!pjName){ showToast('請填寫案件名稱',1000); return; } if(inquiryCart.size===0){ showToast('詢價車為空',1000); return; } const html=generateInquiryHtml(pjName); const win=window.open(); win.document.write(html); win.document.close(); }
+    
+	function setupDrawerEvents() { 
+    const drawer = document.getElementById('cartDrawer');
+    const overlay = document.getElementById('drawerOverlay'); 
+    
+    document.getElementById('openCartDrawerBtn').addEventListener('click', () => { 
+        drawer.classList.add('open'); 
+        overlay.classList.add('show'); 
+        renderDrawerCart(); 
+    }); 
+    
+    document.getElementById('closeDrawerBtn').addEventListener('click', () => { 
+        drawer.classList.remove('open'); 
+        overlay.classList.remove('show'); 
+    }); 
+    
+    overlay.addEventListener('click', () => { 
+        drawer.classList.remove('open'); 
+        overlay.classList.remove('show'); 
+    }); 
+    
+    document.getElementById('exportHtmlBtn').addEventListener('click', exportHtml);
+    document.getElementById('exportJsonBtn').addEventListener('click', exportExcel);
+    document.getElementById('drawerCheckoutBtn').addEventListener('click', previewAndAlert);
+}
+
+   function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=> m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+    function init(){ buildSidebarNav(); renderProductsByCategory('A'); updateHeaderByCategory('A'); updateAllUI(); setupDrawerEvents(); }
+    init();
+</script>
+	<!-- 在每個工具的HTML檔案中，body結束前加入 -->
+<button onclick="window.location.href='index.html'" 
+        style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    返回主選單
+</button>	
+
+
+</body>
+</html>
