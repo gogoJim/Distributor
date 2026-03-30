@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代理店工具集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Microsoft JhengHei', system-ui, -apple-system, sans-serif;
+            background-color: #fefcf7;
+            color: #2d2a24;
+        }
+
+        /* 簡易導航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav a {
+            margin-left: 2rem;
+            text-decoration: none;
+            color: #2d2a24;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: #b45309;
+        }
+
+        /* Hero 區域 */
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .hero .highlight {
+            color: #b45309;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 1rem auto 0;
+            color: #5b5348;
+        }
+
+        /* 工具集網格 */
+        .portfolio {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            padding: 0 5%;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        /* 工具卡片樣式 */
+        .tool-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 保留原工具集頂部色條，但改用新色系 */
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #b45309 0%, #fcd34d 100%);
+        }
+
+        .tool-img {
+            background-color: #e7e5e4;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #78716c;
+        }
+
+        .tool-info {
+            padding: 1.5rem;
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+        }
+
+        .tool-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d2a24;
+        }
+
+        .tool-number {
+            display: inline-block;
+            background-color: #b45309;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .tool-desc {
+            color: #5b5348;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .tool-file {
+            font-size: 0.85rem;
+            color: #78716c;
+            background: #f5f5f4;
+            padding: 0.3rem 0.7rem;
+            border-radius: 9999px;
+            display: inline-block;
+            font-family: monospace;
+        }
+
+        .tool-click {
+            color: #b45309;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        /* 頁尾 */
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid #e7e5e4;
+            color: #78716c;
+        }
+
+        .back-btn {
+            display: none;
+        }
+
+        /* 響應式 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .nav a {
+                margin: 0 1rem;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">代理商工具集</div>
+        <div class="nav">
+
+            <a href="mailto:Jim@hochiki.com.tw">聯絡</a>
+        </div>
+    </div>
+
+    <div class="hero">
+        <h1>消防工具 <span class="highlight">&</span> 效率助手</h1>
+        <p>點擊下方卡片使用工具，加速工作流程。</p>
+    </div>
+
+    <div class="portfolio" id="tools">
+        <h2 class="section-title">工具列表</h2>
+        <div class="grid">
+            <!-- 工具卡片將由JS動態生成 -->
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 代理商工具集 | HTBO</p>
+        <p>Jim@hochiki.com.tw</p>
+    </div>
+
+    <script>
+        // 工具名稱與描述數據
+        const toolNames = [
+            "HRR/HRU 使用手冊",
+            "日規總機編號工具", 
+            "HRR/HRU 資料輸出工具",
+            "美規總機編號工具",
+            "Latitude 資料輸出工具",
+            "UL氣體滅火盤手冊",
+            "設計部門計算點數",
+            "設計部門摩擦損失",
+            "設備採購工具",
+            "CAD點位名稱合併",
+            "區域名稱合併"
+        ];
+        
+        const toolDescriptions = [
+            "故障排除、操作選項工具",
+            "中繼器編號快速排列",
+            "消防檢查、業主資料提供工具",
+            "模組編號工具",
+            "latitude 數據格式轉換工具",
+            "HCVR-3 配線、設定",
+            "日規總機採用中繼器計算",
+            "管道摩擦損失計算工具",
+            "可以此工具製作詢價、訂購",
+            "將各別探測器對應名稱合併",
+            "自動生成編碼與區域名稱合併"
+        ];
+        
+        const toolLinks = [
+            "tool1.html", "tool2.html", "tool3.html", "tool4.html", "tool5.html",
+            "tool6.html", "tool7.html", "tool8.html", "tool9.html", "tool10.html", "tool11.html"
+        ];
+        
+        const toolIcons = ['🔧', '🔢', '📤', '🇺🇸', '🗺️', '🧯', '🧮', '📉', '🛒', '📌', '🏷️'];
+        
+        // 動態生成工具卡片
+        document.addEventListener('DOMContentLoaded', function() {
+            const gridContainer = document.querySelector('.grid');
+            
+            toolNames.forEach((name, index) => {
+                const toolCard = document.createElement('a');
+                toolCard.href = toolLinks[index];
+                toolCard.className = 'tool-card';
+                
+                // 為每個卡片設置獨特的頂部色條
+                const hue = (index * 30) % 360;
+                toolCard.style.setProperty('--card-color', `hsl(${hue}, 70%, 50%)`);
+                toolCard.style.borderTop = `4px solid hsl(${hue}, 70%, 50%)`;
+                
+                toolCard.innerHTML = `
+                    <div class="tool-img">${toolIcons[index] || '⚙️'}</div>
+                    <div class="tool-info">
+                        <div class="tool-header">
+                            <div class="tool-title">${name}</div>
+                            <div class="tool-number">${index + 1}</div>
+                        </div>
+                        <div class="tool-desc">${toolDescriptions[index]}</div>
+                        <div class="tool-file">${toolLinks[index]}</div>
+                        <div class="tool-click">點擊使用 →</div>
+                    </div>
+                `;
+                gridContainer.appendChild(toolCard);
+            });
+        });
+    </script>
+</body>
+</html>
