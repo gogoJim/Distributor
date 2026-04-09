@@ -743,6 +743,36 @@
             color: #6c86a3;
             font-size: 1.1rem;
         }
+
+	.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+		}
+
+		.email-inquiry-btn {
+    background: #ffb347;
+    border: none;
+    color: #1e2f3c;
+    padding: 8px 22px;
+    border-radius: 48px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.email-inquiry-btn:hover {
+    background: #ff9f1a;
+    transform: translateY(-2px);
+}	
+		
+		
     </style>
 	    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
     <script>
@@ -838,10 +868,14 @@
                 <h3 id="activeCatTitle">A類 · 日規火警系統</h3>
                 <p id="activeCatDesc">火警總機 / 定址探測器 / 中繼器</p>
             </div>
-            <div class="search-area">
-                <input type="text" id="searchKeyword" placeholder="🔍 型號 / 關鍵字查詢" autocomplete="off">
-                <button id="searchBtn">搜尋</button>
-                <button id="clearSearchBtn" class="search-clear" title="清除搜尋">✕</button>
+            <div class="header-actions">
+                <!-- 新增寄送Email按鈕 -->
+                <button class="email-inquiry-btn" id="emailInquiryBtn">📧 寄送Email</button>
+                <div class="search-area">
+                    <input type="text" id="searchKeyword" placeholder="🔍 型號 / 關鍵字查詢" autocomplete="off">
+                    <button id="searchBtn">搜尋</button>
+                    <button id="clearSearchBtn" class="search-clear" title="清除搜尋">✕</button>
+                </div>
             </div>
         </div>
 
@@ -2353,7 +2387,31 @@
 }
     
     function previewAndAlert() { let pjName=document.getElementById('projectNameInput').value.trim(); if(!pjName){ showToast('請填寫案件名稱',1000); return; } if(inquiryCart.size===0){ showToast('詢價車為空',1000); return; } const html=generateInquiryHtml(pjName); const win=window.open(); win.document.write(html); win.document.close(); }
-    function setupDrawerEvents() { const drawer = document.getElementById('cartDrawer'); const overlay = document.getElementById('drawerOverlay'); document.getElementById('openCartDrawerBtn').addEventListener('click', () => { drawer.classList.add('open'); overlay.classList.add('show'); renderDrawerCart(); }); document.getElementById('closeDrawerBtn').addEventListener('click', () => { drawer.classList.remove('open'); overlay.classList.remove('show'); }); overlay.addEventListener('click', () => { drawer.classList.remove('open'); overlay.classList.remove('show'); }); document.getElementById('exportHtmlBtn').addEventListener('click', exportHtml); document.getElementById('exportJsonBtn').addEventListener('click', exportExcel); document.getElementById('drawerCheckoutBtn').addEventListener('click', previewAndAlert); }
+		    // 寄送Email功能 (指定信箱)
+    function sendEmailWithInquiry() {
+        let projectName = document.getElementById('projectNameInput').value.trim();
+        if(!projectName) {
+            showToast('請先填寫案件名稱', 1500);
+            return;
+        }
+        if(inquiryCart.size === 0) {
+            showToast('詢價車為空，無資料可寄送', 1500);
+            return;
+        }
+        const inquiryHtml = generateInquiryHtml(projectName);
+        // 將HTML內容轉為純文字並保留結構作為郵件正文
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = inquiryHtml;
+        const plainText = tempDiv.innerText; // 取得純文字版
+        
+        const mailtoLink = `mailto:tomyamamoto@hochiki.com.tw?subject=${encodeURIComponent(`設備詢價單 - ${projectName}`)}&body=${encodeURIComponent(plainText)}`;
+        window.location.href = mailtoLink;
+        showToast('已開啟郵件客戶端，請發送', 1500);
+    }
+	
+	
+    function setupDrawerEvents() { const drawer = document.getElementById('cartDrawer'); const overlay = document.getElementById('drawerOverlay'); document.getElementById('openCartDrawerBtn').addEventListener('click', () => { drawer.classList.add('open'); overlay.classList.add('show'); renderDrawerCart(); }); document.getElementById('closeDrawerBtn').addEventListener('click', () => { drawer.classList.remove('open'); overlay.classList.remove('show'); }); overlay.addEventListener('click', () => { drawer.classList.remove('open'); overlay.classList.remove('show'); }); document.getElementById('exportHtmlBtn').addEventListener('click', exportHtml); document.getElementById('exportJsonBtn').addEventListener('click', exportExcel); document.getElementById('drawerCheckoutBtn').addEventListener('click', previewAndAlert);
+document.getElementById('emailInquiryBtn').addEventListener('click', sendEmailWithInquiry);	}
     
     function init(){ 
         buildSidebarNav(); 
