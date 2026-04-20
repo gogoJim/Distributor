@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DRC 火焰探測器可視化 </title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4fa 0%, #d0d9e8 100%);
+        }
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 20px;
+            border-radius: 16px;
+            width: 440px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 100;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.5);
+            max-height: 82vh;
+            overflow-y: auto;
+            pointer-events: auto;
+            font-size: 0.95rem;
+        }
+        #controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(30,30,40,0.92);
+            backdrop-filter: blur(8px);
+            padding: 18px 22px;
+            border-radius: 20px;
+            width: 380px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+            z-index: 100;
+            border: 1px solid rgba(255,255,255,0.2);
+            pointer-events: auto;
+            color: #f0f0f0;
+        }
+        h1, h2 {
+            margin-top: 0;
+            color: #1e2f3e;
+        }
+        h1 {
+            border-bottom: 3px solid #ff884d;
+            padding-bottom: 8px;
+            font-size: 1.5rem;
+        }
+        .calculation-step {
+            background-color: #ffffffdd;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 14px;
+            border-left: 4px solid #e65100;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        button {
+            background: linear-gradient(135deg, #ff8c42, #d65c1e);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            font-weight: bold;
+            border-radius: 40px;
+            margin: 6px 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+            background: #3a5068;
+            height: 4px;
+            border-radius: 5px;
+        }
+        .control-group {
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .value-display {
+            font-weight: bold;
+            color: #ffaa66;
+            background: #1e2a36;
+            padding: 0 8px;
+            border-radius: 20px;
+        }
+        .section-title {
+            color: #ffbc6e;
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .fix-note {
+            background: #e6f4ea;
+            padding: 10px;
+            border-radius: 14px;
+            border-left: 5px solid #2c7a4d;
+            margin: 12px 0;
+        }
+        .correction-note {
+            background: #fff0db;
+            padding: 10px;
+            border-radius: 12px;
+            border-left: 4px solid #ffa559;
+            margin: 12px 0;
+        }
+        .version-info {
+            text-align: right;
+            font-size: 11px;
+            color: #4a627a;
+            margin-bottom: 8px;
+        }
+        .warning-note {
+            background: #2d2f36cc;
+            padding: 8px 12px;
+            border-radius: 14px;
+            border-left: 3px solid #ffaa44;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            color: #ffd9b5;
+        }
+        .highlight-text {
+            color: #ffaa66;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="version-info">✨ Ver.10 純視覺模式 | 尖端距離基準 | 雙線框模式 </div>
+        <div id="info-panel">
+            <h1>🔥 DRC 火焰探測器可視化 <span style="font-size:0.8rem;">(尖端朝上・底部傾斜)</span></h1>
+            <div class="fix-note">
+                <p><strong>✓ 模型翻轉完成</strong> — 尖端位於頂部(Y=20m)，寬底位於地面(Y=0m)。<br>
+                <strong>📏 高度基準變更：</strong> 平面位置現在改為<strong class="highlight-text">「距離圓錐體尖端的距離」</strong> (0m = 尖端處，20m = 底部地面)。<br>
+                <strong>🔧 平面預設角度：</strong> 平面傾角預設為 <strong>90°</strong> (垂直平面)，方便觀察截面。<br>
+                <strong>🖍️ 線框模式增強：</strong> 「顯示/隱藏線框」按鈕現在<strong>同時作用於圓錐體與切割平面</strong>，讓交接處觀察更清晰。</p>
+            </div>
+            <div class="correction-note">
+                <p><strong>✂️ 橘紅色粗線即為交線</strong> — 完全跟隨平面的傾斜角度旋轉，便於觀察截面形狀。<br>
+                <span style="color:#c0392b;">※ ，專注於視覺交線與幾何變化。</span></p>
+            </div>
+            <div class="control-group">
+                <p class="section-title">📐 錐體參數</p>
+                <ul style="margin:0 0 8px 16px;">
+                    <li>總高 H = 20m (尖端 Y=20m ~ 底部 Y=0m)</li>
+                    <li>底部半徑 ≈ 3.5m | 中段最寬處 距尖端約13m處</li>
+                    <li>形狀：下寬上尖，類火焰輪廓</li>
+                    <li>傾斜支點：<strong>底部中心 (0,0,0)</strong></li>
+                </ul>
+            </div>
+            <div class="control-group">
+                <p class="section-title">✂️ 即時截面位置</p>
+                <p>📏 距尖端距離 = <span id="cut-position" class="value-display">10.0</span> m &nbsp;&nbsp;(尖端為0m，底部為20m)<br>
+                📐 平面傾角 = <span id="cut-angle" class="value-display">90</span>°</p>
+                <p>📌 計算精度：<span id="calc-precision" class="value-display">64</span> 邊形</p>
+            </div>
+            <div id="calculation">
+                <h2>📊 即時交線資訊</h2>
+                <div id="calc-steps"></div>
+            </div>
+        </div>
+        <div id="controls">
+            <div class="control-group">
+                <p class="section-title">📌 切割平面控制</p>
+                <div class="control-label">
+                    <span>📏 距尖端距離 (0~20m):</span>
+                    <span id="position-value" class="value-display">10.0m</span>
+                </div>
+                <input type="range" id="position-slider" min="0" max="20" step="0.1" value="10">
+                
+                <div class="control-label">
+                    <span>📐 平面傾角 (繞X軸):</span>
+                    <span id="angle-value" class="value-display">90°</span>
+                </div>
+                <input type="range" id="angle-slider" min="0" max="90" step="1" value="90">
+                
+                <div class="control-label">
+                    <span>⚙️ 截面細分精度:</span>
+                    <span id="precision-value" class="value-display">64邊</span>
+                </div>
+                <input type="range" id="precision-slider" min="8" max="128" step="8" value="64">
+            </div>
+            
+            <div class="control-group">
+                <p class="section-title">🌀 圓錐體傾斜 (繞底部中心點)</p>
+                <div class="control-label">
+                    <span>錐體傾斜角度 (X軸方向):</span>
+                    <span id="cone-tilt-value" class="value-display">0°</span>
+                </div>
+                <input type="range" id="cone-tilt-slider" min="-35" max="35" step="1" value="0">
+                <div class="warning-note">
+                    💡 傾斜軸心位於底部中心 → 底部固定，頂端擺動。<br>
+                    交線會即時更新並<strong class="highlight-text">完美貼合平面角度</strong>。
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <p class="section-title">🖱️ 視圖輔助</p>
+                <button id="reset-view">⟳ 重置視角</button>
+                <button id="toggle-plane">🔲 隱藏/顯示平面</button>
+                <button id="toggle-intersection">🔴 隱藏/顯示交線</button>
+                <button id="toggle-wireframe">📐 隱藏/顯示線框 (圓錐體+平面)</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        // --- 初始化場景 ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xeef2fa);
+        scene.fog = new THREE.FogExp2(0xeef2fa, 0.003);
+        
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(22, 14, 26);
+        camera.lookAt(0, 9, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('container').appendChild(renderer.domElement);
+        
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.rotateSpeed = 1.5;
+        controls.zoomSpeed = 1.3;
+        controls.panSpeed = 1.2;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.minPolarAngle = 0;
+        controls.maxPolarAngle = Math.PI;
+        controls.target.set(0, 10, 0);
+        
+        // 光源
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+        scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xfff5e0, 1.0);
+        mainLight.position.set(12, 24, 10);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+        const fillLight = new THREE.PointLight(0xccaa88, 0.5);
+        fillLight.position.set(-6, 12, 9);
+        scene.add(fillLight);
+        const backLight = new THREE.PointLight(0x88aaff, 0.4);
+        backLight.position.set(0, 14, -14);
+        scene.add(backLight);
+        const rimLight = new THREE.PointLight(0xffaa77, 0.45);
+        rimLight.position.set(9, 16, -8);
+        scene.add(rimLight);
+        
+        const gridHelper = new THREE.GridHelper(42, 24, 0x5a6e7e, 0xaabbcc);
+        gridHelper.position.y = -0.02;
+        scene.add(gridHelper);
+        const axesHelper = new THREE.AxesHelper(18);
+        axesHelper.material.transparent = true;
+        axesHelper.material.opacity = 0.35;
+        scene.add(axesHelper);
+        
+        // 底部軸心標記
+        const pivotMarkerGeo = new THREE.SphereGeometry(0.32, 32, 32);
+        const pivotMat = new THREE.MeshStandardMaterial({ color: 0xff6666, emissive: 0x441122 });
+        const pivotMarker = new THREE.Mesh(pivotMarkerGeo, pivotMat);
+        pivotMarker.position.set(0, 0.02, 0);
+        scene.add(pivotMarker);
+        
+        const ringGeo = new THREE.RingGeometry(0.5, 0.95, 48);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xffaa77, side: THREE.DoubleSide, transparent: true, opacity: 0.9 });
+        const pivotRing = new THREE.Mesh(ringGeo, ringMat);
+        pivotRing.rotation.x = -Math.PI / 2;
+        pivotRing.position.set(0, 0.05, 0);
+        scene.add(pivotRing);
+        
+        // ========= 圓錐體幾何 (翻轉180度: 尖端朝上，底部Y=0，尖端Y=20) =========
+        const coneHeight = 20;  // 底部0，尖端20
+        
+        function getRadiusAtHeightOriginal(y_orig) {
+            if (y_orig <= 13) {
+                return y_orig * Math.tan(50 * Math.PI / 180);
+            } else if (y_orig <= 15) {
+                const t = (y_orig - 13) / 2;
+                const r13 = 13 * Math.tan(50 * Math.PI / 180);
+                const r15 = 15 * Math.tan(45 * Math.PI / 180);
+                return r13 + t * (r15 - r13);
+            } else if (y_orig <= 16) {
+                const t = (y_orig - 15);
+                const r15 = 15 * Math.tan(45 * Math.PI / 180);
+                const r16 = 16 * Math.tan(40 * Math.PI / 180);
+                return r15 + t * (r16 - r15);
+            } else if (y_orig <= 17) {
+                const t = (y_orig - 16);
+                const r16 = 16 * Math.tan(40 * Math.PI / 180);
+                const r17 = 17 * Math.tan(35 * Math.PI / 180);
+                return r16 + t * (r17 - r16);
+            } else if (y_orig <= 18) {
+                const t = (y_orig - 17);
+                const r17 = 17 * Math.tan(35 * Math.PI / 180);
+                const r18 = 18 * Math.tan(30 * Math.PI / 180);
+                return r17 + t * (r18 - r17);
+            } else if (y_orig <= 19) {
+                const t = (y_orig - 18);
+                const r18 = 18 * Math.tan(30 * Math.PI / 180);
+                const r19 = 19 * Math.tan(25 * Math.PI / 180);
+                return r18 + t * (r19 - r18);
+            } else {
+                const t = (y_orig - 19);
+                const r19 = 19 * Math.tan(25 * Math.PI / 180);
+                const r20 = 20 * Math.tan(10 * Math.PI / 180);
+                return r19 + t * (r20 - r19);
+            }
+        }
+        
+        // 翻轉後: 輸入 y (0底部~20頂部) 輸出半徑
+        function getRadiusAtHeightFlipped(y) {
+            const y_orig = coneHeight - y;
+            return getRadiusAtHeightOriginal(y_orig);
+        }
+        
+        const radialSegments = 72;
+        const heightSegments = 52;
+        const verticesLocal = [];
+        const indices = [];
+        
+        for (let i = 0; i <= heightSegments; i++) {
+            const y = (i / heightSegments) * coneHeight;
+            const r = getRadiusAtHeightFlipped(y);
+            for (let j = 0; j <= radialSegments; j++) {
+                const theta = (j / radialSegments) * Math.PI * 2;
+                const x = r * Math.cos(theta);
+                const z = r * Math.sin(theta);
+                verticesLocal.push(x, y, z);
+            }
+        }
+        
+        for (let i = 0; i < heightSegments; i++) {
+            for (let j = 0; j < radialSegments; j++) {
+                const a = i * (radialSegments + 1) + j;
+                const b = a + 1;
+                const c = a + (radialSegments + 1);
+                const d = c + 1;
+                indices.push(a, b, d);
+                indices.push(a, d, c);
+            }
+        }
+        
+        const topYIndex = heightSegments;
+        const topCenterIndex = verticesLocal.length / 3;
+        verticesLocal.push(0, coneHeight, 0);
+        for (let j = 0; j <= radialSegments; j++) {
+            const idx = topYIndex * (radialSegments + 1) + j;
+            if (j < radialSegments) {
+                indices.push(topCenterIndex, idx, idx + 1);
+            } else {
+                indices.push(topCenterIndex, idx, topYIndex * (radialSegments + 1));
+            }
+        }
+        
+        const bottomYIndex = 0;
+        const bottomCenterIndex = verticesLocal.length / 3;
+        verticesLocal.push(0, 0, 0);
+        for (let j = 0; j <= radialSegments; j++) {
+            const idx = bottomYIndex * (radialSegments + 1) + j;
+            if (j < radialSegments) {
+                indices.push(bottomCenterIndex, idx + 1, idx);
+            } else {
+                indices.push(bottomCenterIndex, bottomYIndex * (radialSegments + 1), idx);
+            }
+        }
+        
+        const baseGeometry = new THREE.BufferGeometry();
+        baseGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verticesLocal), 3));
+        baseGeometry.setIndex(indices);
+        baseGeometry.computeVertexNormals();
+        
+        // 主體材質
+        const coneMaterial = new THREE.MeshPhongMaterial({
+            color: 0x3a86ff,
+            transparent: true,
+            opacity: 0.68,
+            side: THREE.DoubleSide,
+            shininess: 70
+        });
+        const coneMesh = new THREE.Mesh(baseGeometry, coneMaterial);
+        coneMesh.castShadow = true;
+        scene.add(coneMesh);
+        
+        // 圓錐體線框
+        const coneWireframeMat = new THREE.MeshBasicMaterial({ color: 0x1f2a44, wireframe: true, transparent: true, opacity: 0.35 });
+        const coneWireframeMesh = new THREE.Mesh(baseGeometry, coneWireframeMat);
+        coneWireframeMesh.visible = false;
+        scene.add(coneWireframeMesh);
+        
+        // 切割平面
+        const planeWidth = 32;
+        const planeGeometryPlane = new THREE.PlaneGeometry(planeWidth, planeWidth);
+        const planeMaterialObj = new THREE.MeshPhongMaterial({
+            color: 0xffaa55,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.55,
+            emissive: 0x442200
+        });
+        const cuttingPlane = new THREE.Mesh(planeGeometryPlane, planeMaterialObj);
+        scene.add(cuttingPlane);
+        
+        // 平面邊緣線
+        const planeEdgesGeo = new THREE.EdgesGeometry(planeGeometryPlane);
+        const planeEdgesMat = new THREE.LineBasicMaterial({ color: 0xff6600 });
+        const planeEdges = new THREE.LineSegments(planeEdgesGeo, planeEdgesMat);
+        cuttingPlane.add(planeEdges);
+        
+        // 平面的線框模式
+        const planeWireframeMat = new THREE.MeshBasicMaterial({ color: 0xff8844, wireframe: true, transparent: true, opacity: 0.5 });
+        const planeWireframeMesh = new THREE.Mesh(planeGeometryPlane, planeWireframeMat);
+        planeWireframeMesh.visible = false;
+        cuttingPlane.add(planeWireframeMesh);
+        
+        // 交線物件
+        let intersectionLineObj = null;
+        
+        // 將「距尖端距離」轉換為世界Y座標
+        function tipDistanceToWorldY(tipDist) {
+            return coneHeight - tipDist;
+        }
+        
+        // 計算交線點並更新視覺 (純視覺，不計算面積)
+        function computeAndUpdateIntersection(tiltDeg, tipDistance, planeAngleDeg) {
+            const cutHeightWorld = tipDistanceToWorldY(tipDistance);
+            const planeRotX = planeAngleDeg * Math.PI / 180;
+            
+            const planeLocalToWorld = new THREE.Matrix4();
+            planeLocalToWorld.compose(
+                new THREE.Vector3(0, cutHeightWorld, 0),
+                new THREE.Quaternion().setFromEuler(new THREE.Euler(planeRotX, 0, 0, 'XYZ')),
+                new THREE.Vector3(1, 1, 1)
+            );
+            
+            const worldToPlaneLocal = new THREE.Matrix4().copy(planeLocalToWorld).invert();
+            
+            const positionsAttr = baseGeometry.attributes.position.array;
+            const vertexCount = positionsAttr.length / 3;
+            const transformedWorldPoints = [];
+            for (let i = 0; i < vertexCount; i++) {
+                const px = positionsAttr[i*3];
+                const py = positionsAttr[i*3+1];
+                const pz = positionsAttr[i*3+2];
+                const vec = new THREE.Vector3(px, py, pz);
+                vec.applyQuaternion(coneMesh.quaternion);
+                transformedWorldPoints.push(vec);
+            }
+            
+            const transformedLocalPoints = transformedWorldPoints.map(p => p.clone().applyMatrix4(worldToPlaneLocal));
+            
+            const intersectionLocalPoints = [];
+            const indicesArray = baseGeometry.index.array;
+            const eps = 1e-7;
+            
+            for (let i = 0; i < indicesArray.length; i += 3) {
+                const i1 = indicesArray[i];
+                const i2 = indicesArray[i+1];
+                const i3 = indicesArray[i+2];
+                const p1 = transformedLocalPoints[i1];
+                const p2 = transformedLocalPoints[i2];
+                const p3 = transformedLocalPoints[i3];
+                
+                const z1 = p1.z;
+                const z2 = p2.z;
+                const z3 = p3.z;
+                
+                const hasPos = z1 > eps || z2 > eps || z3 > eps;
+                const hasNeg = z1 < -eps || z2 < -eps || z3 < -eps;
+                
+                if (hasPos && hasNeg) {
+                    const edges = [[p1, p2, z1, z2], [p2, p3, z2, z3], [p3, p1, z3, z1]];
+                    for (const [a, b, za, zb] of edges) {
+                        if (Math.abs(za) < eps) intersectionLocalPoints.push(new THREE.Vector2(a.x, a.y));
+                        if (Math.abs(zb) < eps) intersectionLocalPoints.push(new THREE.Vector2(b.x, b.y));
+                        if (za * zb < 0) {
+                            const t = -za / (zb - za);
+                            const ix = a.x + t * (b.x - a.x);
+                            const iy = a.y + t * (b.y - a.y);
+                            intersectionLocalPoints.push(new THREE.Vector2(ix, iy));
+                        }
+                    }
+                }
+            }
+            
+            if (intersectionLocalPoints.length < 3) {
+                if (intersectionLineObj) {
+                    cuttingPlane.remove(intersectionLineObj);
+                    intersectionLineObj = null;
+                }
+                return;
+            }
+            
+            // 去重
+            const unique = [];
+            const tol = 0.003;
+            for (let p of intersectionLocalPoints) {
+                let dup = false;
+                for (let q of unique) {
+                    if (Math.hypot(p.x - q.x, p.y - q.y) < tol) { dup = true; break; }
+                }
+                if (!dup) unique.push(p.clone());
+            }
+            
+            if (unique.length < 3) {
+                if (intersectionLineObj) {
+                    cuttingPlane.remove(intersectionLineObj);
+                    intersectionLineObj = null;
+                }
+                return;
+            }
+            
+            // 排序
+            const center = new THREE.Vector2();
+            for (let p of unique) center.add(p);
+            center.divideScalar(unique.length);
+            unique.forEach(p => {
+                p.angle = Math.atan2(p.y - center.y, p.x - center.x);
+            });
+            unique.sort((a, b) => a.angle - b.angle);
+            
+            // 建立交線視覺
+            if (intersectionLineObj) cuttingPlane.remove(intersectionLineObj);
+            const vertices = [];
+            for (let p of unique) {
+                vertices.push(p.x, p.y, 0);
+            }
+            if (unique.length > 0) {
+                vertices.push(unique[0].x, unique[0].y, 0);
+            }
+            const lineGeometry = new THREE.BufferGeometry();
+            lineGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xff3300, linewidth: 3 });
+            const lineLoop = new THREE.Line(lineGeometry, lineMat);
+            intersectionLineObj = lineLoop;
+            cuttingPlane.add(intersectionLineObj);
+        }
+        
+        let currentTiltDeg = 0;
+        function updateConeTilt(deg) {
+            currentTiltDeg = deg;
+            const rad = deg * Math.PI / 180;
+            const quaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(rad, 0, 0, 'XYZ'));
+            coneMesh.quaternion.copy(quaternion);
+            coneWireframeMesh.quaternion.copy(quaternion);
+            updateIntersectionOnly();
+        }
+        
+        function updateIntersectionOnly() {
+            const tipDistance = parseFloat(document.getElementById('position-slider').value);
+            const cutAngle = parseFloat(document.getElementById('angle-slider').value);
+            const tilt = currentTiltDeg;
+            computeAndUpdateIntersection(tilt, tipDistance, cutAngle);
+            
+            // 更新UI文字，不計算面積
+            const worldY = tipDistanceToWorldY(tipDistance);
+            let infoHtml = `<div class="calculation-step"><strong>⚡ 尖端距離基準模式 (純視覺)</strong><br>
+            📏 距尖端距離: ${tipDistance.toFixed(2)}m → 世界Y座標: ${worldY.toFixed(2)}m<br>
+            圓錐傾斜角度: ${tilt}° | 平面傾角: ${cutAngle}°<br>
+            <span style="color:#ff5500; font-weight:bold;">✓ 交線即時更新，完整貼合平面</span><br>
+            計算方法：三角網格與平面求交，顯示封閉交線。</div>`;
+            infoHtml += `<div class="calculation-step"><strong>📐 交線狀態</strong><br>
+            <span style="font-size:0.85rem;">交線已更新，可旋轉/縮放觀察截面形狀。</span><br>
+            <span style="font-size:0.75rem;">⚠️ 專注於幾何視覺。</span></div>`;
+            document.getElementById('calc-steps').innerHTML = infoHtml;
+            document.getElementById('cut-position').textContent = tipDistance.toFixed(1);
+            document.getElementById('cut-angle').textContent = cutAngle;
+        }
+        
+        function updatePlaneVisual() {
+            const tipDistance = parseFloat(document.getElementById('position-slider').value);
+            const cutAngle = parseFloat(document.getElementById('angle-slider').value);
+            const worldY = tipDistanceToWorldY(tipDistance);
+            cuttingPlane.position.y = worldY;
+            cuttingPlane.rotation.x = cutAngle * Math.PI / 180;
+            
+            document.getElementById('position-value').textContent = tipDistance.toFixed(1) + 'm';
+            document.getElementById('angle-value').textContent = cutAngle.toFixed(0) + '°';
+            updateIntersectionOnly();
+        }
+        
+        // 線框控制
+        let wireframeVisible = false;
+        function toggleWireframe() {
+            wireframeVisible = !wireframeVisible;
+            coneWireframeMesh.visible = wireframeVisible;
+            planeWireframeMesh.visible = wireframeVisible;
+        }
+        
+        let calculationPrecision = 64;
+        // 精度滑桿僅影響顯示，實際交線仍用原始高精度網格（因為預先建立好的網格精度固定）
+        // 但為了符合UI預期，保留顯示即可，不影響核心視覺（因為幾何已固定）
+        document.getElementById('precision-slider').addEventListener('input', (e) => {
+            calculationPrecision = parseInt(e.target.value);
+            document.getElementById('precision-value').textContent = calculationPrecision + '邊';
+            // 不重新生成幾何，因為會影響效能，但提示使用者
+            const stepsDiv = document.getElementById('calc-steps');
+            if (stepsDiv) {
+                stepsDiv.innerHTML += `<div style="background:#fff3e0; padding:6px; border-radius:8px; font-size:0.7rem;">⚙️ 精度變更為 ${calculationPrecision}，但視覺網格固定為高精度 (72x52) 以確保平滑。</div>`;
+                setTimeout(() => {
+                    const lastChild = stepsDiv.lastChild;
+                    if (lastChild && lastChild.innerText.includes("精度變更")) lastChild.remove();
+                }, 2000);
+            }
+        });
+        
+        document.getElementById('position-slider').addEventListener('input', () => updatePlaneVisual());
+        document.getElementById('angle-slider').addEventListener('input', () => updatePlaneVisual());
+        document.getElementById('cone-tilt-slider').addEventListener('input', (e) => {
+            const deg = parseFloat(e.target.value);
+            document.getElementById('cone-tilt-value').textContent = deg + '°';
+            updateConeTilt(deg);
+        });
+        
+        document.getElementById('reset-view').addEventListener('click', () => {
+            camera.position.set(22, 14, 26);
+            controls.target.set(0, 10, 0);
+            controls.update();
+        });
+        document.getElementById('toggle-plane').addEventListener('click', () => {
+            cuttingPlane.visible = !cuttingPlane.visible;
+        });
+        document.getElementById('toggle-intersection').addEventListener('click', () => {
+            if (intersectionLineObj) intersectionLineObj.visible = !intersectionLineObj.visible;
+        });
+        document.getElementById('toggle-wireframe').addEventListener('click', toggleWireframe);
+        
+        updateConeTilt(0);
+        updatePlaneVisual();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        document.getElementById('precision-value').textContent = calculationPrecision + '邊';
+    </script>
+	
+		    <!-- 返回按鈕應該在這裡 -->
+    <button onclick="window.location.href='index.html'" 
+            style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 9999;">
+        返回主選單
+    </button>	
+	
+</body>
+</html>
