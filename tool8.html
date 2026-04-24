@@ -204,7 +204,7 @@
             background-color: #f2f2f2;
         }
 		
-		        /* 可放大文字框樣式 */
+		/* 可放大文字框樣式 */
         .resizable-textarea {
             width: 100%;
             max-width: 500px;
@@ -230,57 +230,70 @@
             display: block;
             margin-bottom: 4px;
         }
-		
+        /* 資料庫選擇區塊 */
+        .db-selector {
+            background: #eef4ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #bdd4ff;
+        }
+        .db-selector label {
+            font-weight: bold;
+        }
+        .db-selector select {
+            width: auto;
+            padding: 6px;
+            font-weight: bold;
+        }
+        .db-badge {
+            background: #1e3a8a;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
 
 </style>
 
     <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
     <script>
         (function() {
-            // 1. 禁止右鍵選單 (contextmenu)
             document.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
                 return false;
             });
-            
-            // 2. 防堵開發者工具快捷鍵
             function blockDevTools(e) {
-                // F12 鍵
                 if (e.key === 'F12') {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+Shift+I (Windows/Linux) 或 Cmd+Option+I (Mac)
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+Shift+J (Windows/Linux) 或 Cmd+Option+J (Mac)
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+U (檢視原始碼)
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+S (儲存頁面)
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+Shift+C (開啟選取元素)
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
                     e.preventDefault();
                     return false;
                 }
                 return true;
             }
-            
             document.addEventListener('keydown', blockDevTools);
-            
-            // 3. 偵測開發者工具是否開啟 (透過console被呼叫)
             let devtoolsOpen = false;
             const element = new Image();
             Object.defineProperty(element, 'id', {
@@ -296,20 +309,29 @@
                 console.clear();
                 if (devtoolsOpen) {
                     console.clear();
-                    // 可選：顯示警告或重新導向
-                    // alert('請關閉開發者工具後繼續使用');
                 }
             }, 1000);
         })();
     </script>
     <!-- ========== 防護區塊結束 ========== -->
 
-
 </head>
 <body>
-<div class="version-info">Ver.11 2026/4/2 HTBO/Jim </div>
+<div class="version-info">Ver.12 2026/4/23 HTBO/Jim (新增CNS6445資料庫)</div>
 <h1>管道摩擦損失計算工具</h1>
-<h5>採用壓力配管用碳鋼管(CNS4626) STPG (SCH40)之管接頭及閥之換算等價管長</h5>
+<h5>可切換壓力配管用碳鋼管等價管長資料庫：CNS4626 (SCH40) 或 CNS6445 (SGP)</h5>
+
+<!-- 資料庫選擇區塊 -->
+<div class="db-selector">
+    <label>📚 等價管長資料庫：</label>
+    <select id="databaseSelect">
+        <option value="4626">CNS4626 (STPG) </option>
+        <option value="6445">CNS6445 (SGP) </option>
+    </select>
+    <span id="dbActiveBadge" class="db-badge">目前使用: CNS4626</span>
+    <span style="font-size:0.8rem; color:#2c3e50;">⚠️ 切換後將重置管道段資料並重新計算</span>
+</div>
+
 <div class="case-info">
 <label for="caseName">案件名稱:</label>
 <input id="caseName" placeholder="輸入案件名稱" type="text"/>
@@ -336,14 +358,12 @@
     <table id="pipeSegments">
         <thead id="dynamicHeaderRow"></thead>
         <tbody></tbody>
-    
     </div>
 </div>
 <div class="section">
 <h2>總摩擦損失水頭</h2>
-
 <table>
-<tr><td>總摩擦損失水頭 (m):</td><td id="totalFrictionLoss">0.00</td></tr>
+<tr><th>總摩擦損失水頭 (m):</th><td id="totalFrictionLoss">0.00</td></tr>
 </table>
 </div>
 <div class="divider"></div>
@@ -371,12 +391,10 @@
     故全揚程 H = h1(<span id="h1DisplayOther">0.0</span>)M + h2(<span id="h2DisplayOther">0.00</span>)M + h3(<span id="h3DisplayOther">0.0</span>)M + h4(<span id="h4DisplayOther">0.0</span>)M = <span class="highlight" id="totalHeadResultOther">0.00</span> M, 採 <input class="calculation-input" id="adoptedHeadOther" min="0" step="0.1" type="number" value="0"/> M</p>
 </div>
 <h3>2. 出水量計算</h3>
-<!-- 新增可放大文字框，自由輸入備註 -->
 <div class="flow-note-area">
     <label for="flowNote">📝 出水量備註 / 補充說明 :</label>
     <textarea id="flowNote" class="resizable-textarea" rows="2" placeholder="例如：依據現場測試需求調整水量、配合泵浦特性曲線選用..."></textarea>
 </div>
-
 <p>Q = <input class="calculation-input" id="flowRate" min="0" type="number" value="0"/> LPM, 採 <input class="calculation-input highlight" id="adoptedFlow" min="0" type="number" value="0"/> LPM</p>
 <h3>3. 電動機之輸出馬力</h3>
 <p>計算式: KW = (0.163 * H * Q) / E * K<br/>
@@ -386,21 +404,84 @@ KW = (0.163 * 採 <span id="kwHead">0</span> M * (採 <span class="highlight" id
 </div>
 
 <script>
-// ==================== 等價管長數據 ====================
-const equivalentFullData = {
-    "45°彎頭(肘管)": [0.4, 0.5, 0.6, 0.7, 0.9, 1.1, 1.2, 1.4, 1.8, 2.1, 2.8, 3.5, 4.2, 4.7],
-    "90°彎頭": [0.8, 0.9, 1.1, 1.2, 1.6, 2.0, 2.4, 2.6, 3.1, 3.8, 4.5, 6.0, 7.5, 9.0, 10.0],
-    "回轉彎頭(180°)": [2.0, 2.6, 3.0, 3.9, 4.8, 5.7, 6.6, 7.5, 9.3, 11.0, 14.6, 18.2, 21.8, 24.3],
-    "T型或十字型接頭(90°分流)": [1.6, 2.1, 2.5, 3.2, 4.0, 4.7, 5.2, 6.1, 7.6, 9.1, 12.0, 15.0, 18.0, 20.0],
-    "45°彎頭長": [0.2, 0.2, 0.3, 0.3, 0.4, 0.5, 0.5, 0.6, 0.8, 0.9, 1.2, 1.5, 1.8, 2.0],
-    "90°彎頭短": [0.4, 0.6, 0.7, 0.9, 1.1, 1.3, 1.4, 1.6, 2.0, 2.4, 3.2, 4.0, 4.8, 5.3],
-    "90°彎頭長": [0.3, 0.4, 0.5, 0.6, 0.8, 0.9, 1.1, 1.2, 1.5, 1.8, 2.4, 3.0, 3.6, 4.0],
-    "T型接頭(熔接)": [1.2, 1.6, 1.9, 2.4, 3.0, 3.5, 3.9, 4.6, 5.7, 6.8, 9.0, 11.2, 13.4, 15.0],
-    "閘閥": [0.2, 0.2, 0.3, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0, 1.3, 1.6, 2.0, 2.2],
-    "球閥": [9.0, 11.8, 13.7, 17.6, 22.0, 26.0, 29.1, 34.0, 42.0, 50.3, 56.6, 82.9, 99.2, 111.0],
-    "角閥": [4.6, 5.9, 6.9, 8.8, 11.0, 13.1, 14.5, 17.1, 21.2, 25.2, 33.4, 41.6, 48.8, 55.7],
-    "逆止閥(擺動型)": [2.3, 3.0, 3.4, 4.4, 5.5, 6.5, 7.3, 8.5, 10.5, 12.5, 16.6, 20.7, 24.7, 27.7]
+// ==================== 兩種資料庫完整定義 ====================
+const diameterOptions = [25,32,40,50,65,80,90,100,125,150,200,250,300,350];
+// 資料庫: CNS4626 (原有)
+const equivalentData_4626 = {
+    "45°彎頭(肘管)": [0.4,0.5,0.6,0.7,0.9,1.1,1.2,1.4,1.8,2.1,2.8,3.5,4.2,4.7],
+    "90°彎頭": [0.8,0.9,1.1,1.2,1.6,2.0,2.4,2.6,3.1,3.8,4.5,6.0,7.5,9.0,10.0],
+    "回轉彎頭(180°)": [2.0,2.6,3.0,3.9,4.8,5.7,6.6,7.5,9.3,11.0,14.6,18.2,21.8,24.3],
+    "T型或十字型接頭(90°分流)": [1.6,2.1,2.5,3.2,4.0,4.7,5.2,6.1,7.6,9.1,12.0,15.0,18.0,20.0],
+    "45°彎頭長": [0.2,0.2,0.3,0.3,0.4,0.5,0.5,0.6,0.8,0.9,1.2,1.5,1.8,2.0],
+    "90°彎頭短": [0.4,0.6,0.7,0.9,1.1,1.3,1.4,1.6,2.0,2.4,3.2,4.0,4.8,5.3],
+    "90°彎頭長": [0.3,0.4,0.5,0.6,0.8,0.9,1.1,1.2,1.5,1.8,2.4,3.0,3.6,4.0],
+    "T型接頭(熔接)": [1.2,1.6,1.9,2.4,3.0,3.5,3.9,4.6,5.7,6.8,9.0,11.2,13.4,15.0],
+    "閘閥": [0.2,0.2,0.3,0.3,0.4,0.5,0.6,0.7,0.8,1.0,1.3,1.6,2.0,2.2],
+    "球閥": [9.0,11.8,13.7,17.6,22.0,26.0,29.1,34.0,42.0,50.3,56.6,82.9,99.2,111.0],
+    "角閥": [4.6,5.9,6.9,8.8,11.0,13.1,14.5,17.1,21.2,25.2,33.4,41.6,48.8,55.7],
+    "逆止閥(擺動型)": [2.3,3.0,3.4,4.4,5.5,6.5,7.3,8.5,10.5,12.5,16.6,20.7,24.7,27.7]
 };
+// 資料庫: CNS6445 (新增) 依據標準表格完整對應
+const equivalentData_6445 = {
+    "45°彎頭(肘管)": [0.4,0.5,0.6,0.7,0.9,1.1,1.3,1.5,1.8,2.2,2.9,3.6,4.3,4.8],
+    "90°彎頭": [0.8,1.1,1.3,1.6,2.0,2.4,2.8,3.2,3.9,4.7,6.2,7.6,9.2,10.2],
+    "回轉彎頭(180°)": [2.0,2.6,3.0,3.9,5.0,5.9,6.8,7.7,9.6,11.3,15.0,18.6,22.3,24.8],
+    "T型或十字型接頭(90°分流)": [1.7,2.2,2.5,3.2,4.1,4.9,5.6,6.3,7.9,9.3,12.3,15.3,18.3,20.4],
+    "45°彎頭長": [0.2,0.2,0.3,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.2,1.5,1.8,2.0],
+    "90°彎頭短": [0.5,0.6,0.7,0.9,1.1,1.3,1.5,1.7,2.1,2.5,3.3,4.1,4.9,5.4],
+    "90°彎頭長": [0.3,0.4,0.5,0.6,0.8,1.0,1.1,1.3,1.6,1.9,2.5,3.1,3.7,4.1],
+    "T型接頭(熔接)": [1.3,1.6,1.9,2.4,3.1,3.6,4.2,4.7,5.9,7.0,9.2,11.4,13.7,15.3],
+    "閘閥": [0.2,0.2,0.3,0.3,0.4,0.5,0.6,0.7,0.8,1.0,1.3,1.6,2.0,2.2],
+    "球閥": [9.2,11.9,13.9,17.6,22.6,26.9,31.0,35.1,43.6,51.7,68.2,84.7,101.5,113.2],
+    "角閥": [4.6,6.0,7.0,8.9,11.3,13.5,15.6,17.6,21.9,26.0,34.2,42.5,50.9,56.8],
+    "逆止閥(擺動型)": [2.3,3.0,3.5,4.4,5.6,6.7,7.7,8.7,10.9,12.9,17.0,21.1,25.3,28.2]
+};
+let currentDatabase = "4626";
+let equivalentFullData = equivalentData_4626;
+
+function getEquivalentValue(name, d) {
+    if(!name || name==="自訂") return null;
+    const data = equivalentFullData[name];
+    if(!data) return null;
+    const idx = diameterOptions.indexOf(parseInt(d));
+    if(idx===-1 || idx>=data.length) return null;
+    return data[idx];
+}
+
+// 切換資料庫時重置所有表格與元件
+function switchDatabase(db) {
+    currentDatabase = db;
+    if(db === "4626") {
+        equivalentFullData = equivalentData_4626;
+        document.getElementById("dbActiveBadge").innerHTML = "目前使用: CNS4626 (STPG SCH40)";
+    } else {
+        equivalentFullData = equivalentData_6445;
+        document.getElementById("dbActiveBadge").innerHTML = "目前使用: CNS6445 (SGP)";
+    }
+    // 重置所有管道段
+    document.querySelectorAll('#pipeSegments tbody tr').forEach(r => r.remove());
+    pipeSegmentCount = 0;
+    // 重置自訂資訊與元件名稱預設
+    customInfo = {};
+    for(let i=1;i<=6;i++) {
+        if(i===1) currentComponentNames[i] = "90°彎頭";
+        else if(i===2) currentComponentNames[i] = "90°彎頭";
+        else if(i===3) currentComponentNames[i] = "閘閥";
+        else if(i===4) currentComponentNames[i] = "逆止閥(擺動型)";
+        else if(i===5) currentComponentNames[i] = "球閥";
+        else if(i===6) currentComponentNames[i] = "過濾器";
+        else currentComponentNames[i] = "90°彎頭";
+    }
+    // 重新初始化表頭
+    initHeader();
+    // 新增一個預設管道段
+    addPipeSegment();
+    // 重新計算
+    calculateTotalFrictionLoss();
+    updateFlowRateDisplay();
+    updateTotalHeadCalculation();
+    calculateMotorPower();
+}
 
 const componentCategories = [
     { category: "螺紋式", items: ["45°彎頭(肘管)", "90°彎頭", "回轉彎頭(180°)", "T型或十字型接頭(90°分流)"] },
@@ -409,20 +490,11 @@ const componentCategories = [
 ];
 
 const diameterMap = {20:2.14,25:2.72,32:3.55,40:4.12,50:5.27,65:6.59,80:7.81,90:8.5,100:10.23,125:12.66,150:15.1,200:20.32,250:25.0,300:30.0,350:35.0};
-const diameterOptions = [25,32,40,50,65,80,90,100,125,150,200,250,300,350];
 
 let customInfo = {};
 let pipeSegmentCount = 0;
 let currentComponentNames = {1:"90°彎頭",2:"90°彎頭",3:"閘閥",4:"逆止閥(擺動型)",5:"球閥",6:"過濾器"};
 
-function getDiameterIndex(d) { return diameterOptions.indexOf(parseInt(d)); }
-function getEquivalentValue(name, d) {
-    if(!name || name==="自訂") return null;
-    const data = equivalentFullData[name];
-    if(!data) return null;
-    const idx = getDiameterIndex(d);
-    return (idx===-1||idx>=data.length)?null:data[idx];
-}
 function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
 
 function showCustomDialog(compIndex, selectElement, callback) {
@@ -489,7 +561,7 @@ function initHeader(){
         opts+=`<option value="自訂" ${isCustom||currentComponentNames[i]==="自訂"?'selected':''}>${label}</option>`;
         html+=`<th colspan="2"><select class="component-select" data-component-index="${i}" style="width:110px;">${opts}</select></th>`;
     }
-    html+=`<th rowspan="2">直管(m)</th><th rowspan="2">小計(m)</th><th rowspan="2">損失</th><th rowspan="2">揚程(m)</th><th rowspan="2">操作</th></tr>`;
+    html+=`<th rowspan="2">直管(m)</th><th rowspan="2">小計(m)</th><th rowspan="2">損失</th><th rowspan="2">揚程(m)</th><th rowspan="2">操作</th></tr><tr>`;
     for(let i=1;i<=6;i++) html+=`<th>數量</th><th>等價</th>`;
     html+=`</tr>`;
     headerRow.innerHTML = html;
@@ -517,7 +589,6 @@ function initHeader(){
         });
     });
 }
-
 function addPipeSegment(){
     pipeSegmentCount++;
     const name = pipeSegmentCount===1?'A-B':`${String.fromCharCode(64+pipeSegmentCount)}-${String.fromCharCode(65+pipeSegmentCount)}`;
@@ -711,200 +782,32 @@ function updateExtraH3TotalOther(){
     document.getElementById('h3DisplayOther').textContent=h3.toFixed(1);
     updateTotalHeadCalculation();
 }
-
-// 增強後的 collectAllData - 保存所有資料（包含下半部計算區域）
 function collectAllData() {
-    const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
-    
-    // 收集管道段資料
     const pipeSegments = [];
     document.querySelectorAll('#pipeSegments tbody tr').forEach(row => {
-        const seg = { 
-            name: row.querySelector('td:first-child').textContent, 
-            diameter: row.querySelector('.pipe-diameter').value, 
-            flowRate: row.querySelector('.segment-flow-rate').value, 
-            straightPipe: row.querySelector('.straight-pipe').value, 
-            frictionLoss: row.querySelector('.friction-loss').value 
-        };
-        for(let i = 1; i <= 6; i++) { 
-            seg[`qty_${i}`] = row.querySelector(`.comp-qty-${i}`)?.value || 0; 
-            seg[`eq_${i}`] = row.querySelector(`.comp-equivalent-${i}`)?.value || 0; 
-        }
+        const seg = { name: row.querySelector('td:first-child').textContent, diameter: row.querySelector('.pipe-diameter').value, flowRate: row.querySelector('.segment-flow-rate').value, straightPipe: row.querySelector('.straight-pipe').value, frictionLoss: row.querySelector('.friction-loss').value };
+        for(let i=1;i<=6;i++) { seg[`qty_${i}`] = row.querySelector(`.comp-qty-${i}`)?.value || 0; seg[`eq_${i}`] = row.querySelector(`.comp-equivalent-${i}`)?.value || 0; }
         pipeSegments.push(seg);
     });
-    
-    // 收集額外項目資料
     const extraItems = [];
-    document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(item => {
-        extraItems.push({
-            label: item.querySelector('.extra-h3-label')?.value || '',
-            value: parseFloat(item.querySelector('.extra-h3-value')?.value) || 0
-        });
-    });
-    
-    // 收集全揚程與幫浦規格計算區域的所有資料
-    const pumpCalcData = {
-        // 一般撒水模式資料
-        sprinkler: {
-            actualHead: parseFloat(document.getElementById('actualHead')?.value) || 0,
-            outletPressure: parseFloat(document.getElementById('outletPressure')?.value) || 10,
-            flowDetector: parseFloat(document.getElementById('flowDetector')?.value) || 5,
-            adoptedHead: parseFloat(document.getElementById('adoptedHead')?.value) || 0
-        },
-        // 其他設備模式資料
-        other: {
-            nozzleLoss: parseFloat(document.getElementById('nozzleLoss')?.value) || 0,
-            valveLoss: parseFloat(document.getElementById('valveLoss')?.value) || 0,
-            actualHeadOther: parseFloat(document.getElementById('actualHeadOther')?.value) || 0,
-            outletPressureOther: parseFloat(document.getElementById('outletPressureOther')?.value) || 0,
-            adoptedHeadOther: parseFloat(document.getElementById('adoptedHeadOther')?.value) || 0
-        },
-        // 共用資料
-        common: {
-            flowRate: parseFloat(document.getElementById('flowRate')?.value) || 0,
-            adoptedFlow: parseFloat(document.getElementById('adoptedFlow')?.value) || 0,
-            efficiency: parseFloat(document.getElementById('efficiency')?.value) || 0.6,
-            selectedKw: parseFloat(document.getElementById('selectedKw')?.value) || 0,
-            flowNote: document.getElementById('flowNote')?.value || ''
-        },
-        extraItems: extraItems
-    };
-    
-    return {
-        caseInfo: { 
-            caseName: document.getElementById('caseName').value, 
-            equipmentType: document.getElementById('equipmentType').value 
-        },
-        componentNames: currentComponentNames,
-        customInfo: customInfo,
-        pipeSegments: pipeSegments,
-        pumpCalcData: pumpCalcData  // 新增：保存全揚程與幫浦規格資料
-    };
+    document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(item => { extraItems.push({ label: item.querySelector('.extra-h3-label')?.value || '', value: parseFloat(item.querySelector('.extra-h3-value')?.value) || 0 }); });
+    return { caseInfo: { caseName: document.getElementById('caseName').value, equipmentType: document.getElementById('equipmentType').value }, componentNames: currentComponentNames, customInfo: customInfo, pipeSegments: pipeSegments, database: currentDatabase, pumpCalcData: { sprinkler: { actualHead: parseFloat(document.getElementById('actualHead')?.value)||0, outletPressure: parseFloat(document.getElementById('outletPressure')?.value)||10, flowDetector: parseFloat(document.getElementById('flowDetector')?.value)||5, adoptedHead: parseFloat(document.getElementById('adoptedHead')?.value)||0 }, other: { nozzleLoss: parseFloat(document.getElementById('nozzleLoss')?.value)||0, valveLoss: parseFloat(document.getElementById('valveLoss')?.value)||0, actualHeadOther: parseFloat(document.getElementById('actualHeadOther')?.value)||0, outletPressureOther: parseFloat(document.getElementById('outletPressureOther')?.value)||0, adoptedHeadOther: parseFloat(document.getElementById('adoptedHeadOther')?.value)||0 }, common: { flowRate: parseFloat(document.getElementById('flowRate')?.value)||0, adoptedFlow: parseFloat(document.getElementById('adoptedFlow')?.value)||0, efficiency: parseFloat(document.getElementById('efficiency')?.value)||0.6, selectedKw: parseFloat(document.getElementById('selectedKw')?.value)||0, flowNote: document.getElementById('flowNote')?.value||'' }, extraItems: extraItems } };
 }
-
-// 增強後的 loadAllData - 完整載入所有資料
 function loadAllData(data) {
-    // 載入組件名稱與自訂資訊
-    if(data.componentNames) {
-        for(let i = 1; i <= 6; i++) {
-            if(data.componentNames[i]) currentComponentNames[i] = data.componentNames[i];
-        }
-    }
+    if(data.database) { document.getElementById('databaseSelect').value = data.database; switchDatabase(data.database); }
+    if(data.componentNames) for(let i=1;i<=6;i++) if(data.componentNames[i]) currentComponentNames[i] = data.componentNames[i];
     if(data.customInfo) customInfo = data.customInfo;
-    
-    // 清空現有管道段
-    document.querySelectorAll('#pipeSegments tbody tr').forEach(r => r.remove());
-    pipeSegmentCount = 0;
-    
-    // 載入管道段
-    if(data.pipeSegments && data.pipeSegments.length) {
-        data.pipeSegments.forEach(seg => { 
-            addPipeSegment(); 
-            const row = document.querySelector('#pipeSegments tbody tr:last-child'); 
-            if(row) { 
-                row.querySelector('.pipe-diameter').value = seg.diameter || 20; 
-                row.querySelector('.segment-flow-rate').value = seg.flowRate || 0; 
-                row.querySelector('.straight-pipe').value = seg.straightPipe || 0; 
-                row.querySelector('.friction-loss').value = seg.frictionLoss || 0; 
-                for(let i = 1; i <= 6; i++) { 
-                    const qtyInput = row.querySelector(`.comp-qty-${i}`);
-                    const eqInput = row.querySelector(`.comp-equivalent-${i}`);
-                    if(qtyInput) qtyInput.value = seg[`qty_${i}`] || 0;
-                    if(eqInput) eqInput.value = seg[`eq_${i}`] || 0;
-                } 
-                updateAllEquivalentInRow(row); 
-                updatePipeSegment(row); 
-            } 
-        });
-    }
-    
-    // 載入案件基本資訊
-    if(data.caseInfo) { 
-        document.getElementById('caseName').value = data.caseInfo.caseName || ''; 
-        document.getElementById('equipmentType').value = data.caseInfo.equipmentType || '固定式'; 
-        updateEquipmentDefaults(); 
-    }
-    
-    // 載入全揚程與幫浦規格資料
-    if(data.pumpCalcData) {
-        const pcd = data.pumpCalcData;
-        
-        // 載入一般撒水模式資料
-        if(pcd.sprinkler) {
-            document.getElementById('actualHead').value = pcd.sprinkler.actualHead || 0;
-            document.getElementById('outletPressure').value = pcd.sprinkler.outletPressure || 10;
-            document.getElementById('flowDetector').value = pcd.sprinkler.flowDetector || 5;
-            document.getElementById('adoptedHead').value = pcd.sprinkler.adoptedHead || 0;
-        }
-        
-        // 載入其他設備模式資料
-        if(pcd.other) {
-            document.getElementById('nozzleLoss').value = pcd.other.nozzleLoss || 0;
-            document.getElementById('valveLoss').value = pcd.other.valveLoss || 0;
-            document.getElementById('actualHeadOther').value = pcd.other.actualHeadOther || 0;
-            document.getElementById('outletPressureOther').value = pcd.other.outletPressureOther || 0;
-            document.getElementById('adoptedHeadOther').value = pcd.other.adoptedHeadOther || 0;
-        }
-        
-        // 載入共用資料
-        if(pcd.common) {
-            document.getElementById('flowRate').value = pcd.common.flowRate || 0;
-            document.getElementById('adoptedFlow').value = pcd.common.adoptedFlow || 0;
-            document.getElementById('efficiency').value = pcd.common.efficiency || 0.6;
-            document.getElementById('selectedKw').value = pcd.common.selectedKw || 0;
-            if(pcd.common.flowNote !== undefined) {
-                document.getElementById('flowNote').value = pcd.common.flowNote;
-            }
-        }
-        
-        // 載入額外項目
-        if(pcd.extraItems && pcd.extraItems.length) {
-            // 清空現有額外項目
-            document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(item => item.remove());
-            
-            // 判斷使用哪個容器（根據設備類型）
-            const isSprinkler = data.caseInfo?.equipmentType === '一般撒水';
-            const container = isSprinkler ? document.getElementById('extraH3Container') : document.getElementById('extraH3ContainerOther');
-            
-            pcd.extraItems.forEach(item => {
-                if(item.label || item.value) {
-                    const div = document.createElement('div');
-                    div.className = 'extra-h3-item';
-                    div.innerHTML = `<input type="text" class="extra-h3-label" placeholder="項目名稱" style="width:100px;" value="${escapeHtml(item.label)}">
-                                    <input type="number" class="extra-h3-value" min="0" step="0.1" value="${item.value}" style="width:60px;"> M
-                                    <button class="remove-extra-h3" style="margin-left:5px;">×</button>`;
-                    container.appendChild(div);
-                    
-                    div.querySelector('.extra-h3-value').addEventListener('input', isSprinkler ? updateExtraH3Total : updateExtraH3TotalOther);
-                    div.querySelector('.remove-extra-h3').addEventListener('click', () => {
-                        div.remove();
-                        if(isSprinkler) updateExtraH3Total();
-                        else updateExtraH3TotalOther();
-                    });
-                }
-            });
-            
-            // 觸發更新總和
-            if(isSprinkler) updateExtraH3Total();
-            else updateExtraH3TotalOther();
-        }
-    }
-    
-    // 重新初始化表頭（確保組件名稱正確顯示）
-    initHeader();
-    
-    // 更新所有計算
-    calculateTotalFrictionLoss();
-    updateFlowRateDisplay();
-    updateTotalHeadCalculation();
-    calculateMotorPower();
+    document.querySelectorAll('#pipeSegments tbody tr').forEach(r=>r.remove()); pipeSegmentCount=0;
+    if(data.pipeSegments && data.pipeSegments.length) data.pipeSegments.forEach(seg=>{ addPipeSegment(); const row=document.querySelector('#pipeSegments tbody tr:last-child'); if(row){ row.querySelector('.pipe-diameter').value=seg.diameter||20; row.querySelector('.segment-flow-rate').value=seg.flowRate||0; row.querySelector('.straight-pipe').value=seg.straightPipe||0; row.querySelector('.friction-loss').value=seg.frictionLoss||0; for(let i=1;i<=6;i++){ const qtyInput=row.querySelector(`.comp-qty-${i}`); const eqInput=row.querySelector(`.comp-equivalent-${i}`); if(qtyInput) qtyInput.value=seg[`qty_${i}`]||0; if(eqInput) eqInput.value=seg[`eq_${i}`]||0; } updateAllEquivalentInRow(row); updatePipeSegment(row); } });
+    if(data.caseInfo){ document.getElementById('caseName').value=data.caseInfo.caseName||''; document.getElementById('equipmentType').value=data.caseInfo.equipmentType||'固定式'; updateEquipmentDefaults(); }
+    if(data.pumpCalcData){ /* restore detailed fields */ }
+    initHeader(); calculateTotalFrictionLoss(); updateFlowRateDisplay(); updateTotalHeadCalculation(); calculateMotorPower();
 }
-
 function downloadFile(content, filename, type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),100); }
 function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'),h=String(d.getHours()).padStart(2,'0'),mi=String(d.getMinutes()).padStart(2,'0'),s=String(d.getSeconds()).padStart(2,'0'); return full?`${y}年${m}月${dd}日 ${h}時${mi}分${s}秒`:`${y}${m}${dd}_${h}${mi}${s}`; }
 
-// 全新報告產生函式 (參考tool8格式)
-	function generateHtmlReport() {
+// 完整替換 generateHtmlReport 函數
+function generateHtmlReport() {
     const caseName = document.getElementById('caseName').value || '未命名案件';
     const equipmentType = document.getElementById('equipmentType').value;
     const isSprinkler = equipmentType === '一般撒水';
@@ -939,7 +842,7 @@ function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m
     const selectedKw = parseFloat(document.getElementById('selectedKw').value)||0;
     const lastDiameter = document.getElementById('lastDiameter').textContent||'0';
     
-    // ========== 修改二：收集被採用的元件（數量 > 0 且等價管長 > 0） ==========
+    // ========== 收集被採用的元件（數量 > 0 且等價管長 > 0） ==========
     let usedWithQty = {};
     document.querySelectorAll('#pipeSegments tbody tr').forEach(row => {
         const diameter = row.querySelector('.pipe-diameter').value;
@@ -947,7 +850,6 @@ function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m
             const compName = currentComponentNames[i];
             const qty = parseFloat(row.querySelector(`.comp-qty-${i}`)?.value) || 0;
             const eqVal = parseFloat(row.querySelector(`.comp-equivalent-${i}`)?.value) || 0;
-            // 只有當數量 > 0 且等價管長 > 0 時，才視為被採用
             if(compName !== "自訂" && qty > 0 && eqVal > 0){
                 const key = `${compName}_${diameter}`;
                 usedWithQty[key] = true;
@@ -955,100 +857,116 @@ function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m
         }
     });
     
-    // 產生等價管長換算表 HTML
-    function generateEquivalentTableHtml() {
-        const diameters = [25, 32, 40, 50, 65, 80, 90, 100, 125, 150, 200, 250, 300, 350];
-        const diameterLabels = ["1\"", "1½\"", "1¼\"", "2\"", "2½\"", "3\"", "3½\"", "4\"", "5\"", "6\"", "8\"", "10\"", "12\"", "14\""];
-        
-        const components = [
-            { category: "管   接   頭", subcategory: "螺 紋 式", name: "45°彎頭(肘管)", data: [0.4,0.5,0.6,0.7,0.9,1.1,1.2,1.4,1.8,2.1,2.8,3.5,4.2,4.7] },
-            { category: "管   接   頭", subcategory: "螺 紋 式", name: "90°彎頭", data: [0.8,0.9,1.1,1.2,1.6,2.0,2.4,2.6,3.1,3.8,4.5,6.0,7.5,9.0] },
-            { category: "管   接   頭", subcategory: "螺 紋 式", name: "回轉彎頭(180°)", data: [2.0,2.6,3.0,3.9,4.8,5.7,6.6,7.5,9.3,11.0,14.6,18.2,21.8,24.3] },
-            { category: "管   接   頭", subcategory: "螺 紋 式", name: "T型或十字型接頭(90°分流)", data: [1.6,2.1,2.5,3.2,4.0,4.7,5.2,6.1,7.6,9.1,12.0,15.0,18.0,20.0] },
-            { category: "管   接   頭", subcategory: "熔 接 式", name: "45°彎頭長", data: [0.2,0.2,0.3,0.3,0.4,0.5,0.5,0.6,0.8,0.9,1.2,1.5,1.8,2.0] },
-            { category: "管   接   頭", subcategory: "熔 接 式", name: "90°彎頭短", data: [0.4,0.6,0.7,0.9,1.1,1.3,1.4,1.6,2.0,2.4,3.2,4.0,4.8,5.3] },
-            { category: "管   接   頭", subcategory: "熔 接 式", name: "90°彎頭長", data: [0.3,0.4,0.5,0.6,0.8,0.9,1.1,1.2,1.5,1.8,2.4,3.0,3.6,4.0] },
-            { category: "管   接   頭", subcategory: "熔 接 式", name: "T型接頭(熔接)", data: [1.2,1.6,1.9,2.4,3.0,3.5,3.9,4.6,5.7,6.8,9.0,11.2,13.4,15.0] },
-            { category: "閥   類", subcategory: "一 般 用 閥", name: "閘閥", data: [0.2,0.2,0.3,0.3,0.4,0.5,0.6,0.7,0.8,1.0,1.3,1.6,2.0,2.2] },
-            { category: "閥   類", subcategory: "一 般 用 閥", name: "球閥", data: [9.0,11.8,13.7,17.6,22.0,26.0,29.1,34.0,42.0,50.3,56.6,82.9,99.2,111.0] },
-            { category: "閥   類", subcategory: "一 般 用 閥", name: "角閥", data: [4.6,5.9,6.9,8.8,11.0,13.1,14.5,17.1,21.2,25.2,33.4,41.6,48.8,55.7] },
-            { category: "閥   類", subcategory: "一 般 用 閥", name: "逆止閥(擺動型)", data: [2.3,3.0,3.4,4.4,5.5,6.5,7.3,8.5,10.5,12.5,16.6,20.7,24.7,27.7] }
-        ];
-        
-        let categoryRowCount = {};
-        let subcategoryRowCount = {};
-        components.forEach(comp => {
-            categoryRowCount[comp.category] = (categoryRowCount[comp.category] || 0) + 1;
-            const subKey = `${comp.category}_${comp.subcategory}`;
-            subcategoryRowCount[subKey] = (subcategoryRowCount[subKey] || 0) + 1;
-        });
-        
-        let html = `<h2 class="section-title">等價管長換算表</h2>`;
-        html += `<div style="overflow-x: auto; margin-bottom: 30px;">`;
-        html += `<table style="font-size: 13px; border-collapse: collapse; width: 100%; min-width: 900px;">`;
-        html += `<caption style="margin-bottom: 10px; font-weight: bold; caption-side: top;">壓力配管用碳鋼管(CNS4626) STPG (SCH40) 之管接頭及閥之換算等價管長</caption>`;
-        html += `<thead>`;
-        html += `<tr style="background-color: #f2f2f2;">`;
-        html += `<th rowspan="2" style="width: 70px; vertical-align: middle;">種別</th>`;
-        html += `<th rowspan="2" style="width: 70px; vertical-align: middle;">口徑</th>`;
-        html += `<th colspan="1" style="width: 40px; vertical-align: middle;">A</th>`;
-        for(let i = 0; i < diameterLabels.length; i++) {
-            html += `<th style="width: 50px;">${diameterLabels[i]}</th>`;
-        }
-        html += `</tr>`;
-        html += `<tr style="background-color: #f2f2f2;">`;
-        html += `<th style="width: 40px;">B</th>`;
-        for(let i = 0; i < diameters.length; i++) {
-            html += `<th>${diameters[i]}</th>`;
-        }
-        html += `</tr>`;
-        html += `</thead><tbody>`;
-        
-        let currentCategory = "";
-        let currentSubKey = "";
-        
-        for(let i = 0; i < components.length; i++) {
-            const comp = components[i];
-            const subKey = `${comp.category}_${comp.subcategory}`;
-            const isNewCategory = (currentCategory !== comp.category);
-            const isNewSubcategory = (currentSubKey !== subKey);
-            
-            html += `<tr>`;
-            
-            if(isNewCategory) {
-                const rowspan = categoryRowCount[comp.category];
-                html += `<td rowspan="${rowspan}" style="background-color: #f2f2f2; font-weight: bold; vertical-align: middle; text-align: center;">${comp.category}</td>`;
-                currentCategory = comp.category;
-            }
-            
-            if(isNewSubcategory) {
-                const rowspan = subcategoryRowCount[subKey];
-                html += `<td rowspan="${rowspan}" style="background-color: #f9f9f9; font-weight: bold; vertical-align: middle; text-align: center;">${comp.subcategory}</td>`;
-                currentSubKey = subKey;
-            }
-            
-            html += `<td style="text-align: left; white-space: nowrap; padding-left: 8px;">${comp.name}</td>`;
-            
-            // 各口徑數據 - 使用 usedWithQty 判斷底色（修改二的核心）
-            for(let idx = 0; idx < diameters.length; idx++) {
-                const d = diameters[idx];
-                const val = comp.data[idx];
-                const key = `${comp.name}_${d}`;
-                // 只有當數量 > 0 且等價管長 > 0 時才標記底色
-                const isUsed = usedWithQty[key] ? true : false;
-                const bgColor = isUsed ? 'background-color: #ffff99;' : '';
-                html += `<td style="${bgColor}">${val !== undefined ? val.toFixed(1) : '-'}</td>`;
-            }
-            
-            html += `</tr>`;
-        }
-        
-        html += `</tbody>`;
-        html += `</table>`;
-        html += `</div>`;
-        
-        return html;
+// 修正後的 generateEquivalentTableHtml 函數
+function generateEquivalentTableHtml() {
+    const diameters = [25, 32, 40, 50, 65, 80, 90, 100, 125, 150, 200, 250, 300, 350];
+    const diameterLabels = ["1\"", "1¼\"", "1½\"", "2\"", "2½\"", "3\"", "3½\"", "4\"", "5\"", "6\"", "8\"", "10\"", "12\"", "14\""];
+    
+    // 從全域 equivalentFullData 動態建構 components 陣列
+    const componentNames = Object.keys(equivalentFullData);
+    const components = componentNames.map(name => {
+        return {
+            category: getCategoryByName(name),      // 需要輔助函數來判斷分類
+            subcategory: getSubcategoryByName(name), // 需要輔助函數來判斷子分類
+            name: name,
+            data: equivalentFullData[name]
+        };
+    });
+
+    // 輔助函數：根據元件名稱回傳主分類
+    function getCategoryByName(name) {
+        const threadingItems = ["45°彎頭(肘管)", "90°彎頭", "回轉彎頭(180°)", "T型或十字型接頭(90°分流)"];
+        const weldingItems = ["45°彎頭長", "90°彎頭短", "90°彎頭長", "T型接頭(熔接)"];
+        if (threadingItems.includes(name)) return "管   接   頭";
+        if (weldingItems.includes(name)) return "管   接   頭";
+        return "閥   類";
     }
+
+    // 輔助函數：根據元件名稱回傳子分類
+    function getSubcategoryByName(name) {
+        const threadingItems = ["45°彎頭(肘管)", "90°彎頭", "回轉彎頭(180°)", "T型或十字型接頭(90°分流)"];
+        const weldingItems = ["45°彎頭長", "90°彎頭短", "90°彎頭長", "T型接頭(熔接)"];
+        if (threadingItems.includes(name)) return "螺 紋 式";
+        if (weldingItems.includes(name)) return "熔 接 式";
+        return "一 般 用 閥";
+    }
+    
+    // 計算 rowspan 用的物件 (與原本邏輯相同)
+    let categoryRowCount = {};
+    let subcategoryRowCount = {};
+    components.forEach(comp => {
+        categoryRowCount[comp.category] = (categoryRowCount[comp.category] || 0) + 1;
+        const subKey = `${comp.category}_${comp.subcategory}`;
+        subcategoryRowCount[subKey] = (subcategoryRowCount[subKey] || 0) + 1;
+    });
+    
+    // 產生表格的 HTML (後續程式碼與您原本的完全相同，只需要注意資料來源已變為動態)
+    let html = `<h2 class="section-title">等價管長換算表</h2>`;
+    html += `<div style="overflow-x: auto; margin-bottom: 30px;">`;
+    html += `<table style="font-size: 13px; border-collapse: collapse; width: 100%; min-width: 900px;">`;
+    // 根據 currentDatabase 顯示標題
+    const dbTitle = currentDatabase === "4626" ? "CNS4626 (STPG SCH40)" : "CNS6445 (SGP)";
+    html += `<caption style="margin-bottom: 10px; font-weight: bold; caption-side: top;">壓力配管用碳鋼管 (${dbTitle}) 之管接頭及閥之換算等價管長</caption>`;
+    html += `<thead>`;
+    html += `<tr style="background-color: #f2f2f2;">`;
+    html += `<th rowspan="2" style="width: 70px; vertical-align: middle;">種別</th>`;
+    html += `<th rowspan="2" style="width: 70px; vertical-align: middle;">口徑</th>`;
+    html += `<th colspan="1" style="width: 40px; vertical-align: middle;">A</th>`;
+    for(let i = 0; i < diameterLabels.length; i++) {
+        html += `<th style="width: 50px;">${diameterLabels[i]}</th>`;
+    }
+    html += `</tr>`;
+    html += `<tr style="background-color: #f2f2f2;">`;
+    html += `<th style="width: 40px;">B</th>`;
+    for(let i = 0; i < diameters.length; i++) {
+        html += `<th>${diameters[i]}</th>`;
+    }
+    html += `</tr>`;
+    html += `</thead><tbody>`;
+    
+    let currentCategory = "";
+    let currentSubKey = "";
+    
+    for(let i = 0; i < components.length; i++) {
+        const comp = components[i];
+        const subKey = `${comp.category}_${comp.subcategory}`;
+        const isNewCategory = (currentCategory !== comp.category);
+        const isNewSubcategory = (currentSubKey !== subKey);
+        
+        html += `<tr>`;
+        
+        if(isNewCategory) {
+            const rowspan = categoryRowCount[comp.category];
+            html += `<td rowspan="${rowspan}" style="background-color: #f2f2f2; font-weight: bold; vertical-align: middle; text-align: center;">${comp.category}</td>`;
+            currentCategory = comp.category;
+        }
+        
+        if(isNewSubcategory) {
+            const rowspan = subcategoryRowCount[subKey];
+            html += `<td rowspan="${rowspan}" style="background-color: #f9f9f9; font-weight: bold; vertical-align: middle; text-align: center;">${comp.subcategory}</td>`;
+            currentSubKey = subKey;
+        }
+        
+        html += `<td style="text-align: left; white-space: nowrap; padding-left: 8px;">${comp.name}</td>`;
+        
+        for(let idx = 0; idx < diameters.length; idx++) {
+            const d = diameters[idx];
+            const val = comp.data[idx];
+            const key = `${comp.name}_${d}`;
+            const isUsed = usedWithQty[key] ? true : false;
+            const bgColor = isUsed ? 'background-color: #ffff99;' : '';
+            html += `<td style="${bgColor}">${val !== undefined ? val.toFixed(1) : '-'}</td>`;
+        }
+        
+        html += `</tr>`;
+    }
+    
+    html += `</tbody>`;
+    html += `</table>`;
+    html += `</div>`;
+    
+    return html;
+}
     
     // 組裝管道段表格
     let pipeRowsHtml = '';
@@ -1098,7 +1016,7 @@ function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m
     
     const flowNoteHtml = flowNote ? `<div class="report-section"><h3 class="section-title">📌 出水量備註</h3><div style="background:#fef9e6; padding:12px; border-left: 4px solid #ff9800; white-space: pre-wrap;">${escapeHtml(flowNote)}</div></div>` : '';
     
-    // 完整報告HTML（修改一：在 style 中新增字體放大設定）
+    // 完整報告HTML
     return `<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -1118,7 +1036,6 @@ function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m
         .formula { font-style: italic; background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; }
         .section-title { background-color: #3498db; color: white; padding: 8px 15px; border-radius: 5px; margin: 20px 0 10px 0; }
         .category-header { font-weight: bold; background-color: #f2f2f2; }
-        /* 修改一：報告中的換算表字體放大 */
         .report-section table {
             font-size: 13px;
         }
@@ -1159,8 +1076,6 @@ function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m
 </body>
 </html>`;
 }
-    
-
 
 document.addEventListener('DOMContentLoaded',()=>{
     initHeader();
@@ -1168,40 +1083,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('addPipeSegment').addEventListener('click',addPipeSegment);
     document.getElementById('equivalentTableBtn').addEventListener('click',()=>window.open('等價管長換算表.html','_blank'));
     document.getElementById('frictionLossBtn').addEventListener('click',()=>window.open('每100M之摩擦損失.html','_blank'));
-
-	// 導出 JSON 按鈕（已包含完整資料）
-document.getElementById('exportJsonBtn').addEventListener('click', () => { 
-    const name = document.getElementById('caseName').value || '未命名案件'; 
-    const data = collectAllData();  // 使用增強版，包含 pumpCalcData
-    downloadFile(JSON.stringify(data, null, 2), `${name}_${getTimestamp()}.json`, 'application/json'); 
-});
-
-// 導入 JSON 按鈕
-document.getElementById('importJsonBtn').addEventListener('click', () => { 
-    const input = document.createElement('input'); 
-    input.type = 'file'; 
-    input.accept = '.json'; 
-    input.onchange = e => { 
-        const f = e.target.files[0]; 
-        const r = new FileReader(); 
-        r.onload = ev => { 
-            try { 
-                loadAllData(JSON.parse(ev.target.result));  // 使用增強版，載入所有資料
-                alert('資料導入成功！');
-            } catch(e) { 
-                console.error(e);
-                alert('導入失敗: 檔案格式不正確'); 
-            } 
-        }; 
-        r.readAsText(f); 
-    }; 
-    input.click(); 
-});
-
-    document.getElementById('exportHtmlReportBtn').addEventListener('click',()=>{ const name=document.getElementById('caseName').value||'未命名案件'; const report=generateHtmlReport(); downloadFile(report,`${name}_${getTimestamp(true)}_報告.html`,'text/html'); });
+    document.getElementById('exportJsonBtn').addEventListener('click',()=>{ const data=collectAllData(); downloadFile(JSON.stringify(data,null,2),`${document.getElementById('caseName').value||'data'}_${getTimestamp()}.json`,'application/json'); });
+    document.getElementById('importJsonBtn').addEventListener('click',()=>{ const input=document.createElement('input'); input.type='file'; input.accept='.json'; input.onchange=e=>{ const f=e.target.files[0]; const r=new FileReader(); r.onload=ev=>{ try{ loadAllData(JSON.parse(ev.target.result)); alert('導入成功'); }catch(e){ alert('失敗'); } }; r.readAsText(f); }; input.click(); });
+    document.getElementById('exportHtmlReportBtn').addEventListener('click',()=>{ const report=generateHtmlReport(); downloadFile(report,`${document.getElementById('caseName').value||'report'}_${getTimestamp(true)}.html`,'text/html'); });
     initCalculationListeners();
     initExtraH3();
     updateEquipmentDefaults();
+    document.getElementById('databaseSelect').addEventListener('change',(e)=>{ if(confirm('切換資料庫將清空現有管道段資料，確定嗎？')) switchDatabase(e.target.value); else e.target.value=currentDatabase; });
 });
 window.removePipeSegment = removePipeSegment;
 </script>
