@@ -1,357 +1,432 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>等價管長換算表 | CNS 4626 & CNS 6445 合併對照</title>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
+        * {
+            box-sizing: border-box;
         }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
+            background: #e9f0f5;
+            margin: 0;
+            padding: 24px 20px;
+            color: #1a2c3e;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* 主標題與副標風格 */
+        .main-header {
             text-align: center;
+            margin-bottom: 32px;
         }
+
+        .main-header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1e4668, #2b5c84);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.3px;
+        }
+
+        .sub {
+            color: #2c6e9e;
+            font-weight: 500;
+            border-bottom: 2px solid #bdd4e4;
+            display: inline-block;
+            padding-bottom: 4px;
+        }
+
+        .dual-table {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .table-wrapper {
+            flex: 1 1 48%;
+            min-width: 560px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            overflow-x: auto;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+        }
+
+        .table-wrapper:hover {
+            box-shadow: 0 20px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .table-caption {
+            background: #f8fafd;
+            padding: 16px 20px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #cfdfed;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .caption-left {
+            color: #1f4e79;
+        }
+
+        .badge {
+            background: #d4e3f0;
+            color: #1f5e8e;
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 40px;
+            letter-spacing: 0.5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            background: #ffffff;
+            min-width: 680px;
+        }
+
+        th, td {
+            border: 1px solid #cad4e0;
+            padding: 10px 8px;
+            text-align: center;
+            vertical-align: middle;
+            transition: background 0.1s ease;
+        }
+
         th {
-            background-color: #f2f2f2;
+            background-color: #eef3fc;
+            font-weight: 700;
+            color: #1c4e72;
+            font-size: 13px;
+            letter-spacing: 0.3px;
         }
-        .header-row {
-            font-weight: bold;
-            background-color: #e6e6e6;
+
+        .header-row-first th {
+            background-color: #e2ebf5;
+            font-size: 13px;
         }
+
         .category-header {
-            font-weight: bold;
-            background-color: #f2f2f2;
-            text-align: left;
+            background-color: #f4f9fe;
+            font-weight: 800;
+            color: #0a3b55;
+            border-right: 1.5px solid #bfd3e4;
         }
+
+        .category-row {
+            background-color: #fbfeff;
+        }
+
+        /* 點擊複製樣式 - 溫柔螢光黃 */
+        td.clickable-cell {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+        }
+
+        td.clickable-cell:hover {
+            background-color: #fef5cf;
+            transform: scale(1.00);
+            box-shadow: inset 0 0 0 1px #ffdd88;
+        }
+
         .selected {
-            background-color: yellow;
+            background-color: #ffecb3 !important;
+            box-shadow: inset 0 0 0 2px #ffb74d;
+            font-weight: 500;
         }
-        #copyNotification {
+
+        /* 固定特殊標頭合併調整 */
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            white-space: nowrap;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .subgroup {
+            font-weight: 700;
+            background: #f0f5fa;
+        }
+
+        /* 複製通知動畫 */
+        #copyToast {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #4CAF50;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(30px);
+            background: #1f4b6e;
             color: white;
-            padding: 15px;
-            border-radius: 5px;
-            display: none;
-            z-index: 1000;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        #copyToast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #6f8eaa;
+            border-top: 1px solid #cbdde9;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .dual-table {
+                flex-direction: column;
+                align-items: center;
+            }
+            .table-wrapper {
+                min-width: auto;
+                width: 100%;
+            }
+            body {
+                padding: 16px;
+            }
+        }
+
+        /* 整齊滾動條 */
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+            background: #e2eaf1;
+            border-radius: 10px;
+        }
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #8fadc7;
+            border-radius: 10px;
         }
     </style>
-    <title>壓力配管用碳鋼管(CNS4626) STPG (SCH40)之管接頭及閥類之換算等價管長</title>
 </head>
 <body>
+<div class="container">
+    <div class="main-header">
+        <h1>⚙️ 等價管長換算表 · 碳鋼管壓力配管</h1>
+        <div class="sub">CNS 4626 (STPG SCH40)  &  CNS 6445 (SGP)  管接頭／閥類等價長度(m)</div>
+        <p style="font-size: 13px; margin-top: 12px; color: #3f6b8c;">✨ 點擊任一數值即可複製，方便工程計算 — 雙標準對照設計</p>
+    </div>
 
-<div id="copyNotification">已複製到剪貼簿</div>
+    <div class="dual-table">
+        <!-- 左：CNS 4626 STPG SCH40 表格 -->
+        <div class="table-wrapper">
+            <div class="table-caption">
+                <span class="caption-left">📄 CNS 4626 · 壓力配管用碳鋼管 STPG (SCH40)</span>
+                <span class="badge">JIS 對照｜常用於鍋爐/高壓</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="tableCNS4626">
+                    <thead>
+                        <tr class="header-row-first">
+                            <th rowspan="2">種別</th>
+                            <th rowspan="2">口徑</th>
+                            <th colspan="1">A</th>
+                            <th>25</th><th>32</th><th>40"</th><th>50</th><th>65</th><th>80</th><th>90</th><th>100</th>
+                            <th>125</th><th>150</th><th>200</th><th>250</th><th>300</th><th>350</th>
+                        </tr>
+                        <tr class="header-row-first">
+                            <th>B</th>
+                            <th>1"</th><th>1¼"</th><th>1½"</th><th>2"</th><th>2½"</th><th>3"</th><th>3½"</th><th>4"</th>
+                            <th>5"</th><th>6"</th><th>8"</th><th>10"</th><th>12"</th><th>14"</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 管接頭 螺紋式 4項 -->
+                        <tr><td rowspan="8" class="category-header">管<br>接<br>頭</td><td rowspan="4" class="category-header">螺 紋 式</td><td class="subgroup">45° 彎頭(肘管)</td>
+                        <td>0.4</td><td>0.5</td><td>0.6</td><td>0.7</td><td>0.9</td><td>1.1</td><td>1.2</td><td>1.4</td><td>1.8</td><td>2.1</td><td>2.8</td><td>3.5</td><td>4.2</td><td>4.7</td></tr>
+                        <tr><td class="subgroup">90° 彎頭</td>
+                        <td>0.8</td><td>1.1</td><td>1.2</td><td>1.6</td><td>2.0</td><td>2.4</td><td>2.6</td><td>3.1</td><td>3.8</td><td>4.5</td><td>6.0</td><td>7.5</td><td>9.0</td><td>10.0</td></tr>
+                        <tr><td class="subgroup">回轉彎頭(180°)</td>
+                        <td>2.0</td><td>2.6</td><td>3.0</td><td>3.9</td><td>4.8</td><td>5.7</td><td>6.6</td><td>7.5</td><td>9.3</td><td>11.0</td><td>14.6</td><td>18.2</td><td>21.8</td><td>24.3</td></tr>
+                        <tr><td class="subgroup">T型或十字型接頭(90°分流)</td>
+                        <td>1.6</td><td>2.1</td><td>2.5</td><td>3.2</td><td>4.0</td><td>4.7</td><td>5.2</td><td>6.1</td><td>7.6</td><td>9.1</td><td>12.0</td><td>15.0</td><td>18.0</td><td>20.0</td></tr>
 
-<table id="equivalentLengthTable">
-    <caption>壓力配管用碳鋼管(CNS4626) STPG (SCH40)之管接頭及閥之換算等價管長</caption>
-    <thead>
-        <tr class="header-row">
-            <th rowspan="2">種別</th>
-            <th rowspan="2">口徑</th>
-            <th colspan="1">A</th>
-            <th>25</th>
-            <th>32</th>
-            <th>40"</th>
-            <th>50</th>
-            <th>65</th>
-            <th>80</th>
-            <th>90</th>
-            <th>100</th>
-            <th>125</th>
-            <th>150</th>
-            <th>200</th>
-            <th>250</th>
-            <th>300</th>
-            <th>350</th>				
-        </tr>
-        <tr class="header-row">
-            <th>B</th>
-            <th>1"</th>
-            <th>1'4"</th>
-            <th>1'2"</th>
-            <th>2"</th>
-            <th>2'1'2"</th>
-            <th>3"</th>
-            <th>3'1'2"</th>
-            <th>4"</th>
-            <th>5"</th>
-            <th>6"</th>
-            <th>8"</th>
-            <th>10"</th>
-            <th>12"</th>
-            <th>14"</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td class="category-header" rowspan="8">管   接   頭 </td>			
-            <td class="category-header" rowspan="4">螺 紋 式</td>
-            <td>45° 彎頭(肘管)</td>
-            <td>0.4</td>
-            <td>0.5</td>
-            <td>0.6</td>
-            <td>0.7</td>
-            <td>0.9</td>
-            <td>1.1</td>
-            <td>1.2</td>
-            <td>1.4</td>
-            <td>1.8</td>
-            <td>2.1</td>
-            <td>2.8</td>
-            <td>3.5</td>
-            <td>4.2</td>
-            <td>4.7</td>
-        </tr>
-        <tr>
-            <td>90° 彎頭</td>
-            <td>0.8</td>
-            <td>1.1</td>
-            <td>1.2</td>
-            <td>1.6</td>
-            <td>2.0</td>
-            <td>2.4</td>
-            <td>2.6</td>
-            <td>3.1</td>
-            <td>3.8</td>
-            <td>4.5</td>
-            <td>6.0</td>
-            <td>7.5</td>
-            <td>9.0</td>
-            <td>10.0</td>
-        </tr>
-        <tr>
-            <td>回轉彎頭(180°)</td>
-            <td>2.0</td>
-            <td>2.6</td>
-            <td>3.0</td>
-            <td>3.9</td>
-            <td>4.8</td>
-            <td>5.7</td>
-            <td>6.6</td>
-            <td>7.5</td>
-            <td>9.3</td>
-            <td>11.0</td>
-            <td>14.6</td>
-            <td>18.2</td>
-            <td>21.8</td>
-            <td>24.3</td>
-        </tr>
-        <tr>
-            <td>T型或十字型接頭(90°分流)</td>
-            <td>1.6</td>
-            <td>2.1</td>
-            <td>2.5</td>
-            <td>3.2</td>
-            <td>4.0</td>
-            <td>4.7</td>
-            <td>5.2</td>
-            <td>6.1</td>
-            <td>7.6</td>
-            <td>9.1</td>
-            <td>12.0</td>
-            <td>15.0</td>
-            <td>18.0</td>
-            <td>20.0</td>
-        </tr>
-        
-        <tr>
-            <td class="category-header" rowspan="4">熔  接 式</td>
-            <td>45° 彎頭 長</td>
-            <td>0.2</td>
-            <td>0.2</td>
-            <td>0.3</td>
-            <td>0.3</td>
-            <td>0.4</td>
-            <td>0.5</td>
-            <td>0.5</td>
-            <td>0.6</td>
-            <td>0.8</td>
-            <td>0.9</td>
-            <td>1.2</td>
-            <td>1.5</td>
-            <td>1.8</td>
-            <td>2.0</td>
-        </tr>
-        <tr>
-            <td>90° 彎頭 短</td>
-            <td>0.4</td>
-            <td>0.6</td>
-            <td>0.7</td>
-            <td>0.9</td>
-            <td>1.1</td>
-            <td>1.3</td>
-            <td>1.4</td>
-            <td>1.6</td>
-            <td>2.0</td>
-            <td>2.4</td>
-            <td>3.2</td>
-            <td>4.0</td>
-            <td>4.8</td>
-            <td>5.3</td>
-        </tr>
-        <tr>
-            <td>90° 彎頭 長</td>
-            <td>0.3</td>
-            <td>0.4</td>
-            <td>0.5</td>
-            <td>0.6</td>
-            <td>0.8</td>
-            <td>0.9</td>
-            <td>1.1</td>
-            <td>1.2</td>
-            <td>1.5</td>
-            <td>1.8</td>
-            <td>2.4</td>
-            <td>3.0</td>
-            <td>3.6</td>
-            <td>4.0</td>
-        </tr>
-        
-        <tr>
-            <td>T型或十字型接頭(90°分流)</td>
-            <td>1.2</td>
-            <td>1.6</td>
-            <td>1.9</td>
-            <td>2.4</td>
-            <td>3.0</td>
-            <td>3.5</td>
-            <td>3.9</td>
-            <td>4.6</td>
-            <td>5.7</td>
-            <td>6.8</td>
-            <td>9.0</td>
-            <td>11.2</td>
-            <td>13.4</td>
-            <td>15.0</td>
-        </tr>
-        <tr>
-           <td class="category-header" rowspan="4"> 閥   類</td>
-           <td class="category-header" rowspan="4">一 般 用 閥</td>			
-            <td>閘 閥</td>
-            <td>0.2</td>
-            <td>0.2</td>
-            <td>0.3</td>
-            <td>0.3</td>
-            <td>0.4</td>
-            <td>0.5</td>
-            <td>0.6</td>
-            <td>0.7</td>
-            <td>0.8</td>
-            <td>1.0</td>
-            <td>1.3</td>
-            <td>1.6</td>
-            <td>2.0</td>
-            <td>2.2</td>
-        </tr>
-        <tr>
-            <td>球 閥</td>
-            <td>9.0</td>
-            <td>11.8</td>
-            <td>13.7</td>
-            <td>17.6</td>
-            <td>22.0</td>
-            <td>26.0</td>
-            <td>29.1</td>
-            <td>34.0</td>
-            <td>42.0</td>
-            <td>50.3</td>
-            <td>56.6</td>
-            <td>82.9</td>
-            <td>99.2</td>
-            <td>111.0</td>
-        </tr>
-        <tr>
-            <td>角 閥</td>
-            <td>4.6</td>
-            <td>5.9</td>
-            <td>6.9</td>
-            <td>8.8</td>
-            <td>11.0</td>
-            <td>13.1</td>
-            <td>14.5</td>
-            <td>17.1</td>
-            <td>21.2</td>
-            <td>25.2</td>
-            <td>33.4</td>
-            <td>41.6</td>
-            <td>48.8</td>
-            <td>55.7</td>
-        </tr>
-        <tr>
-            <td>逆止閥(擺動型)</td>
-            <td>2.3</td>
-            <td>3.0</td>
-            <td>3.4</td>
-            <td>4.4</td>
-            <td>5.5</td>
-            <td>6.5</td>
-            <td>7.3</td>
-            <td>8.5</td>
-            <td>10.5</td>
-            <td>12.5</td>
-            <td>16.6</td>
-            <td>20.7</td>
-            <td>24.7</td>
-            <td>27.7</td>
-        </tr>
-    </tbody>
-</table>
+                        <!-- 熔接式 4項 -->
+                        <tr><td rowspan="4" class="category-header">熔 接 式</td><td class="subgroup">45° 彎頭 長</td>
+                        <td>0.2</td><td>0.2</td><td>0.3</td><td>0.3</td><td>0.4</td><td>0.5</td><td>0.5</td><td>0.6</td><td>0.8</td><td>0.9</td><td>1.2</td><td>1.5</td><td>1.8</td><td>2.0</td></tr>
+                        <tr><td class="subgroup">90° 彎頭 短</td>
+                        <td>0.4</td><td>0.6</td><td>0.7</td><td>0.9</td><td>1.1</td><td>1.3</td><td>1.4</td><td>1.6</td><td>2.0</td><td>2.4</td><td>3.2</td><td>4.0</td><td>4.8</td><td>5.3</td></tr>
+                        <tr><td class="subgroup">90° 彎頭 長</td>
+                        <td>0.3</td><td>0.4</td><td>0.5</td><td>0.6</td><td>0.8</td><td>0.9</td><td>1.1</td><td>1.2</td><td>1.5</td><td>1.8</td><td>2.4</td><td>3.0</td><td>3.6</td><td>4.0</td></tr>
+                        <tr><td class="subgroup">T型或十字型接頭(90°分流)</td>
+                        <td>1.2</td><td>1.6</td><td>1.9</td><td>2.4</td><td>3.0</td><td>3.5</td><td>3.9</td><td>4.6</td><td>5.7</td><td>6.8</td><td>9.0</td><td>11.2</td><td>13.4</td><td>15.0</td></tr>
+
+                        <!-- 閥類 一般用閥 -->
+                        <tr><td rowspan="4" class="category-header">閥   類</td><td rowspan="4" class="category-header">一 般 用 閥</td><td class="subgroup">閘 閥</td>
+                        <td>0.2</td><td>0.2</td><td>0.3</td><td>0.3</td><td>0.4</td><td>0.5</td><td>0.6</td><td>0.7</td><td>0.8</td><td>1.0</td><td>1.3</td><td>1.6</td><td>2.0</td><td>2.2</td></tr>
+                        <tr><td class="subgroup">球 閥</td>
+                        <td>9.0</td><td>11.8</td><td>13.7</td><td>17.6</td><td>22.0</td><td>26.0</td><td>29.1</td><td>34.0</td><td>42.0</td><td>50.3</td><td>56.6</td><td>82.9</td><td>99.2</td><td>111.0</td></tr>
+                        <tr><td class="subgroup">角 閥</td>
+                        <td>4.6</td><td>5.9</td><td>6.9</td><td>8.8</td><td>11.0</td><td>13.1</td><td>14.5</td><td>17.1</td><td>21.2</td><td>25.2</td><td>33.4</td><td>41.6</td><td>48.8</td><td>55.7</td></tr>
+                        <tr><td class="subgroup">逆止閥(擺動型)</td>
+                        <td>2.3</td><td>3.0</td><td>3.4</td><td>4.4</td><td>5.5</td><td>6.5</td><td>7.3</td><td>8.5</td><td>10.5</td><td>12.5</td><td>16.6</td><td>20.7</td><td>24.7</td><td>27.7</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 右：CNS 6445 SGP 表格 (完整資料) -->
+        <div class="table-wrapper">
+            <div class="table-caption">
+                <span class="caption-left">📐 CNS 6445 · 碳鋼鋼管 SGP 等價管長換算</span>
+                <span class="badge">一般配管用｜消防/水系統</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="tableCNS6445">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">種別</th>
+                            <th rowspan="2">口徑</th>
+                            <th colspan="2">A</th><th>25</th><th>32</th><th>40</th><th>50</th><th>65</th><th>80</th><th>90</th><th>100</th>
+                            <th>125</th><th>150</th><th>200</th><th>250</th><th>300</th><th>350</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2">B</th><th>1</th><th>1¼</th><th>1½</th><th>2</th><th>2½</th><th>3</th><th>3½</th><th>4</th>
+                            <th>5</th><th>6</th><th>8</th><th>10</th><th>12</th><th>14</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 螺紋式接頭 (4項) -->
+                        <tr><td rowspan="8" class="category-header">管<br>接<br>頭</td><td rowspan="4" class="category-header">螺<br>紋<br>式</td><td colspan="2">45°彎頭（肘管）</td>
+                        <td>0.4</td><td>0.5</td><td>0.6</td><td>0.7</td><td>0.9</td><td>1.1</td><td>1.3</td><td>1.5</td><td>1.8</td><td>2.2</td><td>2.9</td><td>3.6</td><td>4.3</td><td>4.8</td></tr>
+                        <tr><td colspan="2">90°彎頭</td>
+                        <td>0.8</td><td>1.1</td><td>1.3</td><td>1.6</td><td>2.0</td><td>2.4</td><td>2.8</td><td>3.2</td><td>3.9</td><td>4.7</td><td>6.2</td><td>7.6</td><td>9.2</td><td>10.2</td></tr>
+                        <tr><td colspan="2">回轉彎頭（180°）</td>
+                        <td>2.0</td><td>2.6</td><td>3.0</td><td>3.9</td><td>5.0</td><td>5.9</td><td>6.8</td><td>7.7</td><td>9.6</td><td>11.3</td><td>15.0</td><td>18.6</td><td>22.3</td><td>24.8</td></tr>
+                        <tr><td colspan="2">T型或十字型接頭（分流90°）</td>
+                        <td>1.7</td><td>2.2</td><td>2.5</td><td>3.2</td><td>4.1</td><td>4.9</td><td>5.6</td><td>6.3</td><td>7.9</td><td>9.3</td><td>12.3</td><td>15.3</td><td>18.3</td><td>20.4</td></tr>
+
+                        <!-- 熔接式接頭 -->
+                        <tr><td rowspan="4" class="category-header">熔<br>接<br>式</td><td>45°彎頭</td><td>長</td>
+                        <td>0.2</td><td>0.2</td><td>0.3</td><td>0.3</td><td>0.4</td><td>0.5</td><td>0.6</td><td>0.7</td><td>0.8</td><td>0.9</td><td>1.2</td><td>1.5</td><td>1.8</td><td>2.0</td></tr>
+                        <tr><td>90°彎頭</td><td>短</td>
+                        <td>0.5</td><td>0.6</td><td>0.7</td><td>0.9</td><td>1.1</td><td>1.3</td><td>1.5</td><td>1.7</td><td>2.1</td><td>2.5</td><td>3.3</td><td>4.1</td><td>4.9</td><td>5.4</td></tr>
+                        <tr><td>90°彎頭</td><td>長</td>
+                        <td>0.3</td><td>0.4</td><td>0.5</td><td>0.6</td><td>0.8</td><td>1.0</td><td>1.1</td><td>1.3</td><td>1.6</td><td>1.9</td><td>2.5</td><td>3.1</td><td>3.7</td><td>4.1</td></tr>
+                        <tr><td colspan="2">T型或十字型接頭（分流90°）</td>
+                        <td>1.3</td><td>1.6</td><td>1.9</td><td>2.4</td><td>3.1</td><td>3.6</td><td>4.2</td><td>4.7</td><td>5.9</td><td>7.0</td><td>9.2</td><td>11.4</td><td>13.7</td><td>15.3</td></tr>
+
+                        <!-- 閥類 一般用閥 (4項) -->
+                        <tr><td rowspan="7" class="category-header">閥<br>類</td><td rowspan="4" class="category-header">一<br>般<br>用<br>閥</td><td colspan="2">閘閥</td>
+                        <td>0.2</td><td>0.2</td><td>0.3</td><td>0.3</td><td>0.4</td><td>0.5</td><td>0.6</td><td>0.7</td><td>0.8</td><td>1.0</td><td>1.3</td><td>1.6</td><td>2.0</td><td>2.2</td></tr>
+                        <tr><td colspan="2">球閥</td>
+                        <td>9.2</td><td>11.9</td><td>13.9</td><td>17.6</td><td>22.6</td><td>26.9</td><td>31.0</td><td>35.1</td><td>43.6</td><td>51.7</td><td>68.2</td><td>84.7</td><td>101.5</td><td>113.2</td></tr>
+                        <tr><td colspan="2">底閥</td>
+                        <td>4.6</td><td>6.0</td><td>7.0</td><td>8.9</td><td>11.3</td><td>13.5</td><td>15.6</td><td>17.6</td><td>21.9</td><td>26.0</td><td>34.2</td><td>42.5</td><td>50.9</td><td>56.8</td></tr>
+                        <tr><td colspan="2">逆止閥（擺動型）</td>
+                        <td>2.3</td><td>3.0</td><td>3.5</td><td>4.4</td><td>5.6</td><td>6.7</td><td>7.7</td><td>8.7</td><td>10.9</td><td>12.9</td><td>17.0</td><td>21.1</td><td>25.3</td><td>28.2</td></tr>
+
+                        <!-- 消防栓等閥類 (三項保留特殊值，無資料用—) -->
+                        <tr><td rowspan="3" class="category-header">消<br>防<br>栓<br>等<br>閥</td><td colspan="2">角閥</td>
+                        <td>—</td><td>—</td><td>7.0</td><td>9.0</td><td>14.0</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td colspan="2">180°型球閥</td>
+                        <td>—</td><td>—</td><td>16.0</td><td>18.0</td><td>24.0</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td colspan="2">90°型球閥</td>
+                        <td>—</td><td>—</td><td>19.0</td><td>21.0</td><td>27.0</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer>📌 點擊任一數值自動複製｜依據 CNS 4626 (STPG SCH40) 與 CNS 6445 (SGP) 標準編製，單位：公尺(m)</footer>
+</div>
+
+<div id="copyToast">📋 已複製數值</div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 獲取表格中的所有td元素
-        const tableCells = document.querySelectorAll('#equivalentLengthTable tbody td');
-        const copyNotification = document.getElementById('copyNotification');
-        
-        // 為每個td元素添加點擊事件監聽器
-        tableCells.forEach(cell => {
-            // 跳過類別標題單元格
-            if (cell.classList.contains('category-header')) {
-                return;
-            }
-            
-            cell.addEventListener('click', function() {
-                // 移除之前選中的單元格的黃色背景
-                document.querySelectorAll('.selected').forEach(selectedCell => {
-                    selectedCell.classList.remove('selected');
-                });
-                
-                // 為當前點擊的單元格添加黃色背景
-                this.classList.add('selected');
-                
-                // 獲取單元格文本內容
-                const textToCopy = this.textContent;
-                
-                // 創建一個臨時的textarea元素來複製文本
-                const textarea = document.createElement('textarea');
-                textarea.value = textToCopy;
-                textarea.style.position = 'fixed';  // 避免滾動到頁面底部
-                document.body.appendChild(textarea);
-                textarea.select();
-                
-                try {
-                    // 執行複製命令
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        // 顯示複製成功的通知
-                        copyNotification.style.display = 'block';
+    (function() {
+        // 通用賦予所有資料格點擊事件 (排除標頭/類別欄位)
+        function makeCellsClickable(tableId) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const cells = table.querySelectorAll('tbody td');
+            cells.forEach(cell => {
+                // 跳過帶有 category-header 或是合併欄位但特別保留(但這些類別文字含有"管接頭"等，但數值欄位我們讓所有非特殊文字都啟用)
+                // 但更精確：僅當文字內容為純數字、負號或 "—" 照理說是可複製；但為了避免複製「螺紋式」這種類別標題，篩選條件為：
+                // 若該儲存格沒有 rowspan 且 內容非空白，且該儲存格上一層td所屬行列不屬於「類別」群組標題。但簡單判斷：如果儲存格的父層 tr 內的 td 有 class="category-header" 則不操作，但是每個儲存格單獨判斷。
+                // 更簡明：排除那些背景色類別欄位或者內容為中文大類(螺紋式,熔接式,一般用閥等)。可使用正則: 若文字包含「彎頭」「閥」「T型」「閘閥」這些是數值旁邊的描述欄，但保留數值。所以最佳: 直接判斷是否為純數字或是負號/浮點數，或是包含 "—" 也可複製
+                const text = cell.innerText.trim();
+                // 排除明顯的大類標題儲存格: 若儲存格 class 有 category-header 或 rowspan>1 但保留值: 但我們遍歷的cells裡有些是第一欄大文字，可以判斷如果text長度>3且含有「接頭」「閥」「熔接」且非數字開頭則跳過
+                if (cell.classList.contains('category-header')) return;
+                if (cell.rowSpan && cell.rowSpan > 1) return;  // 跳過多行合併類別格
+                // 進一步過濾: 如果文字中包含「螺紋式」「熔接式」「一般用閥」「消防栓」等但不包含數字且長度>3 跳過
+                if (/^(螺紋式|熔接式|一般用閥|消防栓|管接頭|閥類|種別|口徑|彎頭|T型|十字型|回轉|短|長)$/.test(text)) return;
+                // 若文字為 A/B 欄位或是單位,跳過
+                if (text === "A" || text === "B" || text === "長" || text === "短") return;
+                // 添加clickable樣式與事件
+                cell.classList.add('clickable-cell');
+                cell.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // 移除兩個表格所有selected樣式
+                    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                    cell.classList.add('selected');
+                    let copyValue = cell.innerText.trim();
+                    // 複製功能
+                    navigator.clipboard.writeText(copyValue).then(() => {
+                        const toast = document.getElementById('copyToast');
+                        toast.classList.add('show');
                         setTimeout(() => {
-                            copyNotification.style.display = 'none';
-                        }, 2000);
-                    }
-                } catch (err) {
-                    console.error('無法複製文本: ', err);
-                }
-                
-                // 移除臨時textarea元素
-                document.body.removeChild(textarea);
+                            toast.classList.remove('show');
+                        }, 1500);
+                    }).catch(() => {
+                        // fallback
+                        const textarea = document.createElement('textarea');
+                        textarea.value = copyValue;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        const toast = document.getElementById('copyToast');
+                        toast.classList.add('show');
+                        setTimeout(() => toast.classList.remove('show'), 1500);
+                    });
+                });
             });
-        });
-    });
-</script>
+        }
 
+        makeCellsClickable('tableCNS4626');
+        makeCellsClickable('tableCNS6445');
+
+        // 附加額外清除選取自動效果，點擊其他區域可清除，但保留實用性，點擊其他表格格會重新選取，不需全清除，不做全區清除以免干擾
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.clickable-cell')) {
+                // 可選: 清除所有選取樣式，但有時好用但不強制，為了UI乾淨啟用
+                document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            }
+        });
+    })();
+</script>
 </body>
 </html>
