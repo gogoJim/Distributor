@@ -579,43 +579,59 @@
         }
 		
 		/* 案件名稱區域 - 醒目提示 */
-        .project-name-area {
-            background: #fff3e0;
-            padding: 16px 20px;
-            border-bottom: 2px solid #ffb347;
-            border-left: 5px solid #ffb347;
-            margin-bottom: 8px;
-        }
+		/* 案件名稱區域 - 整體容器 */
+.project-name-area {
+    background: #fff3e0;
+    padding: 16px 20px;
+    border-bottom: 2px solid #ffb347;
+    border-left: 5px solid #ffb347;
+    margin-bottom: 8px;
+}
 
-        .project-name-area label {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #c44536;
-            display: block;
-            margin-bottom: 8px;
-        }
+.project-name-area label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #c44536;
+    display: block;
+    margin-bottom: 10px;
+}
 
-        .project-name-area label:before {
-            content: "⚠️ ";
-            font-size: 1.1rem;
-        }
+.project-name-area label:before {
+    content: "📌 ";
+    font-size: 1rem;
+}
 
-        .project-name-input {
-            font-size: 1.25rem;
-            padding: 12px 16px;
-            width: 100%;
-            border: 2px solid #ffb347;
-            border-radius: 10px;
-            background: #ffffff;
-            font-weight: 500;
-            box-sizing: border-box;
-        }
+/* 橢圓風格的輸入框容器 + 輸入框 */
+.project-name-wrapper {
+    background: #ffffff;
+    border-radius: 48px;          /* 橢圓效果，與按鈕一致 */
+    border: 1px solid #ffb347;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
-        .project-name-input:focus {
-            outline: none;
-            border-color: #c44536;
-            box-shadow: 0 0 0 3px rgba(196, 69, 54, 0.2);
-        }
+.project-name-wrapper:focus-within {
+    border-color: #c44536;
+    box-shadow: 0 0 0 3px rgba(196, 69, 54, 0.2);
+}
+
+.project-name-input {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 48px;
+    background: transparent;
+    outline: none;
+    font-family: inherit;
+    color: #1f3b4c;
+}
+
+.project-name-input::placeholder {
+    color: #b0c4d9;
+    font-weight: 400;
+}
 		
         .cart-items-list {
             flex: 1;
@@ -888,7 +904,14 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <div class="cart-drawer" id="cartDrawer">
     <div class="drawer-header"><h3>📄 詢價明細</h3><button class="close-drawer" id="closeDrawerBtn">✕</button></div>
-    <div class="project-name-area"><label>📌 案件名稱 (必填，存檔依據)</label><input type="text" id="projectNameInput" placeholder="請輸入專案名稱" value=""></div>
+    <div class="project-name-area">
+    <label>📌 案件名稱 (必填，存檔依據)</label>
+    <div class="project-name-wrapper">
+        <input type="text" id="projectNameInput" class="project-name-input" placeholder="請輸入專案名稱" value="">
+    </div>
+</div>
+	
+	
     <div class="cart-items-list" id="drawerCartList"><div class="empty-cart-msg">目前詢價車為空</div></div>
     <div class="cart-footer">
         <div class="cart-total"><span>總品項數</span><span id="drawerTotalQtySpan">0</span></div>
