@@ -16,38 +16,136 @@
             width: 100%;
             height: 100vh;
         }
-        #info-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.96);
-            padding: 20px;
-            border-radius: 16px;
-            width: 440px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            z-index: 100;
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.5);
-            max-height: 82vh;
-            overflow-y: auto;
-            pointer-events: auto;
-            font-size: 0.95rem;
-        }
-        #controls {
-            position: absolute;
-            bottom: 24px;
-            right: 24px;
-            background: rgba(30,30,40,0.92);
-            backdrop-filter: blur(8px);
-            padding: 18px 22px;
-            border-radius: 20px;
-            width: 380px;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.3);
-            z-index: 100;
-            border: 1px solid rgba(255,255,255,0.2);
-            pointer-events: auto;
-            color: #f0f0f0;
-        }
+
+#info-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 16px 18px;        /* 從 20px 縮小為 16px 18px */
+    border-radius: 16px;
+    width: 360px;              /* 從 440px 縮小為 360px */
+    max-width: 32vw;           /* 新增：限制最大寬度為視窗寬度的32% */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    z-index: 100;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.5);
+    max-height: 82vh;
+    overflow-y: auto;
+    pointer-events: auto;
+    font-size: 0.9rem;         /* 從 0.95rem 稍微縮小 */
+    transition: width 0.2s ease;
+}
+
+/* 縮小內部標題和文字 */
+#info-panel h1 {
+    font-size: 1.3rem;         /* 從 1.5rem 縮小 */
+    margin-bottom: 8px;
+}
+
+#info-panel h2 {
+    font-size: 1rem;           /* 從預設大小縮小 */
+}
+
+.calculation-step {
+    padding: 8px 10px;         /* 從 12px 縮小 */
+    margin: 8px 0;             /* 從 12px 0 縮小 */
+    font-size: 0.8rem;         /* 從 0.85rem 縮小 */
+}
+
+.fix-note, .correction-note {
+    padding: 8px;              /* 從 10px 縮小 */
+    margin: 8px 0;             /* 從 12px 0 縮小 */
+    font-size: 0.8rem;
+}
+
+/* 響應式：當螢幕較小時進一步縮小 */
+@media (max-width: 1000px) {
+    #info-panel {
+        width: 280px;
+        padding: 12px 14px;
+        max-width: 38vw;
+    }
+    #info-panel h1 {
+        font-size: 1.1rem;
+    }
+    .control-group {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 700px) {
+    #info-panel {
+        width: 240px;
+        max-width: 70vw;
+        padding: 10px 12px;
+        top: 10px;
+        left: 10px;
+        font-size: 0.8rem;
+    }
+    #info-panel h1 {
+        font-size: 1rem;
+    }
+    .calculation-step {
+        padding: 6px 8px;
+    }
+}
+
+
+#controls {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(30,30,40,0.92);
+    backdrop-filter: blur(8px);
+    padding: 18px 22px;
+    border-radius: 20px;
+    width: 220px;           /* 從 380px 縮小為 320px */
+    max-width: 35vw;        /* 新增：限制最大寬度為視窗寬度的35% */
+    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    z-index: 100;
+    border: 1px solid rgba(255,255,255,0.2);
+    pointer-events: auto;
+    color: #f0f0f0;
+    transition: width 0.2s ease;  /* 平滑過渡 */
+}
+
+/* 響應式：當螢幕較小時進一步縮小 */
+@media (max-width: 1000px) {
+    #controls {
+        width: 280px;
+        padding: 14px 18px;
+    }
+    .control-group {
+        margin-bottom: 12px;
+    }
+    button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 700px) {
+    #controls {
+        width: 240px;
+        max-width: 40vw;
+        padding: 12px 14px;
+        bottom: 12px;
+        right: 12px;
+    }
+    .control-label {
+        font-size: 0.8rem;
+    }
+    .section-title {
+        font-size: 0.9rem;
+    }
+    button {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+
         h1, h2 {
             margin-top: 0;
             color: #1e2f3e;
