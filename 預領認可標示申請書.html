@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>預先領用認可標示申請書 - 消防安全中心基金會 (含設備匯入)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e2e6e9;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            font-family: 'Times New Roman', '標楷體', '微軟正黑體', 'SimSun', '宋體', serif;
+        }
+
+        .document {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 20px 25px 35px 25px;
+            margin: 0 auto;
+            border: 1px solid #aaa;
+            position: relative;
+        }
+
+        .toolbar {
+            text-align: right;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2c7da0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            background: #2c7da0;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .btn:hover {
+            background: #1f5e7a;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .btn-html {
+            background: #27ae60;
+        }
+        .btn-html:hover {
+            background: #219a52;
+        }
+        .info-bar {
+            background: #eef3fc;
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #1e466e;
+        }
+
+        .apply-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 20px;
+        }
+
+        .apply-table th, .apply-table td {
+            border: 1px solid #000000;
+            padding: 8px 10px;
+            vertical-align: top;
+            line-height: 1.45;
+        }
+
+        .apply-table th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .appendix-no {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: right;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 3px;
+        }
+
+        .note-box {
+            margin-top: 20px;
+            font-size: 13px;
+            border-top: 1px solid #ccc;
+            padding-top: 12px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .toolbar {
+                display: none;
+            }
+            .document {
+                box-shadow: none;
+                padding: 0.5cm;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="document">
+    <div class="toolbar">
+        <div class="info-bar" id="selectedCountDisplay">📋 尚未匯入設備</div>
+        <div class="btn-group">
+            <button class="btn btn-secondary" id="importFromTypeAcceptBtn">📥 從型式認可清冊匯入勾選設備</button>
+            <button class="btn btn-html" id="exportHtmlBtn">📄 匯出 HTML 檔案</button>
+        </div>
+    </div>
+
+    <div class="appendix-no">附表十七</div>
+
+    <table class="apply-table" cellspacing="0" cellpadding="4">
+        <tr><td colspan="2" style="text-align: center; font-size: 18px; font-weight: bold; background-color: #f0f0f0; padding: 12px;">預先領用認可標示申請書</td></tr>
+        <tr><td colspan="2" style="padding: 8px 12px;">
+            <div>此　　致</div>
+            <div style="font-weight: bold; margin-top: 4px;">財團法人消防安全中心基金會</div>
+         </td></tr>
+        <tr>
+            <td style="width: 50%;">申 請 人：<span style="border-bottom:1px solid black; display:inline-block; width: 160px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> 簽章</td>
+            <td style="width: 50%;">申請日期：<span style="border-bottom:1px solid black; display:inline-block; width: 160px;">&nbsp;&nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;日&nbsp;&nbsp;</span></td>
+         </tr>
+    </table>
+
+    <table class="apply-table">
+        <tr><th colspan="4" style="font-size: 15px; text-align: left;">一、申請人資料</th></tr>
+        <tr><th style="width:18%">公司名稱</th><td style="width:38%"><span style="border-bottom:1px solid #000; display:inline-block; width: 95%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+            <th style="width:18%">登記字號</th><td style="width:26%"><span style="border-bottom:1px solid #000; display:inline-block; width: 90%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+        <tr><th>負責人姓名</th><td><span style="border-bottom:1px solid #000; display:inline-block; width: 90%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+            <th>承辦人</th><td><span style="border-bottom:1px solid #000; display:inline-block; width: 70%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+        <tr><th>e-mail</th><td colspan="3"><span style="border-bottom:1px solid #000; display:inline-block; width: 85%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+        <tr><th>地 址</th><td colspan="3"><span style="border-bottom:1px solid #000; display:inline-block; width: 95%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+        <tr><th>電 話</th><td><span style="border-bottom:1px solid #000; display:inline-block; width: 90%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+            <th>傳 真</th><td><span style="border-bottom:1px solid #000; display:inline-block; width: 90%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+    </table>
+
+    <table class="apply-table">
+        <tr><th colspan="2" style="text-align: left;">二、產品資料</th></tr>
+        <tr><th style="width:25%">產品國別</th><td>□ 國產品 &nbsp;&nbsp;&nbsp; □ 國外進口品（國別：<span style="border-bottom:1px solid #000; display:inline-block; width: 150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>）</td></tr>
+        <tr><th>設備種類</th><td><span style="border-bottom:1px solid #000; display:inline-block; width: 85%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+        <tr><th>型式認可編號</th><td><span style="border-bottom:1px solid #000; display:inline-block; width: 85%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+        <tr><th>產品型號</th><td><span style="border-bottom:1px solid #000; display:inline-block; width: 85%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+    </table>
+
+    <table class="apply-table" id="deviceRequireTable">
+        <tr><th colspan="5" style="text-align: left;">三、設備種類及需求標示數量</th></tr>
+        <tr>
+            <th style="width:20%">設備種類</th>
+            <th style="width:25%">產品型號</th>
+            <th style="width:25%">型式認可編號</th>
+            <th style="width:20%">申請數量</th>
+            <th style="width:10%">備考</th>
+         </tr>
+        <tbody id="deviceTableBody">
+            <!-- 預設6行空白 -->
+            <tr class="device-row"><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td></tr>
+            <tr class="device-row"><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td></tr>
+            <tr class="device-row"><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td></tr>
+            <tr class="device-row"><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td></tr>
+            <tr class="device-row"><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td></tr>
+            <tr class="device-row"><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td><td contenteditable="true">&nbsp;</td></tr>
+        </tbody>
+    </table>
+
+    <table class="apply-table">
+        <tr><td style="padding: 12px 10px; background: #fef9e6;">
+            <p style="margin-bottom: 12px;">有關上述產品之個別認可，本公司願依所定品質管理體制落實執行，今後於受檢時，茲請准予先行領用認可標示，俾附加於產品本體上，以備於試驗當日受檢。</p>
+            <p style="margin-bottom: 6px;">本公司對預先領得之認可標示及附加於產品上之製品，當依品質管理說明書之事項妥為保管，如有管理欠當或有疏失時，無異議繳回所領得之認可標示，並遵從貴中心之指示。</p>
+            <div style="margin-top: 15px; text-align: right;">申請公司負責人(或授權代理人)簽章：____________________</div>
+         </td></tr>
+    </table>
+
+    <div class="note-box">
+        <p><strong>附註：</strong></p>
+        <p>一、本表請使用A4式樣紙張。</p>
+        <p>二、本表如不敷使用，可自行黏貼或依式畫製。</p>
+    </div>
+</div>
+
+<script>
+    // ==================== 與型式認可清冊-2 連動 ====================
+    const deviceTableBody = document.getElementById('deviceTableBody');
+    const selectedCountDisplay = document.getElementById('selectedCountDisplay');
+    let currentDevices = [];
+
+    // 確保表格有足夠的行數
+    function ensureRowCount(requiredCount) {
+        const rows = deviceTableBody.querySelectorAll('.device-row');
+        const currentRowCount = rows.length;
+        
+        if (requiredCount > currentRowCount) {
+            // 需要增加行數
+            const addCount = requiredCount - currentRowCount;
+            for (let i = 0; i < addCount; i++) {
+                const newRow = deviceTableBody.insertRow();
+                newRow.className = 'device-row';
+                for (let j = 0; j < 5; j++) {
+                    const cell = newRow.insertCell(j);
+                    cell.innerHTML = '&nbsp;';
+                    cell.setAttribute('contenteditable', 'true');
+                }
+            }
+        }
+        // 不刪除多餘行，保留手動填寫的資料
+        return deviceTableBody.querySelectorAll('.device-row');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 將選定的設備資料填入表格（自動增加行數）
+    function fillDevicesFromSelectedList(selectedItems) {
+        if (!selectedItems || selectedItems.length === 0) {
+            alert('沒有匯入任何設備，請先在「型式認可清冊-2」中勾選設備，系統會自動儲存勾選狀態，再到本頁點擊匯入。');
+            return false;
+        }
+        
+        // 確保表格有足夠行數
+        const rows = ensureRowCount(selectedItems.length);
+        
+        // 填入資料
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.cells;
+            if (cells.length >= 4) {
+                if (i < selectedItems.length) {
+                    const item = selectedItems[i];
+                    cells[0].innerHTML = escapeHtml(item.deviceName || '');
+                    cells[1].innerHTML = escapeHtml(item.model || '');
+                    cells[2].innerHTML = escapeHtml(item.certNo || '');
+                    cells[3].innerHTML = '1';
+                    cells[4].innerHTML = '';
+                } else {
+                    // 超過的部分保持空白（但不清空已存在的資料，避免覆蓋手動填寫）
+                    if (cells[0].innerHTML === '&nbsp;' || cells[0].innerHTML === '') {
+                        cells[0].innerHTML = '&nbsp;';
+                        cells[1].innerHTML = '&nbsp;';
+                        cells[2].innerHTML = '&nbsp;';
+                        cells[3].innerHTML = '&nbsp;';
+                        cells[4].innerHTML = '&nbsp;';
+                    }
+                }
+                // 確保可編輯
+                for (let c = 0; c < 5; c++) {
+                    cells[c].setAttribute('contenteditable', 'true');
+                }
+            }
+        }
+        
+        updateCurrentDevicesFromTable();
+        updateStatusMessage();
+        return true;
+    }
+
+    function updateCurrentDevicesFromTable() {
+        const rows = deviceTableBody.querySelectorAll('.device-row');
+        const devices = [];
+        for (let row of rows) {
+            const cells = row.cells;
+            if (cells.length >= 4) {
+                const deviceType = (cells[0]?.innerText || '').trim();
+                const model = (cells[1]?.innerText || '').trim();
+                const certNo = (cells[2]?.innerText || '').trim();
+                let quantity = (cells[3]?.innerText || '').trim();
+                const remark = (cells[4]?.innerText || '').trim();
+                
+                if (deviceType === '' || deviceType === '&nbsp;' || deviceType === '\u00A0') continue;
+                if (model === '' || model === '&nbsp;' || model === '\u00A0') continue;
+                if (certNo === '' || certNo === '&nbsp;' || certNo === '\u00A0') continue;
+                
+                let qtyNum = parseInt(quantity);
+                if (isNaN(qtyNum) || quantity === '' || quantity === '&nbsp;') qtyNum = 1;
+                devices.push({
+                    deviceType: deviceType,
+                    model: model,
+                    certNo: certNo,
+                    quantity: qtyNum,
+                    remark: remark
+                });
+            }
+        }
+        currentDevices = devices;
+        return devices;
+    }
+
+    function updateStatusMessage() {
+        const count = currentDevices.length;
+        if (count === 0) {
+            selectedCountDisplay.innerHTML = '📋 尚未匯入設備 (或表格無效資料)';
+        } else {
+            selectedCountDisplay.innerHTML = `✅ 已載入 ${count} 筆設備，可編輯調整數量/備註`;
+        }
+    }
+
+    function loadSelectedFromTypeAccept() {
+        try {
+            const stored = localStorage.getItem('typeAccept_selected_export');
+            if (!stored) {
+                alert('找不到匯入資料。\n請先至「型式認可清冊-2」勾選您需要的設備（每次勾選會自動儲存），然後再回到此頁點擊匯入。');
+                return [];
+            }
+            const selectedList = JSON.parse(stored);
+            if (!Array.isArray(selectedList) || selectedList.length === 0) {
+                alert('型式認可清冊勾選清單為空，請先勾選設備後再執行匯入。');
+                return [];
+            }
+            const mapped = selectedList.map(item => ({
+                deviceName: item.deviceName || item.設備名稱 || '',
+                model: item.model || item.型號 || '',
+                certNo: item.certNo || item.認可編號 || item['認可編號 / 案號'] || ''
+            })).filter(item => item.deviceName && item.model && item.certNo);
+            return mapped;
+        } catch(e) {
+            console.error(e);
+            alert('讀取勾選資料失敗，請確認在型式認可清冊頁面已正確勾選設備。');
+            return [];
+        }
+    }
+
+    function importFromTypeAccept() {
+        const selectedDevices = loadSelectedFromTypeAccept();
+        if (selectedDevices.length === 0) return;
+        fillDevicesFromSelectedList(selectedDevices);
+    }
+
+    // 匯出 HTML 檔案（可完整保存表格內容，方便後續開啟或列印）
+    function exportToHtml() {
+        updateCurrentDevicesFromTable();
+        
+        const originalDoc = document.querySelector('.document').cloneNode(true);
+        const toolbarClone = originalDoc.querySelector('.toolbar');
+        if (toolbarClone) toolbarClone.remove();
+        
+        originalDoc.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.removeAttribute('contenteditable');
+        });
+        
+        const htmlContent = `<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>預先領用認可標示申請書</title>
+            <style>
+                * { margin:0; padding:0; box-sizing: border-box; }
+                body { 
+                    font-family: 'Times New Roman', '標楷體', '微軟正黑體', SimSun, serif; 
+                    background: white; 
+                    padding: 40px 20px; 
+                    display: flex; 
+                    justify-content: center;
+                }
+                .document {
+                    max-width: 1200px;
+                    width: 100%;
+                    background: white;
+                    padding: 20px 25px 35px;
+                    margin: 0 auto;
+                    border: 1px solid #aaa;
+                }
+                .apply-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                    font-size: 14px;
+                }
+                .apply-table th, .apply-table td {
+                    border: 1px solid black;
+                    padding: 8px 10px;
+                    vertical-align: top;
+                }
+                .apply-table th {
+                    background-color: #f5f5f5;
+                    text-align: center;
+                }
+                .appendix-no {
+                    text-align: right;
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                    border-bottom: 1px dashed #ccc;
+                }
+                .note-box {
+                    margin-top: 20px;
+                    font-size: 13px;
+                    border-top: 1px solid #ccc;
+                    padding-top: 12px;
+                }
+                @media print {
+                    body { padding: 0; }
+                    .no-print { display: none; }
+                }
+                .print-btn {
+                    text-align: center;
+                    margin-top: 20px;
+                }
+                .print-btn button {
+                    background: #2c7da0;
+                    color: white;
+                    border: none;
+                    padding: 8px 24px;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    font-size: 14px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-btn no-print">
+                <button onclick="window.print();">🖨️ 列印 / 儲存為 PDF</button>
+            </div>
+            ${originalDoc.outerHTML}
+        </body>
+        </html>`;
+        
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `預領認可標示申請書_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function bindTableEditEvents() {
+        deviceTableBody.addEventListener('blur', (e) => {
+            if (e.target.closest('td') && e.target.closest('td').hasAttribute('contenteditable')) {
+                updateCurrentDevicesFromTable();
+                updateStatusMessage();
+            }
+        }, true);
+        deviceTableBody.addEventListener('input', () => {
+            setTimeout(() => {
+                updateCurrentDevicesFromTable();
+                updateStatusMessage();
+            }, 10);
+        });
+    }
+
+    document.getElementById('importFromTypeAcceptBtn').addEventListener('click', importFromTypeAccept);
+    document.getElementById('exportHtmlBtn').addEventListener('click', exportToHtml);
+
+    function init() {
+        bindTableEditEvents();
+        updateCurrentDevicesFromTable();
+        updateStatusMessage();
+    }
+    init();
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'typeAccept_selected_export') {
+            console.log('偵測到型式認可清冊更新，可手動點擊匯入按鈕');
+        }
+    });
+</script>
+</body>
+</html>
