@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>消防安全設備認可清冊 - 可勾選/搜尋/篩選 (自動儲存勾選狀態)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            padding: 30px 20px;
+            font-family: 'Segoe UI', 'Roboto', '微軟正黑體', 'Times New Roman', serif;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow-x: auto;
+            padding: 20px 24px 30px 24px;
+            position: relative;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        .title-section {
+            flex: 2;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #1e466e;
+            border-left: 6px solid #c0392b;
+            padding-left: 20px;
+        }
+        .subtitle {
+            color: #2c3e50;
+            font-size: 14px;
+            padding-left: 26px;
+            margin-top: 4px;
+        }
+        .search-area {
+            background: #f8fafc;
+            padding: 8px 15px;
+            border-radius: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            border: 1px solid #cfdfed;
+        }
+        .search-area label {
+            font-weight: 600;
+            color: #1e466e;
+        }
+        #searchInput {
+            padding: 8px 14px;
+            border: 1px solid #bdc4cc;
+            border-radius: 30px;
+            width: 240px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+        #searchInput:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 2px rgba(44,125,160,0.2);
+        }
+        .search-btn {
+            background: #2c7da0;
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .search-btn:hover {
+            background: #1f5e7a;
+        }
+        .reset-btn {
+            background: #5f6c7a;
+        }
+        .reset-btn:hover {
+            background: #3e4a57;
+        }
+
+        .master-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            font-family: inherit;
+            margin-top: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .master-table caption {
+            text-align: left;
+            font-size: 17px;
+            font-weight: 600;
+            background-color: #e9f0f5;
+            padding: 10px 14px;
+            border-radius: 10px 10px 0 0;
+            color: #004b7c;
+            border-left: 4px solid #b22234;
+            margin-bottom: 2px;
+        }
+
+        .master-table th, .master-table td {
+            border: 1px solid #9aaebf;
+            padding: 10px 12px;
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+
+        .master-table th {
+            background-color: #eef3fc;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .master-table td {
+            background-color: #fff;
+        }
+
+        .checkbox-col {
+            text-align: center;
+            width: 45px;
+        }
+        .checkbox-col input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            transform: scale(1);
+            accent-color: #2c7da0;
+        }
+
+        .master-table td:nth-child(2),
+        .master-table th:nth-child(2) {
+            text-align: center;
+            width: 70px;
+        }
+
+        .selection-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 28px;
+            align-items: center;
+            gap: 16px;
+        }
+        .selected-btn {
+            background: #2c7da0;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: 0.2s;
+        }
+        .selected-btn:hover {
+            background: #1a5e7c;
+            transform: scale(1.02);
+        }
+        .clear-all-btn {
+            background: #b0bed0;
+            color: #2d3e50;
+        }
+        .clear-all-btn:hover {
+            background: #97a9be;
+        }
+        .info-badge {
+            font-size: 13px;
+            color: #2c5a74;
+            background: #eef3fa;
+            padding: 5px 12px;
+            border-radius: 30px;
+        }
+        .storage-hint {
+            font-size: 12px;
+            color: #27ae60;
+            background: #e8f5e9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        @media (max-width: 800px) {
+            .header-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-area {
+                justify-content: flex-end;
+            }
+            .master-table th, .master-table td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            .checkbox-col {
+                width: 35px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0.2cm;
+            }
+            .search-area, .selection-bar, .selected-btn, .clear-all-btn {
+                display: none;
+            }
+            .master-table th, .master-table td {
+                border: 1px solid black;
+            }
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: right;
+            color: #3a5a78;
+            border-top: 1px dashed #bdd4e5;
+            padding-top: 12px;
+        }
+    </style>
+    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
+    <script>
+        (function() {
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            function blockDevTools(e) {
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+                    e.preventDefault();
+                    return false;
+                }
+                return true;
+            }
+            document.addEventListener('keydown', blockDevTools);
+            let devtoolsOpen = false;
+            const element = new Image();
+            Object.defineProperty(element, 'id', {
+                get: function() {
+                    devtoolsOpen = true;
+                    console.warn('偵測到開發者工具');
+                    return '';
+                }
+            });
+            setInterval(function() {
+                devtoolsOpen = false;
+                console.log(element);
+                console.clear();
+                if (devtoolsOpen) {
+                    console.clear();
+                }
+            }, 1000);
+        })();
+    </script>
+    <!-- ========== 防護區塊結束 ========== -->	
+	
+	
+</head>
+<body>
+<div class="container">
+    <div class="header-area">
+        <div class="title-section">
+            <h1>📋 消防安全設備型式認可／個別認可總表</h1>
+            <div class="subtitle">可勾選清冊 | 搜尋關鍵字 | 點擊「選定」僅顯示勾選項目 | <span class="storage-hint">💾 勾選狀態自動儲存，可匯入申請書</span></div>
+        </div>
+        <div class="search-area">
+            <label>🔍 搜尋</label>
+            <input type="text" id="searchInput" placeholder="輸入關鍵字 (編號/設備/廠商/型號...)" autocomplete="off">
+            <button class="search-btn" id="searchBtn">過濾</button>
+            <button class="search-btn reset-btn" id="resetSearchBtn">重置表格</button>
+        </div>
+    </div>
+
+    <table class="master-table" id="dataTable">
+        <caption>📌 認可設備清冊 (勾選後自動儲存，可至「預領認可標示申請書」匯入)</caption>
+        <thead>
+            <tr>
+                <th class="checkbox-col">選取</th>
+                <th>序號</th>
+                <th>認可編號 / 案號</th>
+                <th>設備名稱</th>
+                <th>製造商 / 公司</th>
+                <th>型號</th>
+             </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="selection-bar">
+        <div class="info-badge" id="selectedCountInfo">已選取 0 筆</div>
+        <button class="clear-all-btn selected-btn" id="clearAllCheckedBtn">清除勾選</button>
+        <button class="selected-btn" id="showSelectedBtn">✓ 選定 (僅顯示勾選項目)</button>
+    </div>
+
+    <div class="footer-note">
+        ✅ 操作說明：勾選左側方框「自動儲存」勾選狀態，按下「選定」可只顯示勾選項目。<br>
+        ✅ 至「預領認可標示申請書」點擊「📥 從型式認可清冊匯入勾選設備」，即可帶入已勾選的設備清單。
+    </div>
+</div>
+
+<script>
+    // ==================== 原始資料集 (序號 1~72) ====================
+    const rawData = [
+        { sn: 1, certNo: "內投消字第1131300820號", deviceName: "小規模放水槍", manufacturer: "HOCHIKI", model: "GD-101" },
+        { sn: 2, certNo: "內投消字第1131601828號", deviceName: "瓦斯警報器", manufacturer: "YAZAKI", model: "YF-517D" },
+        { sn: 3, certNo: "內投消字第1141601200號", deviceName: "固定式放水型", manufacturer: "HOCHIKI", model: "GE-101" },
+        { sn: 4, certNo: "AR-A104001", deviceName: "火警受信總機", manufacturer: "HOCHIKI", model: "HRN-ABS2550FGA(T)" },
+        { sn: 5, certNo: "AR-A110008", deviceName: "火警受信總機", manufacturer: "HOCHIKI AMERICA", model: "L@titude" },
+        { sn: 6, certNo: "AR-A111005", deviceName: "火警受信總機", manufacturer: "HOCHIKI AMERICA", model: "K1810-12" },
+        { sn: 7, certNo: "AR-A114003", deviceName: "火警受信總機", manufacturer: "HOCHIKI AMERICA", model: "HCVR-3" },
+        { sn: 8, certNo: "AR-A114004", deviceName: "火警受信總機", manufacturer: "HOCHIKI", model: "HRU-ABS1020(OP)" },
+        { sn: 9, certNo: "AR-A114005", deviceName: "火警受信總機", manufacturer: "HOCHIKI", model: "HRR-AAW5610" },
+        { sn: 10, certNo: "AV-A106001", deviceName: "流水檢測裝置", manufacturer: "HOCHIKI", model: "GNA-EA100" },
+        { sn: 11, certNo: "AV-A106005", deviceName: "流水檢測裝置", manufacturer: "HOCHIKI", model: "GNA-FA100" },
+        { sn: 12, certNo: "AV-A106006", deviceName: "流水檢測裝置", manufacturer: "HOCHIKI", model: "GNA-FA150" },
+        { sn: 13, certNo: "B-A103001", deviceName: "火警警鈴", manufacturer: "HOCHIKI", model: "FBB-150ID" },
+        { sn: 14, certNo: "B-A103002", deviceName: "火警警鈴", manufacturer: "HOCHIKI", model: "FBB-150I" },
+        { sn: 15, certNo: "CSP-A103009-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "GQH-FE72-2" },
+        { sn: 16, certNo: "CSP-A104001-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "GQH-GA72-2" },
+        { sn: 17, certNo: "CSP-A104002-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "HF-E72-2" },
+        { sn: 18, certNo: "CSP-A104003-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "GQH-FE98-2" },
+        { sn: 19, certNo: "DV-A106014", deviceName: "一齊開放閥", manufacturer: "TOYO", model: "10-65FDEWF" },
+        { sn: 20, certNo: "DV-A106018", deviceName: "一齊開放閥", manufacturer: "TOYO", model: "10-50FDEWF" },
+        { sn: 21, certNo: "FD-114025", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFG-TW70L" },
+        { sn: 22, certNo: "FD-A10213", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DRD-E" },
+        { sn: 23, certNo: "FD-A10233", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "DFE-135" },
+        { sn: 24, certNo: "FD-A10234", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "DSC-EA" },
+        { sn: 25, certNo: "FD-A10250", deviceName: "火警探測器", manufacturer: "HOCHIKI EUROPE", model: "DCD-1E-IS" },
+        { sn: 26, certNo: "FD-A10256", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "DCD-135" },
+        { sn: 27, certNo: "FD-A10257", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SPC-24" },
+        { sn: 28, certNo: "FD-A103008", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DHA-2L" },
+        { sn: 29, certNo: "FD-A103017", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFG-1W70L" },
+        { sn: 30, certNo: "FD-A103018", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DSC-2" },
+        { sn: 31, certNo: "FD-A103019", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "SLV-2" },
+        { sn: 32, certNo: "FD-A105031", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ACC-V" },
+        { sn: 33, certNo: "FD-A105032", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ALN-V" },
+        { sn: 34, certNo: "FD-A106004", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ATJ-EA" },
+        { sn: 35, certNo: "FD-A106022", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SOC-24VN" },
+        { sn: 36, certNo: "FD-A107011", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ALK-NLYA" },
+        { sn: 37, certNo: "FD-A108010", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ABC-12YA" },
+        { sn: 38, certNo: "FD-A110001", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ASB-2LYA" },
+        { sn: 39, certNo: "FD-A110003", deviceName: "火警探測器", manufacturer: "HOCHIKI EUROPE", model: "SOC-E-IS" },
+        { sn: 40, certNo: "FD-A110010", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SOE-24H" },
+        { sn: 41, certNo: "FD-A111040", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SOE-24V" },
+        { sn: 42, certNo: "FD-A112017", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DRC-13A" },
+        { sn: 43, certNo: "FD-A113003", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ALO-V" },
+        { sn: 44, certNo: "FD-A114006", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFS-1SE70RLB" },
+        { sn: 45, certNo: "FD-A115", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFV-1W70K-J-WI" },
+        { sn: 46, certNo: "FH-A108001", deviceName: "泡沫噴頭", manufacturer: "HOCHIKI", model: "GFH-D35" },
+        { sn: 47, certNo: "L-A103002", deviceName: "火警標示燈", manufacturer: "HOCHIKI", model: "TL-14D" },
+        { sn: 48, certNo: "L-A115001", deviceName: "火警標示燈", manufacturer: "HOCHIKI", model: "PPH-1A" },
+        { sn: 49, certNo: "L-A115002", deviceName: "火警標示燈", manufacturer: "HOCHIKI", model: "PRK-1A" },
+        { sn: 50, certNo: "P-A105004", deviceName: "火警發信機", manufacturer: "HOCHIKI AMERICA", model: "DCP-AMS-LP" },
+        { sn: 51, certNo: "FD-A110003", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ATI-NWLHYA" },
+        { sn: 52, certNo: "P-A114001", deviceName: "火警發信機", manufacturer: "HOCHIKI", model: "PRK-1A" },
+        { sn: 53, certNo: "P-A114002", deviceName: "火警發信機", manufacturer: "HOCHIKI", model: "PPH-1A" },
+        { sn: 54, certNo: "RD-A103003", deviceName: "住宅用火災警報器", manufacturer: "HOCHIKI", model: "SS-FL-10HC" },
+        { sn: 55, certNo: "RD-A106011", deviceName: "住宅用火災警報器", manufacturer: "HOCHIKI", model: "SS-2LT-10HC" },
+        { sn: 56, certNo: "RP-A10202", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-S4A" },
+        { sn: 57, certNo: "RP-A103002", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-BY" },
+        { sn: 58, certNo: "RP-A103003", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-G4" },
+        { sn: 59, certNo: "RP-A103004", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-K4P" },
+        { sn: 60, certNo: "RP-A103005", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-KL" },
+        { sn: 61, certNo: "RP-A103006", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-R4(D2/H4)" },
+        { sn: 62, certNo: "RP-A103008", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-K8" },
+        { sn: 63, certNo: "RP-A105007", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-DIMM" },
+        { sn: 64, certNo: "RP-A105008", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-SCI" },
+        { sn: 65, certNo: "RP-A105009", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-R2ML" },
+        { sn: 66, certNo: "RP-A105011", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-CZM" },
+        { sn: 67, certNo: "RP-A108007", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-SCI2" },
+        { sn: 68, certNo: "RP-A108008", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-PSCI" },
+        { sn: 69, certNo: "RP-A111005", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-ADSICI2" },
+        { sn: 70, certNo: "RP-A114002", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CMA-ABW2040(OP)" },
+        { sn: 71, certNo: "RP-A115001", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CMA-ABW510(OP)" },
+        { sn: 72, certNo: "RP-A115002", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CMA-ABW1020(OP)" }
+    ];
+
+    // 儲存勾選狀態
+    let checkedStatus = new Array(rawData.length).fill(false);
+    let currentFilteredIndices = [];
+    let isFilterMode = false;
+    let selectedModeActive = false;
+    let lastSearchTerm = "";
+
+    const tbody = document.getElementById("tableBody");
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const resetSearchBtn = document.getElementById("resetSearchBtn");
+    const showSelectedBtn = document.getElementById("showSelectedBtn");
+    const clearAllCheckedBtn = document.getElementById("clearAllCheckedBtn");
+    const selectedCountSpan = document.getElementById("selectedCountInfo");
+
+    // ==================== 儲存勾選設備到 localStorage (供申請書讀取) ====================
+	// ==================== 儲存勾選設備到 localStorage (供申請書讀取 & 型認書資料庫同步) ====================
+function saveSelectedToLocalStorage() {
+    const selectedItems = [];
+    const selectedIds = [];  // 新增：儲存勾選設備的 ID (從 id.txt 比對而來)
+    
+    for (let i = 0; i < checkedStatus.length; i++) {
+        if (checkedStatus[i] === true) {
+            const item = rawData[i];
+            selectedItems.push({
+                deviceName: item.deviceName,
+                model: item.model,
+                certNo: item.certNo
+            });
+            
+            // 根據型號找出對應的 ID (需要從 id.txt 的對照表取得)
+            const matchedId = findIdByModel(item.model);
+            if (matchedId) {
+                selectedIds.push(matchedId);
+            }
+        }
+    }
+    
+    // 儲存完整資料 (供申請書使用)
+    localStorage.setItem('typeAccept_selected_export', JSON.stringify(selectedItems));
+    // 儲存 ID 清單 (供型認書資料庫同步)
+    localStorage.setItem('typeAccept_selected_ids', JSON.stringify(selectedIds));
+    
+    console.log('✅ 已儲存勾選設備至 localStorage，共', selectedItems.length, '筆，ID清單:', selectedIds);
+    return selectedItems.length;
+}
+
+// 新增：根據型號查找對應的 ID (比對 id.txt 的 name)
+function findIdByModel(model) {
+    // id.txt 對照表 (根據您提供的 id.txt 內容)
+    const idMapping = [
+        { id: "A101", name: "HRN-ABW510FGA(T)" }, { id: "A102", name: "HRN-ABW1020FGA(T)" }, { id: "A103", name: "HRN-ABS510FGA(T)" },
+        { id: "A104", name: "HRN-ABS1020FGA(T)" }, { id: "A105", name: "HRN-ABS2040FGA(T)" }, { id: "A106", name: "HRN-ABS2550FGA(T)" },
+        { id: "A107", name: "HRR-AAW510" }, { id: "A108", name: "HRR-AAW1020" }, { id: "A109", name: "HRR-AAS510" },
+        { id: "A110", name: "HRR-AAS1020" }, { id: "A111", name: "HRR-AAS2040" }, { id: "A112", name: "HRR-AAS2550" },
+        { id: "A113", name: "HRR-AAS4080" }, { id: "A114", name: "HRR-AAS5100" }, { id: "A115", name: "HRR-AAS5610" },
+        { id: "A116", name: "HRU-ABS510(OP)" }, { id: "A117", name: "HRU-ABS1020(OP)" }, { id: "A201", name: "ALK-NLYA" },
+        { id: "A202", name: "ASB-2LYA" }, { id: "A203", name: "ATI-NWRLYA" }, { id: "A204", name: "PRK-1A" },
+        { id: "A205", name: "ABC-12YA" }, { id: "A206", name: "YBN-R/1NA" }, { id: "A207", name: "YYT-9A" },
+        { id: "A301", name: "CHW-KL" }, { id: "A302", name: "CHW-K4P" }, { id: "A303", name: "CHW-K8" },
+        { id: "A304", name: "CHW-BY" }, { id: "A305", name: "CHW-R4" }, { id: "A306", name: "CHW-S4A" },
+        { id: "A307", name: "CHW-G4" }, { id: "A308", name: "CHW-ADSCI2" }, { id: "A309", name: "CHW-PSCI" },
+        { id: "A310", name: "CMA-ABW510(OP)" }, { id: "A311", name: "CMA-ABW1020(OP)" }, { id: "A312", name: "CMA-ABW2040(OP)" },
+        { id: "A313", name: "TE-RH" }, { id: "A401", name: "FBB-150ID" }, { id: "A402", name: "R/P 移報板 HRN用" },
+        { id: "A403", name: "R/P 移報板 HRR/HRU用" }, { id: "A404", name: "RS-232 串列基板 HRN用" }, { id: "A405", name: "RS-232 串列基板 HRR用" },
+        { id: "A406", name: "TCO-A100" }, { id: "A407", name: "HEX-IPH" }, { id: "A408", name: "NCD-3.50" }, { id: "A409", name: "NCD-6.00" },
+        { id: "A410", name: "NCD-10.00" }, { id: "B101", name: "L@titude 2" }, { id: "B102", name: "L@titude 4" }, { id: "B103", name: "L@titude 6" },
+        { id: "B104", name: "L@titude 8" }, { id: "B105", name: "L@titude 10" }, { id: "B106", name: "L@titude 12" }, { id: "B107", name: "L@titude 14" },
+        { id: "B108", name: "L@titude 16" }, { id: "B201", name: "ALO-V" }, { id: "B202", name: "ATJ-EA" }, { id: "B203", name: "ACC-V" },
+        { id: "B204", name: "YBN-NSA-47" }, { id: "B301", name: "DCP-CZM" }, { id: "B302", name: "DCP-DIMM" }, { id: "B303", name: "DCP-R2ML" },
+        { id: "B304", name: "DCP-SCI" }, { id: "B305", name: "DCP-AMS-LP" }, { id: "B401", name: "Vison" }, { id: "B402", name: "S408" },
+        { id: "B403", name: "S406" }, { id: "B404", name: "S723" }, { id: "B405", name: "S758" }, { id: "B406", name: "S788" },
+        { id: "B407", name: "圖控電腦" }, { id: "C101", name: "SLV-2" }, { id: "C102", name: "DSC-2" }, { id: "C105", name: "DFS-1SE70RLB" },
+        { id: "C106", name: "台製底座" }, { id: "C107", name: "DHA-2L" }, { id: "C108", name: "AK-M" }, { id: "C109", name: "DRC-13A" },
+        { id: "C110", name: "YBR-RL/2(LG)" }, { id: "C111", name: "YZU-AA" }, { id: "C112", name: "YZU-B" }, { id: "C113", name: "YZU-C" },
+        { id: "C114", name: "YZU-D" }, { id: "C115", name: "PPH-1A" }, { id: "C116", name: "YYT-9A" }, { id: "C117", name: "FBB-150I" },
+        { id: "C118", name: "ARS-B104" }, { id: "C201", name: "SOE-24V" }, { id: "C202", name: "SOE-24H" }, { id: "C203", name: "DCD-135" },
+        { id: "C204", name: "NS4-100" }, { id: "C206", name: "DSC-EA" }, { id: "C207", name: "台製底座" }, { id: "C208", name: "SPC-24" },
+        { id: "C209", name: "HSC-224R" }, { id: "C210", name: "HSC-4R" }, { id: "C301", name: "SOC-E-IS" }, { id: "C302", name: "DCD-1E-IS" },
+        { id: "C303", name: "YBN-R/4(IS)" }, { id: "C304", name: "DRD-E" }, { id: "C305", name: "YZU-AA" }, { id: "C306", name: "YZU-B" },
+        { id: "C307", name: "YZU-C" }, { id: "C401", name: "SS-2LT-10HC" }, { id: "C402", name: "SS-FL-10HC" }, { id: "C403", name: "YF-517D" },
+        { id: "C404", name: "SH5910" }, { id: "C501", name: "SOC-E3NM" }, { id: "C502", name: "DCD-AE3M" }, { id: "C503", name: "DCD-CE3M" },
+        { id: "C504", name: "DRD-EM" }, { id: "C505", name: "YBN-R/6M" }, { id: "C506", name: "MBB-2" }, { id: "C601", name: "GQH-FE72-2" },
+        { id: "C602", name: "GQH-FE98-2" }, { id: "C603", name: "GQH-GA72" }, { id: "C604", name: "Sealing Plate K" }, { id: "C605", name: "GFH-D35" },
+        { id: "C606", name: "GNA-FA100" }, { id: "C607", name: "GNA-FA150" }, { id: "D101", name: "HCVR-3 110V" }, { id: "D102", name: "HCVR-3 220V" },
+        { id: "D103", name: "K1821-19" }, { id: "D201", name: "HCVR-AS" }, { id: "D202", name: "K13470M10" }, { id: "D203", name: "HCVR-DS" },
+        { id: "D207", name: "HPS-DAK-SR" }, { id: "D208", name: "HEC3-WR" }, { id: "D301", name: "SOE-24V" }, { id: "D302", name: "SOE-24H" },
+        { id: "D303", name: "DCD-135" }, { id: "D304", name: "NS4-100" }
+    ];
+    
+    const found = idMapping.find(m => m.name === model);
+    return found ? found.id : null;
+}
+
+    // 從 localStorage 恢復勾選狀態 (頁面重啟時)
+    function loadCheckedStatusFromStorage() {
+        const stored = localStorage.getItem('typeAccept_selected_export');
+        if (stored) {
+            try {
+                const savedItems = JSON.parse(stored);
+                if (Array.isArray(savedItems) && savedItems.length > 0) {
+                    // 重置勾選狀態
+                    checkedStatus.fill(false);
+                    // 根據儲存的 deviceName + model + certNo 比對恢復勾選
+                    for (let i = 0; i < rawData.length; i++) {
+                        const item = rawData[i];
+                        const found = savedItems.some(saved => 
+                            saved.deviceName === item.deviceName && 
+                            saved.model === item.model && 
+                            saved.certNo === item.certNo
+                        );
+                        if (found) checkedStatus[i] = true;
+                    }
+                    console.log('🔄 已從 localStorage 恢復勾選狀態，共', savedItems.length, '筆');
+                }
+            } catch(e) { console.warn('恢復勾選狀態失敗', e); }
+        }
+    }
+
+    function updateSelectedCount() {
+        const totalChecked = checkedStatus.filter(v => v === true).length;
+        selectedCountSpan.innerText = `已選取 ${totalChecked} 筆`;
+        return totalChecked;
+    }
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function renderTable() {
+        let indicesToShow = [];
+        if (selectedModeActive) {
+            indicesToShow = rawData.map((_, idx) => idx).filter(idx => checkedStatus[idx] === true);
+        } else {
+            if (isFilterMode && lastSearchTerm.trim() !== "") {
+                indicesToShow = [...currentFilteredIndices];
+            } else {
+                indicesToShow = rawData.map((_, idx) => idx);
+            }
+        }
+        
+        if (indicesToShow.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px;">⚠️ 目前無符合條件的資料，請調整搜尋或「選定」條件</td></tr>`;
+            updateSelectedCount();
+            return;
+        }
+
+        let html = "";
+        for (let i = 0; i < indicesToShow.length; i++) {
+            const originalIdx = indicesToShow[i];
+            const item = rawData[originalIdx];
+            const isChecked = checkedStatus[originalIdx] ? "checked" : "";
+            html += `<tr data-original-index="${originalIdx}">
+                        <td class="checkbox-col"><input type="checkbox" class="row-checkbox" data-idx="${originalIdx}" ${isChecked}></td>
+                        <td style="text-align:center;">${item.sn}</td>
+                        <td>${escapeHtml(item.certNo)}</td>
+                        <td>${escapeHtml(item.deviceName)}</td>
+                        <td>${escapeHtml(item.manufacturer)}</td>
+                        <td>${escapeHtml(item.model)}</td>
+                      </tr>`;
+        }
+        tbody.innerHTML = html;
+        
+        // 綁定 checkbox 事件 (每次勾選變更時自動儲存)
+        document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const idx = parseInt(e.target.getAttribute('data-idx'));
+                if (!isNaN(idx)) {
+                    checkedStatus[idx] = e.target.checked;
+                    updateSelectedCount();
+                    saveSelectedToLocalStorage();  // 每次勾選變更自動儲存
+                    if (selectedModeActive) {
+                        renderTable();
+                    }
+                }
+            });
+        });
+        updateSelectedCount();
+    }
+
+    function applySearchFilter() {
+        const keyword = searchInput.value.trim().toLowerCase();
+        lastSearchTerm = keyword;
+        if (keyword === "") {
+            isFilterMode = false;
+            currentFilteredIndices = [];
+        } else {
+            isFilterMode = true;
+            const filtered = [];
+            for (let i = 0; i < rawData.length; i++) {
+                const item = rawData[i];
+                const combined = `${item.certNo} ${item.deviceName} ${item.manufacturer} ${item.model} ${item.sn}`.toLowerCase();
+                if (combined.includes(keyword)) {
+                    filtered.push(i);
+                }
+            }
+            currentFilteredIndices = filtered;
+        }
+        if (selectedModeActive) {
+            selectedModeActive = false;
+        }
+        renderTable();
+    }
+
+    function resetTable() {
+        searchInput.value = "";
+        isFilterMode = false;
+        selectedModeActive = false;
+        lastSearchTerm = "";
+        currentFilteredIndices = [];
+        renderTable();
+    }
+
+    function showSelectedOnly() {
+        const hasChecked = checkedStatus.some(v => v === true);
+        if (!hasChecked) {
+            alert("目前尚未勾選任何項目，請先勾選列後再點「選定」");
+            return;
+        }
+        selectedModeActive = true;
+        renderTable();
+        const checkedCount = saveSelectedToLocalStorage();
+        alert(`✅ 已選定 ${checkedCount} 筆設備！\n\n可至「預領認可標示申請書」點擊「從型式認可清冊匯入勾選設備」按鈕。`);
+    }
+
+    function clearAllChecks() {
+        checkedStatus.fill(false);
+        saveSelectedToLocalStorage();  // 清除後也儲存空陣列
+        if (selectedModeActive) {
+            selectedModeActive = false;
+            isFilterMode = false;
+            searchInput.value = "";
+            lastSearchTerm = "";
+        }
+        renderTable();
+    }
+
+    // 事件綁定
+    searchBtn.addEventListener('click', applySearchFilter);
+    resetSearchBtn.addEventListener('click', resetTable);
+    showSelectedBtn.addEventListener('click', showSelectedOnly);
+    clearAllCheckedBtn.addEventListener('click', clearAllChecks);
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') applySearchFilter(); });
+
+    // 初始化：先從 localStorage 恢復勾選狀態，再渲染表格
+    loadCheckedStatusFromStorage();
+    renderTable();
+    updateSelectedCount();
+</script>
+</body>
+</html>

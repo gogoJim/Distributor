@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>消防安全設備管理整合平台｜左側導覽選單</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', '微軟正黑體', 'Noto Sans TC', system-ui, sans-serif;
+            background-color: #eef2f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* ========= 左側導覽選單 (固定側邊欄) ========= */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1e3a5f 0%, #0f2c44 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 3px 0 12px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 28px 20px 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header h2 i {
+            color: #4ecdc4;
+            font-size: 28px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            opacity: 0.75;
+            margin-top: 8px;
+        }
+
+        /* 導覽選單項目 - 可滾動 */
+        .nav-menu {
+            flex: 1;
+            padding: 0 16px 20px 16px;
+        }
+
+        /* 選單群組分類 */
+        .nav-group {
+            margin-bottom: 20px;
+        }
+
+        .nav-group-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8eacc9;
+            padding: 8px 12px 4px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border-radius: 28px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .nav-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background: rgba(78, 205, 196, 0.25);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: #2c7da0;
+            color: white;
+            box-shadow: 0 5px 12px rgba(44, 125, 160, 0.3);
+        }
+
+        /* 外部連結按鈕樣式（稍微微調，僅供視覺區分） */
+        .nav-item.external-link i {
+            color: #f39c12;
+        }
+        .nav-item.external-link:hover i {
+            color: white;
+        }
+
+        .sidebar-footer {
+            padding: 20px 20px 28px;
+            font-size: 0.7rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin-top: 20px;
+            color: #bdd4e5;
+        }
+
+        /* ========= 右側主要內容區 ========= */
+        .main-content {
+            flex: 1;
+            background: #f0f4f9;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            background: white;
+            padding: 12px 24px;
+            border-bottom: 1px solid #dce5ec;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .content-header h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #1e466e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .module-badge {
+            background: #eef3fc;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            color: #1f5e7a;
+        }
+
+        .iframe-container {
+            flex: 1;
+            position: relative;
+            background: #eef2f5;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            display: block;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,240,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            backdrop-filter: blur(2px);
+            font-weight: 500;
+            color: #1e466e;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar { width: 240px; }
+            .nav-item { padding: 10px 12px; font-size: 0.85rem; }
+        }
+        @media print { .sidebar { display: none; } }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="app-wrapper">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-fire-extinguisher"></i> 消防管理平台</h2>
+            <p>型式認可 · 個別認可 · 到期管理</p>
+        </div>
+        <div class="nav-menu">
+            <!-- █ 基礎資料查詢區塊 █ -->
+            <div class="nav-group">
+                <div class="nav-group-title"><i class="fas fa-database"></i> 流程管理</div>
+                <div class="nav-item active" data-module="workflow" data-url="./個認流程檢查表單.html" data-target="iframe">
+                    <i class="fas fa-check-double"></i>
+                    <span>商品驗證流程檢查表</span>
+                </div>				
+                <div class="nav-item" data-module="typeAccept" data-url="./型式認可清冊.html" data-target="iframe">
+                    <i class="fas fa-list-ul"></i>
+                    <span>型式認可清冊</span>
+                </div>
+            </div>
+
+            <!-- █ 流程與稽核 █ -->
+            <div class="nav-group">
+                <div class="nav-group-title"><i class="fas fa-clipboard-list"></i> 資料製作</div>
+                <div class="nav-item" data-module="individualApply" data-url="./型認書資料庫.html" data-target="iframe">
+                    <i class="fas fa-file-signature"></i>
+                    <span>型認書資料庫</span>
+                </div>
+                <div class="nav-item" data-module="preLabelApply" data-url="./預領認可標示申請書.html" data-target="iframe">
+                    <i class="fas fa-tags"></i>
+                    <span>預領認可標示申請書</span>
+                </div>
+            </div>
+
+            <!-- █ 統計分析 █ -->
+            <div class="nav-group">
+                <div class="nav-group-title"><i class="fas fa-chart-pie"></i> 統計分析</div>
+                <div class="nav-item" data-module="expiry" data-url="./認可期限査詢-5.html" data-target="iframe">
+                    <i class="fas fa-calendar-exclamation"></i>
+                    <span>設備認可到期管理系統</span>
+                </div>				
+                <!-- 統計全體分析：設定 data-target="blank" 表示另開新頁面 -->
+                <div class="nav-item external-link" data-module="statistics" data-url="./統計全體分析.html" data-target="blank">
+                    <i class="fas fa-chart-line"></i>
+                    <span>統計全體分析 <i class="fas fa-external-link-alt" style="font-size: 0.7rem; margin-left: 5px;"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <i class="fas fa-shield-alt"></i> 消防安全中心基金會<br>
+            整合查詢 · 自動保存 · 合規管理
+        </div>
+    </aside>
+
+    <div class="main-content">
+        <div class="content-header">
+            <h3 id="moduleTitle"><i class="fas fa-check-double"></i> 商品驗證流程檢查表</h3>
+            <div class="module-badge" id="moduleBadge">獨立模組 | 同路徑呼叫</div>
+        </div>
+        <div class="iframe-container" id="iframeContainer">
+            <div class="loading-overlay" id="loadingOverlay">
+                <i class="fas fa-spinner fa-pulse fa-2x"></i> 載入模組中...
+            </div>
+            <iframe id="mainIframe" title="消防安全模組" src="about:blank"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 選單項目與對應的標題/圖示資訊
+    const moduleInfo = {
+        typeAccept: {
+            title: '型式認可清冊',
+            icon: '<i class="fas fa-list-ul"></i>',
+            badge: '型式認可 / 個別認可總表'
+        },
+        individualApply: {
+            title: '個別認可申請書',
+            icon: '<i class="fas fa-file-signature"></i>',
+            badge: '個別認可申請書表單'
+        },
+        preLabelApply: {
+            title: '預領認可標示申請書',
+            icon: '<i class="fas fa-tags"></i>',
+            badge: '預先領用認可標示申請書'
+        },
+        workflow: {
+            title: '商品驗證流程檢查表',
+            icon: '<i class="fas fa-check-double"></i>',
+            badge: '拖曳排序｜自動保存｜任務追蹤'
+        },
+        expiry: {
+            title: '設備認可到期管理系統',
+            icon: '<i class="fas fa-calendar-exclamation"></i>',
+            badge: '上傳Excel｜篩選到期日｜匯出報表'
+        },
+        statistics: {
+            title: '統計全體分析',
+            icon: '<i class="fas fa-chart-line"></i>',
+            badge: '設備統計｜交叉分析｜報告匯出 (新視窗)'
+        }
+    };
+
+    const navItems = document.querySelectorAll('.nav-item');
+    const mainIframe = document.getElementById('mainIframe');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const moduleTitle = document.getElementById('moduleTitle');
+    const moduleBadge = document.getElementById('moduleBadge');
+
+    let currentModule = 'workflow';
+    let loadTimeout = null;
+
+    // 切換模組 (僅 iframe 模式)
+    function loadModuleInIframe(moduleKey, fileUrl) {
+        if (!fileUrl) return;
+
+        // 相同模組不重複載入
+        const currentSrc = mainIframe.src;
+        try {
+            const absoluteUrl = new URL(fileUrl, window.location.href).href;
+            if (currentSrc === absoluteUrl && currentModule === moduleKey) {
+                updateHeaderUI(moduleKey);
+                hideLoading();
+                return;
+            }
+        } catch(e) {}
+
+        // 顯示 loading
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+        if (loadTimeout) clearTimeout(loadTimeout);
+        
+        // 更新標題
+        updateHeaderUI(moduleKey);
+        
+        // 切換 iframe
+        mainIframe.src = fileUrl;
+        
+        // 設定超時隱藏 (防止卡住)
+        loadTimeout = setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        
+        // 載入完成事件
+        mainIframe.onload = () => {
+            if (loadTimeout) clearTimeout(loadTimeout);
+            hideLoading();
+            mainIframe.onload = null;
+        };
+        
+        currentModule = moduleKey;
+    }
+
+    // 另開新頁面
+    function openInNewTab(fileUrl) {
+        if (!fileUrl) return;
+        window.open(fileUrl, '_blank');
+    }
+
+    function hideLoading() {
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+    }
+
+    function updateHeaderUI(moduleKey) {
+        const info = moduleInfo[moduleKey];
+        if (info) {
+            moduleTitle.innerHTML = `${info.icon} ${info.title}`;
+            moduleBadge.innerText = info.badge;
+        }
+    }
+
+    function setActiveMenuItem(moduleKey) {
+        navItems.forEach(item => {
+            const moduleAttr = item.getAttribute('data-module');
+            if (moduleAttr === moduleKey) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    // 點擊事件處理 (根據 data-target 決定行為)
+    function onNavItemClick(event) {
+        const target = event.currentTarget;
+        const moduleKey = target.getAttribute('data-module');
+        const fileUrl = target.getAttribute('data-url');
+        const targetType = target.getAttribute('data-target') || 'iframe'; // 預設為 iframe
+        
+        if (!moduleKey || !fileUrl) return;
+        
+        // 更新 active 樣式 (所有項目都維持 active 視覺一致性)
+        setActiveMenuItem(moduleKey);
+        
+        // 根據 target 類型決定行為
+        if (targetType === 'blank') {
+            // 另開新頁面
+            openInNewTab(fileUrl);
+            // 如果原本在 iframe 中顯示的內容，不影響，但維持 currentModule 避免混淆（可選）
+            // 但不要更新 header 和 iframe 內容
+            // 為了使用者體驗，不改變右側內容
+        } else {
+            // 預設：在 iframe 中載入
+            loadModuleInIframe(moduleKey, fileUrl);
+        }
+    }
+
+    // 綁定事件
+    navItems.forEach(item => {
+        item.addEventListener('click', onNavItemClick);
+    });
+
+    // 初始化：載入預設模組（商品驗證流程檢查表）
+    const defaultItem = document.querySelector('.nav-item[data-module="workflow"]');
+    if (defaultItem) {
+        const defaultUrl = defaultItem.getAttribute('data-url');
+        if (defaultUrl) {
+            setTimeout(() => {
+                if (mainIframe.src === 'about:blank' || mainIframe.src === '') {
+                    mainIframe.src = defaultUrl;
+                }
+                setActiveMenuItem('workflow');
+                updateHeaderUI('workflow');
+                hideLoading();
+            }, 100);
+        }
+    }
+    
+    // 錯誤處理：顯示錯誤訊息在 iframe 中（同源才可寫入）
+    mainIframe.onerror = function() {
+        hideLoading();
+        try {
+            if (mainIframe.contentDocument) {
+                mainIframe.contentDocument.write(`
+                    <html><body style="font-family:Segoe UI; text-align:center; padding:50px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:48px; color:#c0392b;"></i>
+                        <h2>無法載入模組</h2>
+                        <p>請確認檔案 <strong>${mainIframe.src}</strong> 是否存在目前路徑下。</p>
+                        <p>需要同目錄的檔案：型式認可清冊.html、個別認可申請書.html、預領認可標示申請書.html、個認流程檢查表單.html、認可期限査詢-5.html、統計全體分析.html</p>
+                    </body></html>
+                `);
+                mainIframe.contentDocument.close();
+            }
+        } catch(e) {}
+    };
+</script>
+</body>
+</html>

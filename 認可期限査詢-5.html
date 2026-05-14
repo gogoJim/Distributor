@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設備認可到期管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 95vh;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            padding: 25px 30px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        h1 i {
+            color: #4ecdc4;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        /* 上傳區域 */
+        .upload-section {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px;
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .upload-section:hover {
+            border-color: #4a90e2;
+            background-color: #f0f7ff;
+        }
+        
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px 20px;
+            cursor: pointer;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #4a90e2;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .upload-hint {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 5px;
+            line-height: 1.4;
+            max-width: 600px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 12px 18px;
+            background-color: #e6f7ff;
+            border-radius: 8px;
+            border-left: 4px solid #1890ff;
+            text-align: left;
+        }
+        
+        /* 控制區域 */
+        .controls-section {
+            padding: 0 25px;
+            margin-bottom: 25px;
+        }
+        
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        select, input {
+            padding: 10px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            background-color: white;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background-color: #4a90e2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a7bc8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #0da271;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        /* 統計區域 */
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 0 25px;
+            margin-bottom: 25px;
+        }
+        
+        .summary-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #4a90e2;
+        }
+        
+        .summary-card.expiring {
+            border-top-color: #f59e0b;
+        }
+        
+        .summary-card.filtered {
+            border-top-color: #10b981;
+        }
+        
+        .summary-title {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        
+        .summary-count {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .summary-period {
+            font-size: 14px;
+            color: #a0aec0;
+            margin-top: 5px;
+        }
+        
+        /* 數據表格區域 */
+        .data-section {
+            flex: 1;
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin: 0 25px 25px 25px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+        
+        thead {
+            background-color: #2c3e50;
+            color: white;
+        }
+        
+        th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            border-right: 1px solid #3a506b;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+        
+        th:hover {
+            background-color: #3a506b;
+        }
+        
+        th.sortable::after {
+            content: "↕";
+            margin-left: 8px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        th.sorted-asc::after {
+            content: "↑";
+            margin-left: 8px;
+            font-size: 12px;
+            opacity: 1;
+        }
+        
+        th.sorted-desc::after {
+            content: "↓";
+            margin-left: 8px;
+            font-size: 12px;
+            opacity: 1;
+        }
+        
+        th:last-child {
+            border-right: none;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f7fafc;
+        }
+        
+        tbody tr.expiring-soon {
+            background-color: #fff7ed;
+        }
+        
+        tbody tr.expired {
+            background-color: #fef2f2;
+        }
+        
+        td {
+            padding: 14px 12px;
+            font-size: 14px;
+            color: #2d3748;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-valid {
+            background-color: #10b981;
+        }
+        
+        .status-expiring {
+            background-color: #f59e0b;
+        }
+        
+        .status-expired {
+            background-color: #ef4444;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #cbd5e1;
+        }
+        
+        .empty-state h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #718096;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+            font-size: 14px;
+            border-top: 1px solid #eaeaea;
+            margin-top: 20px;
+        }
+        
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #4a90e2;
+        }
+        
+        .loading-indicator i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #10b981;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .serial-number {
+            font-weight: 600;
+            color: #4a90e2;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .buttons {
+                justify-content: center;
+            }
+            
+            .upload-section, .controls-section, .summary-section, .data-section {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+        }
+    </style>
+    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
+    <script>
+        (function() {
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            function blockDevTools(e) {
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
+                    e.preventDefault();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+                    e.preventDefault();
+                    return false;
+                }
+                return true;
+            }
+            document.addEventListener('keydown', blockDevTools);
+            let devtoolsOpen = false;
+            const element = new Image();
+            Object.defineProperty(element, 'id', {
+                get: function() {
+                    devtoolsOpen = true;
+                    console.warn('偵測到開發者工具');
+                    return '';
+                }
+            });
+            setInterval(function() {
+                devtoolsOpen = false;
+                console.log(element);
+                console.clear();
+                if (devtoolsOpen) {
+                    console.clear();
+                }
+            }, 1000);
+        })();
+    </script>
+    <!-- ========== 防護區塊結束 ========== -->	
+	
+	
+	
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-clipboard-check"></i> 設備認可到期管理系統</h1>
+            <p class="subtitle">請上傳「認可期限査詢&型式認可申請表.xlsx」檔案，點擊標題可排序資料</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- 上傳檔案區域 -->
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <div class="upload-text">點擊上傳 Excel 檔案</div>
+                    <p class="upload-hint">請選擇「認可期限査詢&型式認可申請表.xlsx」檔案，系統會自動跳過前4行說明文字</p>
+                    <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                <div class="file-info" id="fileInfo">
+                    請上傳「認可期限査詢&型式認可申請表.xlsx」檔案以開始使用
+                </div>
+            </div>
+            
+            <!-- 控制區域 -->
+            <div class="controls-section">
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="yearFilter"><i class="fas fa-calendar-alt"></i> 篩選到期年份</label>
+                        <select id="yearFilter">
+                            <option value="all">全部年份</option>
+                            <option value="2023">2023 年</option>
+                            <option value="2024">2024 年</option>
+                            <option value="2025">2025 年</option>
+                            <option value="2026">2026 年</option>
+                            <option value="2027">2027 年</option>
+                            <option value="expiring">未來 2 年內到期</option>
+                            <option value="expired">已過期</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="searchInput"><i class="fas fa-search"></i> 搜尋設備</label>
+                        <input type="text" id="searchInput" placeholder="輸入設備名稱、型號或廠牌...">
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button class="btn btn-warning" id="resetBtn">
+                        <i class="fas fa-redo"></i> 重設篩選
+                    </button>
+                    <button class="btn btn-success" id="exportBtn">
+                        <i class="fas fa-download"></i> 匯出篩選結果
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 統計區域 -->
+            <div class="summary-section" id="summarySection">
+                <div class="summary-card">
+                    <div class="summary-title">總設備數量</div>
+                    <div class="summary-count" id="totalCount">0</div>
+                    <div class="summary-period">全部資料</div>
+                </div>
+                <div class="summary-card expiring">
+                    <div class="summary-title">即將到期設備</div>
+                    <div class="summary-count" id="expiringCount">0</div>
+                    <div class="summary-period">未來 2 年內到期</div>
+                </div>
+                <div class="summary-card filtered">
+                    <div class="summary-title">篩選的設備</div>
+                    <div class="summary-count" id="filteredCount">0</div>
+                    <div class="summary-period">符合篩選條件</div>
+                </div>
+            </div>
+            
+            <!-- 數據表格區域 -->
+            <div class="data-section">
+                <div class="loading-indicator" id="loadingIndicator">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>正在載入 Excel 檔案，請稍候...</p>
+                </div>
+                
+                <div id="tableContainer">
+                    <div class="empty-state" id="emptyState">
+                        <i class="fas fa-file-excel"></i>
+                        <h3>請上傳 Excel 檔案</h3>
+                        <p>請點擊上方「上傳檔案」區域，選擇「認可期限査詢&型式認可申請表.xlsx」檔案</p>
+                    </div>
+                    <table id="dataTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-column="serial">序號</th>
+                                <th class="sortable" data-column="status">狀態</th>
+                                <th class="sortable" data-column="認可編號">認可編號</th>
+                                <th class="sortable" data-column="設備名稱">設備名稱</th>
+                                <th class="sortable" data-column="廠牌">廠牌</th>
+                                <th class="sortable" data-column="型號">型號</th>
+                                <th class="sortable" data-column="到期日期">到期日期</th>
+                                <th class="sortable" data-column="到期年">到期年</th>
+                                <th class="sortable" data-column="作業開始">作業開始</th>
+                                <th data-column="備註">備註</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- 數據將動態填入 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>設備認可到期管理系統 &copy; 2023 | 請上傳「認可期限査詢&型式認可申請表.xlsx」檔案</p>
+        </footer>
+    </div>
+
+    <script>
+        // 全局變量
+        let originalData = [];
+        let filteredData = [];
+        let currentYear = new Date().getFullYear();
+        let currentSort = '認可編號'; // 預設排序欄位
+        let sortAscending = true; // 預設排序方向
+        let sortStates = {}; // 追蹤每個欄位的排序狀態
+        
+        // DOM 元素
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const yearFilter = document.getElementById('yearFilter');
+        const searchInput = document.getElementById('searchInput');
+        const resetBtn = document.getElementById('resetBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const dataTable = document.getElementById('dataTable');
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const totalCount = document.getElementById('totalCount');
+        const expiringCount = document.getElementById('expiringCount');
+        const filteredCount = document.getElementById('filteredCount');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        
+        // 初始化
+        function init() {
+            console.log("初始化設備認可管理系統...");
+            
+            // 設定年份選項
+            const yearSelect = document.getElementById('yearFilter');
+            yearSelect.innerHTML = '<option value="all">全部年份</option>';
+            
+            for (let year = currentYear - 2; year <= currentYear + 5; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = `${year} 年`;
+                yearSelect.appendChild(option);
+            }
+            
+            yearSelect.innerHTML += '<option value="expiring">未來 2 年內到期</option><option value="expired">已過期</option>';
+            
+            // 初始化排序狀態
+            initSortStates();
+            
+            // 綁定事件監聽器
+            initEventListeners();
+        }
+        
+        // 初始化排序狀態
+        function initSortStates() {
+            const sortableColumns = ['serial', 'status', '認可編號', '設備名稱', '廠牌', '型號', '到期日期', '到期年', '作業開始'];
+            sortableColumns.forEach(column => {
+                sortStates[column] = {
+                    currentDirection: null, // null: 未排序, true: 升序, false: 降序
+                    lastSorted: false
+                };
+            });
+        }
+        
+        // 初始化事件監聽器
+        function initEventListeners() {
+            // 檔案上傳事件
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', handleFileUpload);
+            
+            // 拖放功能
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#4a90e2';
+                uploadArea.style.backgroundColor = '#f0f7ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#cbd5e1';
+                uploadArea.style.backgroundColor = 'white';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#cbd5e1';
+                uploadArea.style.backgroundColor = 'white';
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload({ target: { files: e.dataTransfer.files } });
+                }
+            });
+            
+            // 篩選器事件
+            yearFilter.addEventListener('change', applyFilters);
+            searchInput.addEventListener('input', applyFilters);
+            
+            // 按鈕事件
+            resetBtn.addEventListener('click', resetFilters);
+            exportBtn.addEventListener('click', exportFilteredData);
+            
+            // 表格標題點擊排序事件
+            document.addEventListener('click', function(e) {
+                if (e.target.tagName === 'TH' && e.target.classList.contains('sortable')) {
+                    const column = e.target.getAttribute('data-column');
+                    toggleSort(column);
+                }
+            });
+        }
+        
+        // 切換排序
+        function toggleSort(column) {
+            console.log(`切換排序，欄位: ${column}`);
+            
+            // 如果點擊的是當前排序欄位，則反轉排序方向
+            if (currentSort === column) {
+                sortAscending = !sortAscending;
+            } else {
+                // 如果是新的欄位，則設定為升序
+                currentSort = column;
+                sortAscending = true;
+            }
+            
+            // 更新排序狀態
+            sortStates[column].currentDirection = sortAscending;
+            sortStates[column].lastSorted = true;
+            
+            // 清除其他欄位的排序指示器
+            Object.keys(sortStates).forEach(key => {
+                if (key !== column) {
+                    sortStates[key].lastSorted = false;
+                }
+            });
+            
+            // 排序數據
+            sortData();
+        }
+        
+        // 處理檔案上傳
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) {
+                console.log("沒有選擇檔案");
+                return;
+            }
+            
+            const file = files[0];
+            console.log("選擇的檔案:", file.name);
+            
+            // 顯示載入指示器
+            loadingIndicator.style.display = 'block';
+            emptyState.style.display = 'none';
+            dataTable.style.display = 'none';
+            progressBar.style.display = 'block';
+            progressFill.style.width = '10%';
+            
+            // 更新檔案資訊
+            fileInfo.innerHTML = `正在載入「${file.name}」檔案...`;
+            
+            // 解析 Excel 檔案
+            const reader = new FileReader();
+            
+            reader.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percentLoaded = Math.round((e.loaded / e.total) * 100);
+                    progressFill.style.width = `${10 + (percentLoaded * 0.8)}%`;
+                }
+            };
+            
+            reader.onload = function(e) {
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 500);
+                
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // 取得第一個工作表
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // 將工作表轉換為 JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    
+                    // 處理數據 - 跳過前4行
+                    processExcelData(jsonData, file.name);
+                } catch (error) {
+                    console.error("解析錯誤:", error);
+                    showErrorMessage(`解析 Excel 檔案時發生錯誤: ${error.message}`);
+                }
+            };
+            
+            reader.onerror = function() {
+                console.error("檔案讀取錯誤");
+                progressBar.style.display = 'none';
+                showErrorMessage("無法讀取檔案，請重試。");
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // 顯示錯誤訊息
+        function showErrorMessage(message) {
+            loadingIndicator.style.display = 'none';
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="color: #e53e3e;"></i>
+                <h3>載入檔案失敗</h3>
+                <p>${message}</p>
+                <p style="margin-top: 15px;">請確保上傳的是正確的 Excel 檔案格式</p>
+            `;
+            
+            fileInfo.innerHTML = `<span style="color: #e53e3e;">載入失敗: ${message}</span>`;
+        }
+        
+        // 處理 Excel 數據 - 修改版，跳過前4行
+        function processExcelData(data, fileName) {
+            console.log("處理Excel數據，總行數:", data.length);
+            
+            if (data.length < 6) { // 至少要有6行（前4行說明 + 標題 + 至少1行數據）
+                showErrorMessage("Excel 檔案中沒有足夠的數據，檔案格式可能不正確");
+                return;
+            }
+            
+            // 跳過前4行說明文字，第5行是標題
+            const headers = data[4].map(header => header ? header.toString().trim() : '');
+            console.log("標題行（第5行）:", headers);
+            
+            // 檢查必要欄位
+            const requiredFields = ['認可編號', '設備名稱', '廠牌', '型號', '到期日期', '到期年', '作業開始', '備註'];
+            const missingFields = requiredFields.filter(field => !headers.includes(field));
+            
+            if (missingFields.length > 0) {
+                showErrorMessage(`Excel 檔案缺少必要欄位：${missingFields.join(', ')}<br>請確保檔案包含以下欄位：${requiredFields.join(', ')}`);
+                return;
+            }
+            
+            // 建立欄位索引映射
+            const fieldIndex = {};
+            headers.forEach((header, index) => {
+                fieldIndex[header] = index;
+            });
+            
+            // 轉換數據 - 從第6行開始（索引5）
+            originalData = [];
+            let processedCount = 0;
+            
+            for (let i = 5; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                // 處理日期格式
+                let expiryDate = row[fieldIndex['到期日期']];
+                let expiryYear = row[fieldIndex['到期年']];
+                let workStart = row[fieldIndex['作業開始']];
+                
+                // 處理日期格式轉換
+                expiryDate = convertExcelDate(expiryDate);
+                expiryYear = convertExcelDate(expiryYear, true); // true表示只取年份
+                workStart = convertExcelDate(workStart);
+                
+                // 如果到期年不存在但到期日期存在，從到期日期提取年份
+                if ((!expiryYear || expiryYear === '') && expiryDate) {
+                    const dateObj = new Date(expiryDate);
+                    if (!isNaN(dateObj.getTime())) {
+                        expiryYear = dateObj.getFullYear().toString();
+                    }
+                }
+                
+                // 建立數據物件
+                const item = {
+                    id: i,
+                    serial: processedCount + 1, // 序號
+                    認可編號: row[fieldIndex['認可編號']] || '',
+                    設備名稱: row[fieldIndex['設備名稱']] || '',
+                    廠牌: row[fieldIndex['廠牌']] || '',
+                    型號: row[fieldIndex['型號']] || '',
+                    到期日期: expiryDate || '',
+                    到期年: expiryYear || '',
+                    作業開始: workStart || '',
+                    備註: row[fieldIndex['備註']] || '',
+                    status: getStatus(expiryDate)
+                };
+                
+                originalData.push(item);
+                processedCount++;
+            }
+            
+            // 隱藏載入指示器
+            loadingIndicator.style.display = 'none';
+            
+            // 顯示成功訊息
+            fileInfo.innerHTML = `
+                <strong style="color: #10b981;">成功載入！</strong><br>
+                <strong>檔案：</strong> ${fileName}<br>
+                <strong>資料筆數：</strong> ${processedCount} 筆設備資料<br>
+                <strong>載入時間：</strong> ${new Date().toLocaleTimeString()}<br>
+                <strong>註：</strong> 已自動跳過檔案前4行說明文字
+            `;
+            
+            // 顯示數據
+            filteredData = [...originalData];
+            
+            // 初始排序
+            sortData();
+            updateSummary();
+            
+            // 隱藏空狀態，顯示表格
+            emptyState.style.display = 'none';
+            dataTable.style.display = 'table';
+            
+            console.log(`處理完成，共 ${processedCount} 筆資料`);
+        }
+        
+        // 轉換Excel日期格式
+        function convertExcelDate(value, yearOnly = false) {
+            if (!value) return '';
+            
+            // 如果是數字（Excel日期序列號）
+            if (typeof value === 'number') {
+                try {
+                    // Excel日期序列號（1900日期系統）
+                    const excelDate = XLSX.SSF.parse_date_code(value);
+                    if (excelDate) {
+                        const date = new Date(excelDate.y, excelDate.m - 1, excelDate.d);
+                        if (yearOnly) {
+                            return date.getFullYear().toString();
+                        }
+                        return date.toISOString().split('T')[0];
+                    }
+                } catch (error) {
+                    console.warn("日期轉換錯誤:", error);
+                }
+            }
+            
+            // 如果是日期物件
+            if (value instanceof Date) {
+                if (yearOnly) {
+                    return value.getFullYear().toString();
+                }
+                return value.toISOString().split('T')[0];
+            }
+            
+            // 如果是字串，嘗試解析
+            if (typeof value === 'string') {
+                // 移除可能的時間部分
+                const dateStr = value.split(' ')[0];
+                const dateObj = new Date(dateStr);
+                
+                if (!isNaN(dateObj.getTime())) {
+                    if (yearOnly) {
+                        return dateObj.getFullYear().toString();
+                    }
+                    return dateObj.toISOString().split('T')[0];
+                }
+                
+                // 如果是 "-" 或其他非日期值
+                if (dateStr === '-' || dateStr === '') {
+                    return '';
+                }
+            }
+            
+            // 其他情況返回原始值
+            return value.toString();
+        }
+        
+        // 根據到期日期獲取狀態
+        function getStatus(expiryDate) {
+            if (!expiryDate) return 'unknown';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const expiry = new Date(expiryDate);
+            expiry.setHours(0, 0, 0, 0);
+            
+            if (isNaN(expiry.getTime())) return 'unknown';
+            
+            // 計算距離今天的天數
+            const diffTime = expiry.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) {
+                return 'expired'; // 已過期
+            } else if (diffDays <= 730) { // 2年內
+                return 'expiring';
+            } else {
+                return 'valid';
+            }
+        }
+        
+        // 排序數據
+        function sortData() {
+            if (filteredData.length === 0) return;
+            
+            console.log(`排序資料，欄位: ${currentSort}, 順序: ${sortAscending ? '升序' : '降序'}`);
+            
+            filteredData.sort((a, b) => {
+                let valueA = a[currentSort];
+                let valueB = b[currentSort];
+                
+                // 處理序號排序
+                if (currentSort === 'serial') {
+                    valueA = parseInt(valueA) || 0;
+                    valueB = parseInt(valueB) || 0;
+                }
+                
+                // 處理日期排序
+                if (currentSort === '到期日期' || currentSort === '作業開始') {
+                    valueA = valueA ? new Date(valueA).getTime() : 0;
+                    valueB = valueB ? new Date(valueB).getTime() : 0;
+                }
+                
+                // 處理狀態排序
+                if (currentSort === 'status') {
+                    const statusOrder = { 'valid': 1, 'expiring': 2, 'expired': 3, 'unknown': 4 };
+                    valueA = statusOrder[a.status] || 4;
+                    valueB = statusOrder[b.status] || 4;
+                }
+                
+                // 處理空值
+                if (!valueA && valueB) return sortAscending ? 1 : -1;
+                if (valueA && !valueB) return sortAscending ? -1 : 1;
+                if (!valueA && !valueB) return 0;
+                
+                // 字串比較
+                if (typeof valueA === 'string' && typeof valueB === 'string') {
+                    return sortAscending 
+                        ? valueA.localeCompare(valueB, 'zh-TW') 
+                        : valueB.localeCompare(valueA, 'zh-TW');
+                }
+                
+                // 數值比較
+                return sortAscending ? valueA - valueB : valueB - valueA;
+            });
+            
+            // 更新表格標題排序指示器
+            updateTableHeaderSortIndicator();
+            
+            // 重新渲染表格
+            renderTable();
+            
+            // 更新篩選設備數量
+            filteredCount.textContent = filteredData.length;
+        }
+        
+        // 更新表格標題排序指示器
+        function updateTableHeaderSortIndicator() {
+            // 清除所有標題的排序指示器
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+            
+            // 為當前排序欄位添加指示器
+            const currentHeader = document.querySelector(`th[data-column="${currentSort}"]`);
+            if (currentHeader) {
+                currentHeader.classList.add(sortAscending ? 'sorted-asc' : 'sorted-desc');
+            }
+        }
+        
+        // 渲染表格
+        function renderTable() {
+            tableBody.innerHTML = '';
+            
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 40px; color: #718096;">
+                            <i class="fas fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                            沒有符合篩選條件的設備
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                // 根據狀態添加 CSS 類
+                if (item.status === 'expiring') {
+                    row.classList.add('expiring-soon');
+                } else if (item.status === 'expired') {
+                    row.classList.add('expired');
+                }
+                
+                // 狀態指示器
+                let statusIcon = '';
+                
+                if (item.status === 'valid') {
+                    statusIcon = '<span class="status-indicator status-valid"></span>有效';
+                } else if (item.status === 'expiring') {
+                    statusIcon = '<span class="status-indicator status-expiring"></span>即將到期';
+                } else if (item.status === 'expired') {
+                    statusIcon = '<span class="status-indicator status-expired"></span>已過期';
+                } else {
+                    statusIcon = '<span class="status-indicator" style="background-color: #a0aec0;"></span>未知';
+                }
+                
+                // 格式化日期顯示
+                let expiryDateFormatted = item.到期日期;
+                let workStartFormatted = item.作業開始;
+                
+                if (expiryDateFormatted && expiryDateFormatted.includes('T')) {
+                    expiryDateFormatted = expiryDateFormatted.split('T')[0];
+                }
+                
+                if (workStartFormatted && workStartFormatted.includes('T')) {
+                    workStartFormatted = workStartFormatted.split('T')[0];
+                }
+                
+                row.innerHTML = `
+                    <td class="serial-number">${index + 1}</td>
+                    <td>${statusIcon}</td>
+                    <td>${item.認可編號}</td>
+                    <td>${item.設備名稱}</td>
+                    <td>${item.廠牌}</td>
+                    <td>${item.型號}</td>
+                    <td>${expiryDateFormatted || ''}</td>
+                    <td>${item.到期年 || ''}</td>
+                    <td>${workStartFormatted || ''}</td>
+                    <td>${item.備註 || ''}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 應用篩選
+        function applyFilters() {
+            const yearFilterValue = yearFilter.value;
+            const searchValue = searchInput.value.toLowerCase();
+            
+            filteredData = originalData.filter(item => {
+                // 年份篩選
+                if (yearFilterValue !== 'all') {
+                    if (yearFilterValue === 'expiring') {
+                        // 未來 2 年內到期
+                        if (item.status !== 'expiring') return false;
+                    } else if (yearFilterValue === 'expired') {
+                        // 已過期
+                        if (item.status !== 'expired') return false;
+                    } else if (item.到期年 !== yearFilterValue) {
+                        return false;
+                    }
+                }
+                
+                // 搜尋篩選
+                if (searchValue) {
+                    const searchFields = [
+                        item.認可編號, 
+                        item.設備名稱, 
+                        item.廠牌, 
+                        item.型號,
+                        item.備註
+                    ];
+                    
+                    const matches = searchFields.some(field => 
+                        field && field.toString().toLowerCase().includes(searchValue)
+                    );
+                    
+                    if (!matches) return false;
+                }
+                
+                return true;
+            });
+            
+            // 應用當前排序
+            sortData();
+        }
+        
+        // 更新摘要統計
+        function updateSummary() {
+            totalCount.textContent = originalData.length;
+            
+            // 計算即將到期的數量
+            const expiringItems = originalData.filter(item => item.status === 'expiring');
+            expiringCount.textContent = expiringItems.length;
+            
+            // 篩選的設備數量
+            filteredCount.textContent = filteredData.length;
+        }
+        
+        // 重設篩選
+        function resetFilters() {
+            yearFilter.value = 'all';
+            searchInput.value = '';
+            filteredData = [...originalData];
+            sortData();
+        }
+        
+        // 匯出篩選結果
+        function exportFilteredData() {
+            if (filteredData.length === 0) {
+                alert('沒有數據可以匯出');
+                return;
+            }
+            
+            try {
+                // 準備工作表數據
+                const headers = ['序號', '狀態', '認可編號', '設備名稱', '廠牌', '型號', '到期日期', '到期年', '作業開始', '備註'];
+                const dataForExport = [headers];
+                
+                filteredData.forEach((item, index) => {
+                    let statusText = '';
+                    if (item.status === 'valid') statusText = '有效';
+                    else if (item.status === 'expiring') statusText = '即將到期';
+                    else if (item.status === 'expired') statusText = '已過期';
+                    else statusText = '未知';
+                    
+                    dataForExport.push([
+                        index + 1,
+                        statusText,
+                        item.認可編號,
+                        item.設備名稱,
+                        item.廠牌,
+                        item.型號,
+                        item.到期日期,
+                        item.到期年,
+                        item.作業開始,
+                        item.備註
+                    ]);
+                });
+                
+                // 建立工作表
+                const worksheet = XLSX.utils.aoa_to_sheet(dataForExport);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, '設備認可列表');
+                
+                // 匯出檔案
+                const exportDate = new Date().toISOString().split('T')[0];
+                XLSX.writeFile(workbook, `設備認可列表_${exportDate}.xlsx`);
+                
+            } catch (error) {
+                alert('匯出檔案時發生錯誤：' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // 初始化應用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
