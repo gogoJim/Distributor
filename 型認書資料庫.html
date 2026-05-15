@@ -472,7 +472,7 @@
                     for (let i = 0; i < validDevices.length; i++) {
                         const item = validDevices[i];
                         setTimeout(() => {
-                            window.open(`認可書/${item.id}.pdf`, '_blank');
+                            window.open(`PDF2/${item.id}.pdf`, '_blank');
                         }, i * 300);
                     }
                     progressDiv.innerHTML = `✅ 已開啟 ${validDevices.length} 個 PDF 檔案（瀏覽器可能阻擋彈窗）`;
@@ -486,7 +486,7 @@
             }
             
             const fetchPromises = validDevices.map(async (item) => {
-                const pdfUrl = `認可書/${item.id}.pdf`;
+                const pdfUrl = `PDF2/${item.id}.pdf`;
                 try {
                     const response = await fetch(pdfUrl);
                     if (response.ok) {
