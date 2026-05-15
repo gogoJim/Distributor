@@ -138,8 +138,6 @@
         font-weight: 500;
     }
 </style>
-
-    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
     <script>
         (function() {
             document.addEventListener('contextmenu', function(e) {
@@ -193,8 +191,6 @@
             }, 1000);
         })();
     </script>
-    <!-- ========== 防護區塊結束 ========== -->
-
 </head>
 <body>
 <div class="container">
@@ -212,12 +208,11 @@
                 <th>設備名稱</th>
                 <th>型號</th>
                 <th>文件連結</th>
-            </tr>
+             </tr>
         </thead>
         <tbody id="tableBody">
-            <!-- 動態填入資料 -->
         </tbody>
-    </table>
+     </table>
     <div class="footer-info">
         ✅ 按鈕說明：📄「認可書」→ 對應 <strong>認可書/</strong> 資料夾內 [ID].pdf  <br>
         🏷️「標籤」→ 對應 <strong>標籤/</strong> 資料夾內 [ID].html <br>
@@ -232,15 +227,14 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-    // ======================= 1. 資料來源 (來自型認書資料庫，已包含 ID 對應) =======================
     const deviceData = [
-        { sn: 1, id: "-", certNo: "內投消字第 1131300820 號", deviceName: "小規模放水槍", model: "GD-101" },
-        { sn: 2, id: "C403", certNo: "內投消字第 1131601828 號", deviceName: "瓦斯警報器", model: "YF-517D" },
-        { sn: 3, id: "-", certNo: "內投消字第 1141601200 號", deviceName: "固定式放水型", model: "GE-101" },
+        { sn: 1, id: "-", certNo: "內授消字第1131300820號", deviceName: "小規模放水槍", model: "GD-101" },
+        { sn: 2, id: "C403", certNo: "內授消字第1131601828號", deviceName: "瓦斯警報器", model: "YF-517D" },
+        { sn: 3, id: "-", certNo: "內授消字第1141601200號", deviceName: "固定式放水型", model: "GE-101" },
         { sn: 4, id: "A106", certNo: "AR-A104001", deviceName: "火警受信總機", model: "HRN-ABS2550FGA(T)" },
         { sn: 5, id: "B101", certNo: "AR-A110008", deviceName: "火警受信總機", model: "L@titude" },
         { sn: 6, id: "-", certNo: "AR-A111005", deviceName: "火警受信總機", model: "K1810-12" },
-        { sn: 7, id: "D101", certNo: "AR-A114003", deviceName: "火警受信總機", model: "HCVR-3-R" },
+        { sn: 7, id: "D101", certNo: "AR-A114003", deviceName: "火警受信總機", model: "HCVR-3" },
         { sn: 8, id: "A116", certNo: "AR-A114004", deviceName: "火警受信總機", model: "HRU-ABS1020(OP)" },
         { sn: 9, id: "A107", certNo: "AR-A114005", deviceName: "火警受信總機", model: "HRR-AAW5610" },
         { sn: 10, id: "-", certNo: "AV-A106001", deviceName: "流水檢測裝置", model: "GNA-EA100" },
@@ -249,6 +243,7 @@
         { sn: 13, id: "A401", certNo: "B-A103001", deviceName: "火警警鈴", model: "FBB-150ID" },
         { sn: 14, id: "C117", certNo: "B-A103002", deviceName: "火警警鈴", model: "FBB-150I" },
         { sn: 15, id: "C601", certNo: "CSP-A103009-1", deviceName: "密閉式水噴頭", model: "GQH-FE72-2" },
+        { sn: 16, id: "-", certNo: "CSP-A104001-1", deviceName: "密閉式水噴頭", model: "GQH-GA72-2" },
         { sn: 17, id: "-", certNo: "CSP-A104002-1", deviceName: "密閉式水噴頭", model: "HF-E72-2" },
         { sn: 18, id: "C602", certNo: "CSP-A104003-1", deviceName: "密閉式水噴頭", model: "GQH-FE98-2" },
         { sn: 19, id: "-", certNo: "DV-A106014", deviceName: "一齊開放閥", model: "10-65FDEWF" },
@@ -326,7 +321,7 @@
             alert("此設備無對應識別碼 (ID)，無法開啟認可書。");
             return;
         }
-        const pdfPath = `PDF2/${idValue}.pdf`;
+        const pdfPath = `認可書/${idValue}.pdf`;
         window.open(pdfPath, '_blank');
     }
 
@@ -335,7 +330,7 @@
             alert("此設備無對應識別碼 (ID)，無法開啟標籤文件。");
             return;
         }
-        const htmlPath = `sticker/${idValue}.html`;
+        const htmlPath = `標籤/${idValue}.html`;
         window.open(htmlPath, '_blank');
     }
 
@@ -343,38 +338,118 @@
         const stored = localStorage.getItem('typeAccept_selected_ids');
         if (stored) {
             try {
-                return JSON.parse(stored);
-            } catch(e) {
-                return [];
-            }
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) return parsed;
+            } catch(e) {}
         }
         return [];
     }
 
-    function getCurrentDisplayDevices() {
+    function renderTable() {
         const selectedIds = getSelectedIdsFromStorage();
         const hasSelection = selectedIds.length > 0;
-        const devices = [];
+        
+        let html = '';
+        let displayCount = 0;
+        
         for (let item of deviceData) {
             const shouldShow = !hasSelection || (item.id !== "-" && selectedIds.includes(item.id));
-            if (shouldShow) {
-                devices.push(item);
-            }
+            if (!shouldShow) continue;
+            
+            displayCount++;
+            const hasValidId = (item.id && item.id !== "-");
+            
+            const approvalBtn = hasValidId 
+                ? `<button class="pdf-btn" data-id="${item.id}" data-type="approval">📄 認可書</button>`
+                : `<button class="pdf-btn" disabled style="background:#aaa; cursor:not-allowed;">📄 認可書</button>`;
+            
+            const labelBtn = hasValidId
+                ? `<button class="pdf-btn label-btn" data-id="${item.id}" data-type="label">🏷️ 標籤</button>`
+                : `<button class="pdf-btn label-btn" disabled style="background:#aaa; cursor:not-allowed;">🏷️ 標籤</button>`;
+
+            html += `
+                <tr>
+                    <td>${item.sn}</td>
+                    <td>${item.id === "-" ? "—" : item.id}</td>
+                    <td>${escapeHtml(item.certNo)}</td>
+                    <td>${escapeHtml(item.deviceName)}</td>
+                    <td>${escapeHtml(item.model)}</td>
+                    <td class="btn-group">${approvalBtn} ${labelBtn}</td>
+                 </tr>
+            `;
         }
-        return { devices, selectedIds, hasSelection };
+        
+        if (displayCount === 0 && hasSelection) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px;">⚠️ 目前勾選的設備無效 ID 或不存在，請重新勾選</td></tr>`;
+            downloadBtn.style.display = "none";
+        } else if (displayCount === 0 && !hasSelection) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px;">📋 目前無設備資料</td></tr>`;
+            downloadBtn.style.display = "none";
+        } else {
+            tbody.innerHTML = html;
+            downloadBtn.style.display = hasSelection ? "inline-flex" : "none";
+        }
+        
+        const allApprovalBtns = document.querySelectorAll('.pdf-btn[data-type="approval"]');
+        const allLabelBtns = document.querySelectorAll('.pdf-btn[data-type="label"]');
+        
+        allApprovalBtns.forEach(btn => {
+            if (!btn.disabled) {
+                btn.removeEventListener('click', approvalHandler);
+                btn.addEventListener('click', approvalHandler);
+            }
+        });
+        
+        allLabelBtns.forEach(btn => {
+            if (!btn.disabled) {
+                btn.removeEventListener('click', labelHandler);
+                btn.addEventListener('click', labelHandler);
+            }
+        });
+        
+        const hintDiv = document.getElementById('syncHint') || document.createElement('div');
+        if (!hintDiv.id) {
+            hintDiv.id = 'syncHint';
+            hintDiv.style.cssText = 'background:#e8f5e9; padding:8px 15px; border-radius:20px; margin-bottom:15px; font-size:13px; color:#2e7d32; display:inline-block; width:auto;';
+            const title = document.querySelector('h2');
+            title.insertAdjacentElement('afterend', hintDiv);
+        }
+        
+        if (hasSelection) {
+            hintDiv.innerHTML = `🔗 同步模式：已從「型式認可清冊」同步 ${selectedIds.length} 筆勾選設備，目前顯示 ${displayCount} 筆 | <a href="#" id="clearSyncBtn" style="color:#c0392b;">清除同步條件</a>`;
+            const clearBtn = document.getElementById('clearSyncBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('typeAccept_selected_ids');
+                    renderTable();
+                });
+            }
+        } else {
+            hintDiv.innerHTML = `📋 一般模式：顯示全部 ${deviceData.length} 筆設備 | 請至「型式認可清冊」勾選設備後即可同步篩選`;
+        }
+    }
+    
+    function approvalHandler(e) {
+        const btn = e.currentTarget;
+        const idValue = btn.getAttribute('data-id');
+        openApprovalPDF(idValue);
+    }
+    
+    function labelHandler(e) {
+        const btn = e.currentTarget;
+        const idValue = btn.getAttribute('data-id');
+        openLabelHTML(idValue);
     }
 
-    // 一鍵下載功能：使用 fetch + JSZip 打包下載（需 HTTP 伺服器）
-    // 注意：此功能需要在 HTTP/HTTPS 協議下執行，file:// 協議會因 CORS 失敗
     async function downloadAllApprovalPDFs() {
-        const { devices, selectedIds, hasSelection } = getCurrentDisplayDevices();
-        
-        if (!hasSelection || devices.length === 0) {
+        const selectedIds = getSelectedIdsFromStorage();
+        if (selectedIds.length === 0) {
             alert("目前無篩選條件，請先至「型式認可清冊」勾選設備後，再使用一鍵下載功能。");
             return;
         }
         
-        const validDevices = devices.filter(item => item.id && item.id !== "-");
+        const validDevices = deviceData.filter(item => item.id !== "-" && selectedIds.includes(item.id));
         
         if (validDevices.length === 0) {
             alert("目前篩選的設備中，沒有有效的識別碼 (ID)，無法下載。");
@@ -391,11 +466,9 @@
             let successCount = 0;
             let failCount = 0;
             
-            // 檢查是否為 file:// 協議，若是則提示改用 HTTP 伺服器
             if (window.location.protocol === 'file:') {
-                progressDiv.innerHTML = `⚠️ 偵測到 file:// 協議，無法打包下載！<br>請使用 HTTP 伺服器（如 Live Server）開啟此頁面。<br>目前改為直接開啟 PDF 檔案...`;
+                progressDiv.innerHTML = `⚠️ 偵測到 file:// 協議，無法打包下載！<br>請使用 HTTP 伺服器（如 Live Server）開啟此頁面。<br>改為直接開啟 PDF 檔案...`;
                 setTimeout(() => {
-                    // 改為直接開啟
                     for (let i = 0; i < validDevices.length; i++) {
                         const item = validDevices[i];
                         setTimeout(() => {
@@ -412,7 +485,6 @@
                 return;
             }
             
-            // HTTP/HTTPS 協議下使用 fetch 打包
             const fetchPromises = validDevices.map(async (item) => {
                 const pdfUrl = `認可書/${item.id}.pdf`;
                 try {
@@ -474,128 +546,26 @@
         }
     }
 
-    function approvalHandler(e) {
-        const btn = e.currentTarget;
-        const idValue = btn.getAttribute('data-id');
-        openApprovalPDF(idValue);
-    }
-
-    function labelHandler(e) {
-        const btn = e.currentTarget;
-        const idValue = btn.getAttribute('data-id');
-        openLabelHTML(idValue);
-    }
-
-    function updateDisplayCount(displayCount, selectedCount) {
-        const existingHint = document.getElementById('syncHint');
-        if (existingHint) existingHint.remove();
-        
-        const hintDiv = document.createElement('div');
-        hintDiv.id = 'syncHint';
-        hintDiv.style.cssText = 'background:#e8f5e9; padding:8px 15px; border-radius:20px; margin-bottom:15px; font-size:13px; color:#2e7d32; display:inline-block; width:auto;';
-        
-        if (selectedCount > 0) {
-            hintDiv.innerHTML = `🔗 同步模式：已從「型式認可清冊」同步 ${selectedCount} 筆勾選設備，目前顯示 ${displayCount} 筆 | <a href="#" id="clearSyncBtn" style="color:#c0392b;">清除同步條件</a>`;
-            downloadBtn.style.display = "inline-flex";
-        } else {
-            hintDiv.innerHTML = `📋 一般模式：顯示全部 ${displayCount} 筆設備 | 請至「型式認可清冊」勾選設備後即可同步篩選`;
-            downloadBtn.style.display = "none";
-        }
-        
-        const title = document.querySelector('h2');
-        title.insertAdjacentElement('afterend', hintDiv);
-        
-        const clearBtn = document.getElementById('clearSyncBtn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('typeAccept_selected_ids');
-                renderTable();
-            });
-        }
-    }
-
-    function renderTable() {
-        const selectedIds = getSelectedIdsFromStorage();
-        const hasSelection = selectedIds.length > 0;
-        
-        let html = '';
-        let displayCount = 0;
-        
-        for (let item of deviceData) {
-            const shouldShow = !hasSelection || (item.id !== "-" && selectedIds.includes(item.id));
-            if (!shouldShow) continue;
-            
-            displayCount++;
-            const hasValidId = (item.id && item.id !== "-");
-            
-            const approvalBtn = hasValidId 
-                ? `<button class="pdf-btn" data-id="${item.id}" data-type="approval">📄 認可書</button>`
-                : `<button class="pdf-btn" disabled style="background:#aaa; cursor:not-allowed;">📄 認可書</button>`;
-            
-            const labelBtn = hasValidId
-                ? `<button class="pdf-btn label-btn" data-id="${item.id}" data-type="label">🏷️ 標籤</button>`
-                : `<button class="pdf-btn label-btn" disabled style="background:#aaa; cursor:not-allowed;">🏷️ 標籤</button>`;
-
-            html += `
-                <tr>
-                    <td>${item.sn}</td>
-                    <td>${item.id === "-" ? "—" : item.id}</td>
-                    <td>${escapeHtml(item.certNo)}</td>
-                    <td>${escapeHtml(item.deviceName)}</td>
-                    <td>${escapeHtml(item.model)}</td>
-                    <td class="btn-group">${approvalBtn} ${labelBtn}</td>
-                </tr>
-            `;
-        }
-        
-        if (displayCount === 0 && hasSelection) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px;">⚠️ 目前勾選的設備無效 ID 或不存在，請重新勾選</td></tr>`;
-        } else if (displayCount === 0 && !hasSelection) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px;">📋 目前無設備資料</td></tr>`;
-        } else {
-            tbody.innerHTML = html;
-        }
-        
-        const allApprovalBtns = document.querySelectorAll('.pdf-btn[data-type="approval"]');
-        const allLabelBtns = document.querySelectorAll('.pdf-btn[data-type="label"]');
-        
-        allApprovalBtns.forEach(btn => {
-            if (!btn.disabled) {
-                btn.removeEventListener('click', approvalHandler);
-                btn.addEventListener('click', approvalHandler);
-            }
-        });
-        
-        allLabelBtns.forEach(btn => {
-            if (!btn.disabled) {
-                btn.removeEventListener('click', labelHandler);
-                btn.addEventListener('click', labelHandler);
-            }
-        });
-        
-        updateDisplayCount(displayCount, selectedIds.length);
-    }
-
+    downloadBtn.addEventListener('click', downloadAllApprovalPDFs);
+    
     window.addEventListener('storage', (e) => {
         if (e.key === 'typeAccept_selected_ids') {
             console.log('🔄 偵測到勾選清單變更，重新整理表格');
             renderTable();
         }
     });
-
-    downloadBtn.addEventListener('click', downloadAllApprovalPDFs);
-
+    
     renderTable();
-
-    let lastIdsLength = getSelectedIdsFromStorage().length;
+    
     setInterval(() => {
-        const currentLength = getSelectedIdsFromStorage().length;
-        if (currentLength !== lastIdsLength) {
-            lastIdsLength = currentLength;
+        const currentIds = getSelectedIdsFromStorage();
+        const currentIdsStr = JSON.stringify(currentIds);
+        const lastIdsStr = localStorage.getItem('_last_rendered_ids') || '[]';
+        if (currentIdsStr !== lastIdsStr) {
+            localStorage.setItem('_last_rendered_ids', currentIdsStr);
             renderTable();
         }
-    }, 2000);
+    }, 500);
 </script>
 </body>
 </html>

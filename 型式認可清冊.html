@@ -248,7 +248,6 @@
             padding-top: 12px;
         }
     </style>
-    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
     <script>
         (function() {
             document.addEventListener('contextmenu', function(e) {
@@ -302,9 +301,6 @@
             }, 1000);
         })();
     </script>
-    <!-- ========== 防護區塊結束 ========== -->	
-	
-	
 </head>
 <body>
 <div class="container">
@@ -331,10 +327,10 @@
                 <th>設備名稱</th>
                 <th>製造商 / 公司</th>
                 <th>型號</th>
-             </tr>
+              </tr>
         </thead>
         <tbody id="tableBody"></tbody>
-    </table>
+     </table>
 
     <div class="selection-bar">
         <div class="info-badge" id="selectedCountInfo">已選取 0 筆</div>
@@ -349,7 +345,6 @@
 </div>
 
 <script>
-    // ==================== 原始資料集 (序號 1~72) ====================
     const rawData = [
         { sn: 1, certNo: "內授消字第1131300820號", deviceName: "小規模放水槍", manufacturer: "HOCHIKI", model: "GD-101" },
         { sn: 2, certNo: "內授消字第1131601828號", deviceName: "瓦斯警報器", manufacturer: "YAZAKI", model: "YF-517D" },
@@ -425,7 +420,35 @@
         { sn: 72, certNo: "RP-A115002", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CMA-ABW1020(OP)" }
     ];
 
-    // 儲存勾選狀態
+    const idMapping = [
+        { id: "A101", name: "HRN-ABW510FGA(T)" }, { id: "A102", name: "HRN-ABW1020FGA(T)" }, { id: "A103", name: "HRN-ABS510FGA(T)" },
+        { id: "A104", name: "HRN-ABS1020FGA(T)" }, { id: "A105", name: "HRN-ABS2040FGA(T)" }, { id: "A106", name: "HRN-ABS2550FGA(T)" },
+        { id: "A107", name: "HRR-AAW510" }, { id: "A108", name: "HRR-AAW1020" }, { id: "A109", name: "HRR-AAS510" },
+        { id: "A110", name: "HRR-AAS1020" }, { id: "A111", name: "HRR-AAS2040" }, { id: "A112", name: "HRR-AAS2550" },
+        { id: "A113", name: "HRR-AAS4080" }, { id: "A114", name: "HRR-AAS5100" }, { id: "A115", name: "HRR-AAS5610" },
+        { id: "A116", name: "HRU-ABS1020(OP)" }, { id: "A117", name: "HRU-ABS2040(OP)" }, { id: "A201", name: "ALK-NLYA" },
+        { id: "A202", name: "ASB-2LYA" }, { id: "A203", name: "ATI-NWLHYA" }, { id: "A204", name: "PRK-1A" },
+        { id: "A205", name: "ABC-12YA" }, { id: "A301", name: "CHW-KL" }, { id: "A302", name: "CHW-K4P" },
+        { id: "A303", name: "CHW-K8" }, { id: "A304", name: "CHW-BY" }, { id: "A305", name: "CHW-R4" },
+        { id: "A306", name: "CHW-S4A" }, { id: "A307", name: "CHW-G4" }, { id: "A308", name: "CHW-ADSCI2" },
+        { id: "A309", name: "CHW-PSCI" }, { id: "A310", name: "CMA-ABW510(OP)" }, { id: "A311", name: "CMA-ABW1020(OP)" },
+        { id: "A312", name: "CMA-ABW2040(OP)" }, { id: "A401", name: "FBB-150ID" }, { id: "B101", name: "L@titude 2" },
+        { id: "B102", name: "L@titude 4" }, { id: "B103", name: "L@titude 6" }, { id: "B104", name: "L@titude 8" },
+        { id: "B105", name: "L@titude 10" }, { id: "B106", name: "L@titude 12" }, { id: "B107", name: "L@titude 14" },
+        { id: "B108", name: "L@titude 16" }, { id: "B201", name: "ALO-V" }, { id: "B202", name: "ATJ-EA" },
+        { id: "B203", name: "ACC-V" }, { id: "B301", name: "DCP-CZM" }, { id: "B302", name: "DCP-DIMM" },
+        { id: "B303", name: "DCP-R2ML" }, { id: "B304", name: "DCP-SCI" }, { id: "B305", name: "DCP-AMS-LP" },
+        { id: "C101", name: "SLV-2" }, { id: "C102", name: "DSC-2" }, { id: "C105", name: "DFS-1SE70RLB" },
+        { id: "C107", name: "DHA-2L" }, { id: "C109", name: "DRC-13A" }, { id: "C115", name: "PPH-1A" },
+        { id: "C117", name: "FBB-150I" }, { id: "C201", name: "SOE-24V" }, { id: "C202", name: "SOE-24H" },
+        { id: "C206", name: "DSC-EA" }, { id: "C208", name: "SPC-24" }, { id: "C301", name: "SOC-E-IS" },
+        { id: "C302", name: "DCD-1E-IS" }, { id: "C304", name: "DRD-E" }, { id: "C401", name: "SS-2LT-10HC" },
+        { id: "C402", name: "SS-FL-10HC" }, { id: "C403", name: "YF-517D" }, { id: "C601", name: "GQH-FE72-2" },
+        { id: "C602", name: "GQH-FE98-2" }, { id: "C605", name: "GFH-D35" }, { id: "C606", name: "GNA-FA100" },
+        { id: "C607", name: "GNA-FA150" }, { id: "D101", name: "HCVR-3" }, { id: "D301", name: "SOE-24V" },
+        { id: "D302", name: "SOE-24H" }, { id: "D303", name: "DCD-135" }
+    ];
+
     let checkedStatus = new Array(rawData.length).fill(false);
     let currentFilteredIndices = [];
     let isFilterMode = false;
@@ -440,95 +463,45 @@
     const clearAllCheckedBtn = document.getElementById("clearAllCheckedBtn");
     const selectedCountSpan = document.getElementById("selectedCountInfo");
 
-    // ==================== 儲存勾選設備到 localStorage (供申請書讀取) ====================
-	// ==================== 儲存勾選設備到 localStorage (供申請書讀取 & 型認書資料庫同步) ====================
-function saveSelectedToLocalStorage() {
-    const selectedItems = [];
-    const selectedIds = [];  // 新增：儲存勾選設備的 ID (從 id.txt 比對而來)
-    
-    for (let i = 0; i < checkedStatus.length; i++) {
-        if (checkedStatus[i] === true) {
-            const item = rawData[i];
-            selectedItems.push({
-                deviceName: item.deviceName,
-                model: item.model,
-                certNo: item.certNo
-            });
-            
-            // 根據型號找出對應的 ID (需要從 id.txt 的對照表取得)
-            const matchedId = findIdByModel(item.model);
-            if (matchedId) {
-                selectedIds.push(matchedId);
+    function findIdByModel(model) {
+        const found = idMapping.find(m => m.name === model);
+        return found ? found.id : null;
+    }
+
+    function saveSelectedToLocalStorage() {
+        const selectedItems = [];
+        const selectedIds = [];
+        
+        for (let i = 0; i < checkedStatus.length; i++) {
+            if (checkedStatus[i] === true) {
+                const item = rawData[i];
+                selectedItems.push({
+                    deviceName: item.deviceName,
+                    model: item.model,
+                    certNo: item.certNo
+                });
+                
+                const matchedId = findIdByModel(item.model);
+                if (matchedId) {
+                    selectedIds.push(matchedId);
+                }
             }
         }
+        
+        localStorage.setItem('typeAccept_selected_export', JSON.stringify(selectedItems));
+        localStorage.setItem('typeAccept_selected_ids', JSON.stringify(selectedIds));
+        
+        console.log('✅ 已儲存勾選設備至 localStorage，共', selectedItems.length, '筆，ID清單:', selectedIds);
+        return selectedItems.length;
     }
-    
-    // 儲存完整資料 (供申請書使用)
-    localStorage.setItem('typeAccept_selected_export', JSON.stringify(selectedItems));
-    // 儲存 ID 清單 (供型認書資料庫同步)
-    localStorage.setItem('typeAccept_selected_ids', JSON.stringify(selectedIds));
-    
-    console.log('✅ 已儲存勾選設備至 localStorage，共', selectedItems.length, '筆，ID清單:', selectedIds);
-    return selectedItems.length;
-}
 
-// 新增：根據型號查找對應的 ID (比對 id.txt 的 name)
-function findIdByModel(model) {
-    // id.txt 對照表 (根據您提供的 id.txt 內容)
-    const idMapping = [
-        { id: "A101", name: "HRN-ABW510FGA(T)" }, { id: "A102", name: "HRN-ABW1020FGA(T)" }, { id: "A103", name: "HRN-ABS510FGA(T)" },
-        { id: "A104", name: "HRN-ABS1020FGA(T)" }, { id: "A105", name: "HRN-ABS2040FGA(T)" }, { id: "A106", name: "HRN-ABS2550FGA(T)" },
-        { id: "A107", name: "HRR-AAW510" }, { id: "A108", name: "HRR-AAW1020" }, { id: "A109", name: "HRR-AAS510" },
-        { id: "A110", name: "HRR-AAS1020" }, { id: "A111", name: "HRR-AAS2040" }, { id: "A112", name: "HRR-AAS2550" },
-        { id: "A113", name: "HRR-AAS4080" }, { id: "A114", name: "HRR-AAS5100" }, { id: "A115", name: "HRR-AAS5610" },
-        { id: "A116", name: "HRU-ABS510(OP)" }, { id: "A117", name: "HRU-ABS1020(OP)" }, { id: "A201", name: "ALK-NLYA" },
-        { id: "A202", name: "ASB-2LYA" }, { id: "A203", name: "ATI-NWRLYA" }, { id: "A204", name: "PRK-1A" },
-        { id: "A205", name: "ABC-12YA" }, { id: "A206", name: "YBN-R/1NA" }, { id: "A207", name: "YYT-9A" },
-        { id: "A301", name: "CHW-KL" }, { id: "A302", name: "CHW-K4P" }, { id: "A303", name: "CHW-K8" },
-        { id: "A304", name: "CHW-BY" }, { id: "A305", name: "CHW-R4" }, { id: "A306", name: "CHW-S4A" },
-        { id: "A307", name: "CHW-G4" }, { id: "A308", name: "CHW-ADSCI2" }, { id: "A309", name: "CHW-PSCI" },
-        { id: "A310", name: "CMA-ABW510(OP)" }, { id: "A311", name: "CMA-ABW1020(OP)" }, { id: "A312", name: "CMA-ABW2040(OP)" },
-        { id: "A313", name: "TE-RH" }, { id: "A401", name: "FBB-150ID" }, { id: "A402", name: "R/P 移報板 HRN用" },
-        { id: "A403", name: "R/P 移報板 HRR/HRU用" }, { id: "A404", name: "RS-232 串列基板 HRN用" }, { id: "A405", name: "RS-232 串列基板 HRR用" },
-        { id: "A406", name: "TCO-A100" }, { id: "A407", name: "HEX-IPH" }, { id: "A408", name: "NCD-3.50" }, { id: "A409", name: "NCD-6.00" },
-        { id: "A410", name: "NCD-10.00" }, { id: "B101", name: "L@titude 2" }, { id: "B102", name: "L@titude 4" }, { id: "B103", name: "L@titude 6" },
-        { id: "B104", name: "L@titude 8" }, { id: "B105", name: "L@titude 10" }, { id: "B106", name: "L@titude 12" }, { id: "B107", name: "L@titude 14" },
-        { id: "B108", name: "L@titude 16" }, { id: "B201", name: "ALO-V" }, { id: "B202", name: "ATJ-EA" }, { id: "B203", name: "ACC-V" },
-        { id: "B204", name: "YBN-NSA-47" }, { id: "B301", name: "DCP-CZM" }, { id: "B302", name: "DCP-DIMM" }, { id: "B303", name: "DCP-R2ML" },
-        { id: "B304", name: "DCP-SCI" }, { id: "B305", name: "DCP-AMS-LP" }, { id: "B401", name: "Vison" }, { id: "B402", name: "S408" },
-        { id: "B403", name: "S406" }, { id: "B404", name: "S723" }, { id: "B405", name: "S758" }, { id: "B406", name: "S788" },
-        { id: "B407", name: "圖控電腦" }, { id: "C101", name: "SLV-2" }, { id: "C102", name: "DSC-2" }, { id: "C105", name: "DFS-1SE70RLB" },
-        { id: "C106", name: "台製底座" }, { id: "C107", name: "DHA-2L" }, { id: "C108", name: "AK-M" }, { id: "C109", name: "DRC-13A" },
-        { id: "C110", name: "YBR-RL/2(LG)" }, { id: "C111", name: "YZU-AA" }, { id: "C112", name: "YZU-B" }, { id: "C113", name: "YZU-C" },
-        { id: "C114", name: "YZU-D" }, { id: "C115", name: "PPH-1A" }, { id: "C116", name: "YYT-9A" }, { id: "C117", name: "FBB-150I" },
-        { id: "C118", name: "ARS-B104" }, { id: "C201", name: "SOE-24V" }, { id: "C202", name: "SOE-24H" }, { id: "C203", name: "DCD-135" },
-        { id: "C204", name: "NS4-100" }, { id: "C206", name: "DSC-EA" }, { id: "C207", name: "台製底座" }, { id: "C208", name: "SPC-24" },
-        { id: "C209", name: "HSC-224R" }, { id: "C210", name: "HSC-4R" }, { id: "C301", name: "SOC-E-IS" }, { id: "C302", name: "DCD-1E-IS" },
-        { id: "C303", name: "YBN-R/4(IS)" }, { id: "C304", name: "DRD-E" }, { id: "C305", name: "YZU-AA" }, { id: "C306", name: "YZU-B" },
-        { id: "C307", name: "YZU-C" }, { id: "C401", name: "SS-2LT-10HC" }, { id: "C402", name: "SS-FL-10HC" }, { id: "C403", name: "YF-517D" },
-        { id: "C404", name: "SH5910" }, { id: "C501", name: "SOC-E3NM" }, { id: "C502", name: "DCD-AE3M" }, { id: "C503", name: "DCD-CE3M" },
-        { id: "C504", name: "DRD-EM" }, { id: "C505", name: "YBN-R/6M" }, { id: "C506", name: "MBB-2" }, { id: "C601", name: "GQH-FE72-2" },
-        { id: "C602", name: "GQH-FE98-2" }, { id: "C603", name: "GQH-GA72" }, { id: "C604", name: "Sealing Plate K" }, { id: "C605", name: "GFH-D35" },
-        { id: "C606", name: "GNA-FA100" }, { id: "C607", name: "GNA-FA150" }, { id: "D101", name: "HCVR-3 110V" }, { id: "D102", name: "HCVR-3 220V" },
-        { id: "D103", name: "K1821-19" }, { id: "D201", name: "HCVR-AS" }, { id: "D202", name: "K13470M10" }, { id: "D203", name: "HCVR-DS" },
-        { id: "D207", name: "HPS-DAK-SR" }, { id: "D208", name: "HEC3-WR" }, { id: "D301", name: "SOE-24V" }, { id: "D302", name: "SOE-24H" },
-        { id: "D303", name: "DCD-135" }, { id: "D304", name: "NS4-100" }
-    ];
-    
-    const found = idMapping.find(m => m.name === model);
-    return found ? found.id : null;
-}
-
-    // 從 localStorage 恢復勾選狀態 (頁面重啟時)
     function loadCheckedStatusFromStorage() {
         const stored = localStorage.getItem('typeAccept_selected_export');
         if (stored) {
             try {
                 const savedItems = JSON.parse(stored);
                 if (Array.isArray(savedItems) && savedItems.length > 0) {
-                    // 重置勾選狀態
                     checkedStatus.fill(false);
-                    // 根據儲存的 deviceName + model + certNo 比對恢復勾選
                     for (let i = 0; i < rawData.length; i++) {
                         const item = rawData[i];
                         const found = savedItems.some(saved => 
@@ -590,18 +563,17 @@ function findIdByModel(model) {
                         <td>${escapeHtml(item.deviceName)}</td>
                         <td>${escapeHtml(item.manufacturer)}</td>
                         <td>${escapeHtml(item.model)}</td>
-                      </tr>`;
+                       </tr>`;
         }
         tbody.innerHTML = html;
         
-        // 綁定 checkbox 事件 (每次勾選變更時自動儲存)
         document.querySelectorAll('.row-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 const idx = parseInt(e.target.getAttribute('data-idx'));
                 if (!isNaN(idx)) {
                     checkedStatus[idx] = e.target.checked;
                     updateSelectedCount();
-                    saveSelectedToLocalStorage();  // 每次勾選變更自動儲存
+                    saveSelectedToLocalStorage();
                     if (selectedModeActive) {
                         renderTable();
                     }
@@ -658,7 +630,7 @@ function findIdByModel(model) {
 
     function clearAllChecks() {
         checkedStatus.fill(false);
-        saveSelectedToLocalStorage();  // 清除後也儲存空陣列
+        saveSelectedToLocalStorage();
         if (selectedModeActive) {
             selectedModeActive = false;
             isFilterMode = false;
@@ -668,17 +640,23 @@ function findIdByModel(model) {
         renderTable();
     }
 
-    // 事件綁定
     searchBtn.addEventListener('click', applySearchFilter);
     resetSearchBtn.addEventListener('click', resetTable);
     showSelectedBtn.addEventListener('click', showSelectedOnly);
     clearAllCheckedBtn.addEventListener('click', clearAllChecks);
     searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') applySearchFilter(); });
 
-    // 初始化：先從 localStorage 恢復勾選狀態，再渲染表格
     loadCheckedStatusFromStorage();
     renderTable();
     updateSelectedCount();
+    
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'typeAccept_selected_ids' || e.key === 'typeAccept_selected_export') {
+            loadCheckedStatusFromStorage();
+            renderTable();
+            updateSelectedCount();
+        }
+    });
 </script>
 </body>
 </html>
