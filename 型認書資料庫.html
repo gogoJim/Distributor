@@ -78,6 +78,20 @@
         background-color: #eef3fc;
         font-weight: 700;
     }
+	    /* 👇 在這裡加入以下代碼 */
+    /* 滑鼠移動時整行變色效果 */
+    #mainTable tbody tr:hover {
+        background-color: #e6f3ff !important;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    #mainTable tbody tr:hover td {
+        background-color: #d4e8ff;
+        transition: background-color 0.15s ease;
+    }
+    /* 👆 以上為新增代碼 */
+	
     .btn-group {
         display: flex;
         gap: 8px;
@@ -491,7 +505,9 @@
                     const response = await fetch(pdfUrl);
                     if (response.ok) {
                         const blob = await response.blob();
-                        const fileName = `${String(item.sn).padStart(3,'0')}_${item.id}_${item.deviceName}.pdf`;
+						const safeModel = item.model.replace(/[\\/:*?"<>|]/g, '');
+						const fileName = `${String(item.sn).padStart(3,'0')}_${item.id}_${item.deviceName}_${item.model}.pdf`;
+
                         zip.file(fileName, blob);
                         successCount++;
                         progressDiv.innerHTML = `⏳ 正在打包... (${successCount + failCount}/${validDevices.length})`;
