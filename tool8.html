@@ -5,11 +5,11 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>管道摩擦損失計算工具</title>
 <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
-        }
+	body {
+    font-family: "微軟正黑體", "Microsoft JhengHei", "PingFang TC", "標楷體", "Segoe UI", Arial, sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+}
         h1, h2 {
             color: #333;
         }
@@ -256,6 +256,16 @@
             border-radius: 20px;
             font-size: 0.85rem;
         }
+		
+		@media print {
+    body {
+        font-family: "微軟正黑體", "Microsoft JhengHei", "標楷體", sans-serif;
+    }
+    table {
+        font-size: 12pt;
+    }
+}
+		
 
 </style>
 
@@ -725,7 +735,7 @@ function updateEquipmentDefaults(){
         document.getElementById('generalSprinklerCalc').style.display='none';
         document.getElementById('otherEquipmentCalc').style.display='block';
         let nl=0,op=0,flow=0,vl=0;
-        if(type==="小規模水鎗"){ nl=2; op=51; flow=500; vl=2.6; }
+        if(type==="小規模水鎗"){ nl=2; op=51; flow=500; vl=4; }
         else if(type==="中規模水鎗"){ nl=4; op=81.6; flow=2800; vl=9.2; }
         else if(type==="大規模水鎗"){ nl=11; op=92; flow=3100; vl=3.4; }
         else if(type==="固定式"){ nl=5; op=40; vl=0; }
@@ -1023,7 +1033,10 @@ function generateEquivalentTableHtml() {
     <meta charset="utf-8"/>
     <title>管道摩擦損失計算報告 - ${escapeHtml(caseName)}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #333; }
+		body {
+    font-family: "微軟正黑體", "Microsoft JhengHei", "PingFang TC", "標楷體", "Segoe UI", Arial, sans-serif;
+    margin: 20px;
+    line-height: 1.6;}
         h1, h2, h3 { color: #2c3e50; }
         .report-header { border-bottom: 2px solid #3498db; margin-bottom: 30px; padding-bottom: 15px; }
         .report-section { margin-bottom: 30px; }
