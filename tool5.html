@@ -135,6 +135,7 @@
         
         .col-addr { width: 200px; }
         .col-name { width: 250px; }
+		.col-zone { width: 100px; }
         .col-type { width: 150px; }
         .col-location { width: 300px; }
         .col-category { width: 80px; }
@@ -489,6 +490,7 @@
             }
         }
     </style>
+	
 	    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
     <script>
         (function() {
@@ -557,7 +559,7 @@
             }, 1000);
         })();
     </script>
-    <!-- ========== 防護區塊結束 ========== -->	
+    <!-- ========== 防護區塊結束 ========== -->		
 	
 </head>
 <body>
@@ -782,22 +784,23 @@ function renderPanelTabs() {
                 const totalCount = devices.length;
                 
                 // 生成表格
-                let html = `
-                    <div style="margin-bottom:10px;font-size:14px;color:#2c3e50;background:#f8f9fa;padding:8px 12px;border-radius:4px;">
-                        <strong>${panel.name}</strong> 
-                        ｜ 迴路 ${activeLoopNumber} 
-                        ｜ 主設備 <strong>${mainCount}</strong> 個
-                        ${totalCount > mainCount ? `｜ 子組件 ${totalCount - mainCount} 個` : ''}
-                        ${totalCount > mainCount ? `｜ 總計 ${totalCount} 個條目` : ''}
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="col-addr">設備地址</th>
-                                <th class="col-name">設備名稱</th>
-                                <th class="col-type">設備類型</th>
-                                <th class="col-location">位置描述</th>
-                `;
+let html = `
+    <div style="margin-bottom:10px;font-size:14px;color:#2c3e50;background:#f8f9fa;padding:8px 12px;border-radius:4px;">
+        <strong>${panel.name}</strong> 
+        ｜ 迴路 ${activeLoopNumber} 
+        ｜ 主設備 <strong>${mainCount}</strong> 個
+        ${totalCount > mainCount ? `｜ 子組件 ${totalCount - mainCount} 個` : ''}
+        ${totalCount > mainCount ? `｜ 總計 ${totalCount} 個條目` : ''}
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th class="col-addr">設備地址</th>
+                <th class="col-name">設備名稱</th>
+                <th class="col-zone">ZONE</th>
+                <th class="col-type">設備類型</th>
+                <th class="col-location">位置描述</th>
+`;
                 
                 if (showCategory) {
                     html += `<th class="col-category">類別</th>`;
@@ -809,24 +812,25 @@ function renderPanelTabs() {
                         <tbody>
                 `;
                 
-                devices.forEach(device => {
-                    const rowClass = device.category === 'component' ? 'class="device-component"' : '';
-                    const deviceAddr = `${device.panelNetworkAddress || ''}-${device.loopNumber || '01'}-${device.addr || ''}`;
-                    
-                    html += `
-                        <tr ${rowClass}>
-                            <td class="col-addr">${escapeHtml(deviceAddr)}</td>
-                            <td class="col-name">${escapeHtml(device.name)}</td>
-                            <td class="col-type">${escapeHtml(device.type)}</td>
-                            <td class="col-location">${escapeHtml(device.location)}</td>
-                    `;
-                    
-                    if (showCategory) {
-                        html += `<td class="col-category">${device.category === 'main' ? '主設備' : '子組件'}</td>`;
-                    }
-                    
-                    html += `</tr>`;
-                });
+devices.forEach(device => {
+    const rowClass = device.category === 'component' ? 'class="device-component"' : '';
+    const deviceAddr = `${device.panelNetworkAddress || ''}-${device.loopNumber || '01'}-${device.addr || ''}`;
+    
+    html += `
+        <tr ${rowClass}>
+            <td class="col-addr">${escapeHtml(deviceAddr)}</td>
+            <td class="col-name">${escapeHtml(device.name)}</td>
+            <td class="col-zone">${escapeHtml(device.zone || '')}</td>
+            <td class="col-type">${escapeHtml(device.type)}</td>
+            <td class="col-location">${escapeHtml(device.location)}</td>
+    `;
+    
+    if (showCategory) {
+        html += `<td class="col-category">${device.category === 'main' ? '主設備' : '子組件'}</td>`;
+    }
+    
+    html += `</tr>`;
+});
                 
                 html += `
                         </tbody>
@@ -1141,6 +1145,7 @@ if (currentPanel && currentPanel.name === 'EDAS - Main Fire Alarm Panel') {
                                         const device = {
                                             addr: deviceAddr,
                                             name: deviceName,
+											zone: rowData[2] || '',  // 加入這行，ZONE 是第 3 欄（索引 2）
                                             type: deviceType,
                                             location: locationText,
                                             category: deviceCategory,
@@ -1467,6 +1472,7 @@ if (currentPanel && currentPanel.name === 'EDAS - Main Fire Alarm Panel') {
                 th { background-color: #f2f2f2; font-weight: bold; }
                 .col-addr { width: 200px; }
                 .col-name { width: 250px; }
+				.col-zone { width: 100px; }
                 .col-type { width: 150px; }
                 .col-location { width: 300px; }
                 .col-category { width: 100px; }
@@ -1516,34 +1522,37 @@ if (currentPanel && currentPanel.name === 'EDAS - Main Fire Alarm Panel') {
                     loops.forEach(loop => {
                         const loopDevices = panel.devices.filter(d => d.loopNumber === loop);
                         const loopMain = countMainDevices(loopDevices);
-                        html += `
-                    <div class="loop-block">
-                        <h3>迴路 ${escapeHtml(loop)} (主設備 ${loopMain} 個${loopDevices.length > loopMain ? `，總計 ${loopDevices.length} 個條目` : ''})</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th class="col-addr">設備地址</th>
-                                    <th class="col-name">設備名稱</th>
-                                    <th class="col-type">設備類型</th>
-                                    <th class="col-location">位置描述</th>
-                                    <th class="col-category">類別</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        `;
-                        loopDevices.forEach(device => {
-                            const rowClass = device.category === 'component' ? 'class="device-component"' : '';
-                            const deviceAddr = `${device.panelNetworkAddress || ''}-${device.loopNumber || '01'}-${device.addr || ''}`;
-                            html += `
-                                <tr ${rowClass}>
-                                    <td class="col-addr">${escapeHtml(deviceAddr)}</td>
-                                    <td class="col-name">${escapeHtml(device.name)}</td>
-                                    <td class="col-type">${escapeHtml(device.type)}</td>
-                                    <td class="col-location">${escapeHtml(device.location)}</td>
-                                    <td class="col-category">${device.category === 'main' ? '主設備' : '子組件'}</td>
-                                </tr>
-                            `;
-                        });
+html += `
+    <div class="loop-block">
+        <h3>迴路 ${escapeHtml(loop)} (主設備 ${loopMain} 個${loopDevices.length > loopMain ? `，總計 ${loopDevices.length} 個條目` : ''})</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-addr">設備地址</th>
+                    <th class="col-name">設備名稱</th>
+                    <th class="col-zone">ZONE</th>
+                    <th class="col-type">設備類型</th>
+                    <th class="col-location">位置描述</th>
+                    <th class="col-category">類別</th>
+                </tr>
+            </thead>
+            <tbody>
+`;
+
+loopDevices.forEach(device => {
+    const rowClass = device.category === 'component' ? 'class="device-component"' : '';
+    const deviceAddr = `${device.panelNetworkAddress || ''}-${device.loopNumber || '01'}-${device.addr || ''}`;
+    html += `
+        <tr ${rowClass}>
+            <td class="col-addr">${escapeHtml(deviceAddr)}</td>
+            <td class="col-name">${escapeHtml(device.name)}</td>
+            <td class="col-zone">${escapeHtml(device.zone || '')}</td>
+            <td class="col-type">${escapeHtml(device.type)}</td>
+            <td class="col-location">${escapeHtml(device.location)}</td>
+            <td class="col-category">${device.category === 'main' ? '主設備' : '子組件'}</td>
+        </tr>
+    `;
+});
                         html += `
                             </tbody>
                         </table>
@@ -1612,8 +1621,7 @@ if (currentPanel && currentPanel.name === 'EDAS - Main Fire Alarm Panel') {
 <button onclick="window.location.href='index.html'" 
         style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer;">
     返回主選單
-</button>		
-	
+</button>			
 	
 </body>
 </html>
