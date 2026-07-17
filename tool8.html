@@ -795,24 +795,184 @@ function updateExtraH3TotalOther(){
 function collectAllData() {
     const pipeSegments = [];
     document.querySelectorAll('#pipeSegments tbody tr').forEach(row => {
-        const seg = { name: row.querySelector('td:first-child').textContent, diameter: row.querySelector('.pipe-diameter').value, flowRate: row.querySelector('.segment-flow-rate').value, straightPipe: row.querySelector('.straight-pipe').value, frictionLoss: row.querySelector('.friction-loss').value };
-        for(let i=1;i<=6;i++) { seg[`qty_${i}`] = row.querySelector(`.comp-qty-${i}`)?.value || 0; seg[`eq_${i}`] = row.querySelector(`.comp-equivalent-${i}`)?.value || 0; }
+        const seg = { 
+            name: row.querySelector('td:first-child').textContent, 
+            diameter: row.querySelector('.pipe-diameter').value, 
+            flowRate: row.querySelector('.segment-flow-rate').value, 
+            straightPipe: row.querySelector('.straight-pipe').value, 
+            frictionLoss: row.querySelector('.friction-loss').value 
+        };
+        for(let i=1;i<=6;i++) { 
+            seg[`qty_${i}`] = row.querySelector(`.comp-qty-${i}`)?.value || 0; 
+            seg[`eq_${i}`] = row.querySelector(`.comp-equivalent-${i}`)?.value || 0; 
+        }
         pipeSegments.push(seg);
     });
+    
+    // 收集額外項目 - 修正重點
     const extraItems = [];
-    document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(item => { extraItems.push({ label: item.querySelector('.extra-h3-label')?.value || '', value: parseFloat(item.querySelector('.extra-h3-value')?.value) || 0 }); });
-    return { caseInfo: { caseName: document.getElementById('caseName').value, equipmentType: document.getElementById('equipmentType').value }, componentNames: currentComponentNames, customInfo: customInfo, pipeSegments: pipeSegments, database: currentDatabase, pumpCalcData: { sprinkler: { actualHead: parseFloat(document.getElementById('actualHead')?.value)||0, outletPressure: parseFloat(document.getElementById('outletPressure')?.value)||10, flowDetector: parseFloat(document.getElementById('flowDetector')?.value)||5, adoptedHead: parseFloat(document.getElementById('adoptedHead')?.value)||0 }, other: { nozzleLoss: parseFloat(document.getElementById('nozzleLoss')?.value)||0, valveLoss: parseFloat(document.getElementById('valveLoss')?.value)||0, actualHeadOther: parseFloat(document.getElementById('actualHeadOther')?.value)||0, outletPressureOther: parseFloat(document.getElementById('outletPressureOther')?.value)||0, adoptedHeadOther: parseFloat(document.getElementById('adoptedHeadOther')?.value)||0 }, common: { flowRate: parseFloat(document.getElementById('flowRate')?.value)||0, adoptedFlow: parseFloat(document.getElementById('adoptedFlow')?.value)||0, efficiency: parseFloat(document.getElementById('efficiency')?.value)||0.6, selectedKw: parseFloat(document.getElementById('selectedKw')?.value)||0, flowNote: document.getElementById('flowNote')?.value||'' }, extraItems: extraItems } };
+    document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(item => {
+        const label = item.querySelector('.extra-h3-label')?.value || '';
+        const value = parseFloat(item.querySelector('.extra-h3-value')?.value) || 0;
+        if (label.trim() || value !== 0) {
+            extraItems.push({ label: label, value: value });
+        }
+    });
+    
+    return { 
+        caseInfo: { 
+            caseName: document.getElementById('caseName').value, 
+            equipmentType: document.getElementById('equipmentType').value 
+        }, 
+        componentNames: currentComponentNames, 
+        customInfo: customInfo, 
+        pipeSegments: pipeSegments, 
+        database: currentDatabase, 
+        pumpCalcData: {
+            sprinkler: {
+                actualHead: parseFloat(document.getElementById('actualHead')?.value)||0,
+                outletPressure: parseFloat(document.getElementById('outletPressure')?.value)||10,
+                flowDetector: parseFloat(document.getElementById('flowDetector')?.value)||5,
+                adoptedHead: parseFloat(document.getElementById('adoptedHead')?.value)||0
+            },
+            other: {
+                nozzleLoss: parseFloat(document.getElementById('nozzleLoss')?.value)||0,
+                valveLoss: parseFloat(document.getElementById('valveLoss')?.value)||0,
+                actualHeadOther: parseFloat(document.getElementById('actualHeadOther')?.value)||0,
+                outletPressureOther: parseFloat(document.getElementById('outletPressureOther')?.value)||0,
+                adoptedHeadOther: parseFloat(document.getElementById('adoptedHeadOther')?.value)||0
+            },
+            common: {
+                flowRate: parseFloat(document.getElementById('flowRate')?.value)||0,
+                adoptedFlow: parseFloat(document.getElementById('adoptedFlow')?.value)||0,
+                efficiency: parseFloat(document.getElementById('efficiency')?.value)||0.6,
+                selectedKw: parseFloat(document.getElementById('selectedKw')?.value)||0,
+                flowNote: document.getElementById('flowNote')?.value||''
+            },
+            extraItems: extraItems
+        }
+    };
 }
+
 function loadAllData(data) {
-    if(data.database) { document.getElementById('databaseSelect').value = data.database; switchDatabase(data.database); }
-    if(data.componentNames) for(let i=1;i<=6;i++) if(data.componentNames[i]) currentComponentNames[i] = data.componentNames[i];
+    // 1. 還原資料庫設定
+    if(data.database) { 
+        document.getElementById('databaseSelect').value = data.database; 
+        switchDatabase(data.database); 
+    }
+    
+    // 2. 還原元件名稱
+    if(data.componentNames) {
+        for(let i=1;i<=6;i++) {
+            if(data.componentNames[i]) currentComponentNames[i] = data.componentNames[i];
+        }
+    }
+    
+    // 3. 還原自訂元件
     if(data.customInfo) customInfo = data.customInfo;
-    document.querySelectorAll('#pipeSegments tbody tr').forEach(r=>r.remove()); pipeSegmentCount=0;
-    if(data.pipeSegments && data.pipeSegments.length) data.pipeSegments.forEach(seg=>{ addPipeSegment(); const row=document.querySelector('#pipeSegments tbody tr:last-child'); if(row){ row.querySelector('.pipe-diameter').value=seg.diameter||20; row.querySelector('.segment-flow-rate').value=seg.flowRate||0; row.querySelector('.straight-pipe').value=seg.straightPipe||0; row.querySelector('.friction-loss').value=seg.frictionLoss||0; for(let i=1;i<=6;i++){ const qtyInput=row.querySelector(`.comp-qty-${i}`); const eqInput=row.querySelector(`.comp-equivalent-${i}`); if(qtyInput) qtyInput.value=seg[`qty_${i}`]||0; if(eqInput) eqInput.value=seg[`eq_${i}`]||0; } updateAllEquivalentInRow(row); updatePipeSegment(row); } });
-    if(data.caseInfo){ document.getElementById('caseName').value=data.caseInfo.caseName||''; document.getElementById('equipmentType').value=data.caseInfo.equipmentType||'固定式'; updateEquipmentDefaults(); }
-    if(data.pumpCalcData){ /* restore detailed fields */ }
-    initHeader(); calculateTotalFrictionLoss(); updateFlowRateDisplay(); updateTotalHeadCalculation(); calculateMotorPower();
+    
+    // 4. 清除現有管道段
+    document.querySelectorAll('#pipeSegments tbody tr').forEach(r=>r.remove()); 
+    pipeSegmentCount = 0;
+    
+    // 5. 還原管道段資料
+    if(data.pipeSegments && data.pipeSegments.length) {
+        data.pipeSegments.forEach(seg => {
+            addPipeSegment(); 
+            const row = document.querySelector('#pipeSegments tbody tr:last-child'); 
+            if(row) { 
+                row.querySelector('.pipe-diameter').value = seg.diameter || 20; 
+                row.querySelector('.segment-flow-rate').value = seg.flowRate || 0; 
+                row.querySelector('.straight-pipe').value = seg.straightPipe || 0; 
+                row.querySelector('.friction-loss').value = seg.frictionLoss || 0; 
+                for(let i=1;i<=6;i++) { 
+                    const qtyInput = row.querySelector(`.comp-qty-${i}`); 
+                    const eqInput = row.querySelector(`.comp-equivalent-${i}`); 
+                    if(qtyInput) qtyInput.value = seg[`qty_${i}`] || 0; 
+                    if(eqInput) eqInput.value = seg[`eq_${i}`] || 0; 
+                } 
+                updateAllEquivalentInRow(row); 
+                updatePipeSegment(row); 
+            } 
+        });
+    }
+    
+    // 6. 還原案件資訊
+    if(data.caseInfo) { 
+        document.getElementById('caseName').value = data.caseInfo.caseName || ''; 
+        document.getElementById('equipmentType').value = data.caseInfo.equipmentType || '固定式'; 
+        updateEquipmentDefaults(); 
+    }
+    
+    // 7. 還原泵浦計算數據
+    if(data.pumpCalcData) {
+        const pcd = data.pumpCalcData;
+        
+        // 還原 Sprinkler 相關
+        if(pcd.sprinkler) {
+            if(document.getElementById('actualHead')) document.getElementById('actualHead').value = pcd.sprinkler.actualHead || 0;
+            if(document.getElementById('outletPressure')) document.getElementById('outletPressure').value = pcd.sprinkler.outletPressure || 10;
+            if(document.getElementById('flowDetector')) document.getElementById('flowDetector').value = pcd.sprinkler.flowDetector || 5;
+            if(document.getElementById('adoptedHead')) document.getElementById('adoptedHead').value = pcd.sprinkler.adoptedHead || 0;
+        }
+        
+        // 還原 Other 相關
+        if(pcd.other) {
+            if(document.getElementById('nozzleLoss')) document.getElementById('nozzleLoss').value = pcd.other.nozzleLoss || 0;
+            if(document.getElementById('valveLoss')) document.getElementById('valveLoss').value = pcd.other.valveLoss || 0;
+            if(document.getElementById('actualHeadOther')) document.getElementById('actualHeadOther').value = pcd.other.actualHeadOther || 0;
+            if(document.getElementById('outletPressureOther')) document.getElementById('outletPressureOther').value = pcd.other.outletPressureOther || 0;
+            if(document.getElementById('adoptedHeadOther')) document.getElementById('adoptedHeadOther').value = pcd.other.adoptedHeadOther || 0;
+        }
+        
+        // 還原 Common 相關
+        if(pcd.common) {
+            if(document.getElementById('flowRate')) document.getElementById('flowRate').value = pcd.common.flowRate || 0;
+            if(document.getElementById('adoptedFlow')) document.getElementById('adoptedFlow').value = pcd.common.adoptedFlow || 0;
+            if(document.getElementById('efficiency')) document.getElementById('efficiency').value = pcd.common.efficiency || 0.6;
+            if(document.getElementById('selectedKw')) document.getElementById('selectedKw').value = pcd.common.selectedKw || 0;
+            if(document.getElementById('flowNote')) document.getElementById('flowNote').value = pcd.common.flowNote || '';
+        }
+        
+        // 還原額外項目 (extraItems)
+        if(pcd.extraItems && pcd.extraItems.length > 0) {
+            // 清除現有額外項目
+            document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(el => el.remove());
+            
+            // 判斷目前設備類型
+            const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
+            
+            // 根據設備類型選擇容器和更新函數
+            const containerId = isSprinkler ? 'extraH3Container' : 'extraH3ContainerOther';
+            const updateFunc = isSprinkler ? updateExtraH3Total : updateExtraH3TotalOther;
+            
+            // 重建額外項目
+            pcd.extraItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'extra-h3-item';
+                div.innerHTML = `<input type="text" class="extra-h3-label" placeholder="項目名稱" style="width:100px;" value="${escapeHtml(item.label || '')}"><input type="number" class="extra-h3-value" min="0" step="0.1" value="${item.value || 0}" style="width:60px;"> M<button class="remove-extra-h3" style="margin-left:5px;">×</button>`;
+                document.getElementById(containerId).appendChild(div);
+                div.querySelector('.extra-h3-value').addEventListener('input', updateFunc);
+                div.querySelector('.remove-extra-h3').addEventListener('click', function() { 
+                    div.remove(); 
+                    updateFunc(); 
+                });
+            });
+            
+            // 更新總和顯示
+            updateFunc();
+        }
+    }
+    
+    // 8. 重新初始化表頭與計算
+    initHeader(); 
+    calculateTotalFrictionLoss(); 
+    updateFlowRateDisplay(); 
+    updateTotalHeadCalculation(); 
+    calculateMotorPower();
 }
+
+
 function downloadFile(content, filename, type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),100); }
 function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'),h=String(d.getHours()).padStart(2,'0'),mi=String(d.getMinutes()).padStart(2,'0'),s=String(d.getSeconds()).padStart(2,'0'); return full?`${y}年${m}月${dd}日 ${h}時${mi}分${s}秒`:`${y}${m}${dd}_${h}${mi}${s}`; }
 
