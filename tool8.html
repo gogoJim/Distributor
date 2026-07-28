@@ -266,7 +266,60 @@
     }
 }
 		
-
+		/* 效率模式切換 */
+		.efficiency-mode-group {
+			display: flex;
+			align-items: center;
+			gap: 20px;
+			margin: 10px 0 15px 0;
+			flex-wrap: wrap;
+		}
+		.efficiency-mode-group label {
+			font-weight: bold;
+		}
+		.efficiency-mode-group .radio-option {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+			cursor: pointer;
+		}
+		.efficiency-mode-group .radio-option input[type="radio"] {
+			width: 18px;
+			height: 18px;
+			cursor: pointer;
+		}
+		#manualEfficiencyGroup {
+			display: none;
+			margin-left: 20px;
+			padding: 8px 15px;
+			background: #fff3cd;
+			border-radius: 5px;
+			border-left: 4px solid #ffc107;
+		}
+		#manualEfficiencyGroup label {
+			font-weight: bold;
+		}
+		#manualEfficiencyGroup input {
+			width: 80px;
+		}
+		
+		/* 報告中的效率標示 */
+		.efficiency-source-tag {
+			display: inline-block;
+			padding: 2px 10px;
+			border-radius: 12px;
+			font-size: 0.85rem;
+			font-weight: bold;
+		}
+		.efficiency-source-tag.table {
+			background: #d4edda;
+			color: #155724;
+		}
+		.efficiency-source-tag.manual {
+			background: #fff3cd;
+			color: #856404;
+		}
+		
 </style>
 
     <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
@@ -327,7 +380,7 @@
 
 </head>
 <body>
-<div class="version-info">Ver.12 2026/4/23 HTBO/Jim (新增CNS6445資料庫)</div>
+<div class="version-info">Ver.13 2026/7/27 HTBO/Jim (修正效率對照表 + 手動模式公式)</div>
 <h1>管道摩擦損失計算工具</h1>
 <h5>可切換壓力配管用碳鋼管等價管長資料庫：CNS4626 (SCH40) 或 CNS6445 (SGP)</h5>
 
@@ -407,48 +460,69 @@
 </div>
 <p>Q = <input class="calculation-input" id="flowRate" min="0" type="number" value="0"/> LPM, 採 <input class="calculation-input highlight" id="adoptedFlow" min="0" type="number" value="0"/> LPM</p>
 <h3>3. 電動機之輸出馬力</h3>
-<!-- ===== 新增效率對照表顯示區塊 ===== -->
+<!-- ===== 效率模式切換區塊 ===== -->
 <div style="background:#f8f9fa; padding:12px; border-radius:5px; margin-bottom:15px; border:1px solid #ddd;">
-    <table style="width:auto; font-size:13px; margin:0 auto;">
-        <thead>
-            <tr style="background:#e9ecef;">
-                <th>額定揚水量 (L/min)</th>
-                <th>150~300</th>
-                <th>300~450</th>
-                <th>450~600</th>
-                <th>600~750</th>
-                <th>750~900</th>
-                <th>900~1800</th>
-                <th>1800~2700</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td style="font-weight:bold; background:#e9ecef;">泵效率 (E)</td>
-                <td>0.43</td>
-                <td>0.47</td>
-                <td>0.49</td>
-                <td>0.525</td>
-                <td>0.575</td>
-                <td>0.59</td>
-                <td>0.59</td>
-            </tr>
-        </tbody>
-    </table>
-    <div style="text-align:center; margin-top:8px;">
-        <span style="font-weight:bold;">當前流量：</span>
-        <span id="currentFlowDisplay" style="color:#e74c3c; font-weight:bold;">0</span> LPM
-        <span style="margin-left:20px; font-weight:bold;">自動帶入效率 E = </span>
-        <span id="currentEfficiencyDisplay" style="color:#e74c3c; font-weight:bold; font-size:1.2em;">0.00</span>
-        <span style="background:#4CAF50; color:white; padding:2px 10px; border-radius:12px; margin-left:10px; font-size:12px;">✓ 自動帶入</span>
+    <div class="efficiency-mode-group">
+        <label>泵效率 (E) 選用方式：</label>
+        <label class="radio-option">
+            <input type="radio" name="effMode" value="table" checked> 查表（依流量自動帶入）
+        </label>
+        <label class="radio-option">
+            <input type="radio" name="effMode" value="manual"> 手動輸入
+        </label>
+    </div>
+    
+    <!-- 查表模式顯示區 -->
+    <div id="tableEfficiencyDisplay" style="margin-bottom:8px;">
+        <table style="width:auto; font-size:13px; margin:0 auto;">
+            <thead>
+                <tr style="background:#e9ecef;">
+                    <th>額定揚水量 (L/min)</th>
+                    <th>150~300</th>
+                    <th>300~450</th>
+                    <th>450~600</th>
+                    <th>600~750</th>
+                    <th>750~900</th>
+                    <th>900~1800</th>
+                    <th>1800~2700</th>
+                    <th>2700以上</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight:bold; background:#e9ecef;">泵效率 (E)</td>
+                    <td>0.37</td>
+                    <td>0.44</td>
+                    <td>0.475</td>
+                    <td>0.495</td>
+                    <td>0.51</td>
+                    <td>0.525</td>
+                    <td>0.57</td>
+                    <td>0.59</td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="text-align:center; margin-top:8px;">
+            <span style="font-weight:bold;">當前流量：</span>
+            <span id="currentFlowDisplay" style="color:#e74c3c; font-weight:bold;">0</span> LPM
+            <span style="margin-left:20px; font-weight:bold;">查表效率 E = </span>
+            <span id="currentEfficiencyDisplay" style="color:#e74c3c; font-weight:bold; font-size:1.2em;">0.00</span>
+            <span style="background:#4CAF50; color:white; padding:2px 10px; border-radius:12px; margin-left:10px; font-size:12px;">✓ 查表</span>
+        </div>
+    </div>
+    
+    <!-- 手動輸入模式顯示區 -->
+    <div id="manualEfficiencyGroup">
+        <label>請輸入泵效率 E = </label>
+        <input class="calculation-input" id="manualEfficiencyInput" min="0" max="1" step="0.01" type="number" value="0.64" style="width:80px;">
+        <span style="margin-left:10px; background:#fff3cd; padding:2px 10px; border-radius:12px; font-size:12px;">✏️ 手動輸入</span>
     </div>
 </div>
-<!-- ===== 新增區塊結束 ===== -->
+<!-- ===== 區塊結束 ===== -->
 
-
-
-<p>計算式: KW = (0.163 * H * Q) / E * K<br/>
-KW = (0.163 * 採 <span id="kwHead">0</span> M * (採 <span class="highlight" id="kwFlow">0</span> LPM / 1000)) / <input class="calculation-input" id="efficiency" min="0" step="0.1" type="number" value="0.6"/> * 1.1 = <span class="highlight" id="kwResult">0.00</span> KW 選用 <input class="calculation-input" id="selectedKw" min="0" step="0.1" type="number" value="0"/></p>
+<p id="formulaDisplayLine">計算式: KW = (0.163 × H × Q) ÷ E × K</p>
+<p>KW = (0.163 × 採 <span id="kwHead">0</span> M × (採 <span class="highlight" id="kwFlow">0</span> LPM / 1000)) / <span id="effDisplayForFormula" style="font-weight:bold; color:#e74c3c;">0.00</span> × 1.1 = <span class="highlight" id="kwResult">0.00</span> KW 選用 <input class="calculation-input" id="selectedKw" min="0" step="0.1" type="number" value="0"/></p>
+<div id="formulaHint" style="font-size:0.85rem; color:#555; margin-top:3px;"></div>
 <h3>4. 放水鎗幫浦規格</h3>
 <p>KW 選用 <span id="pumpKw">0</span>, H 採 <span id="pumpHead">0</span> M, Q 採 <span class="highlight" id="pumpFlow">0</span> LPM, D (管徑最後一段) <span id="lastDiameter">0</span>A</p>
 </div>
@@ -489,21 +563,23 @@ const equivalentData_6445 = {
 let currentDatabase = "4626";
 let equivalentFullData = equivalentData_4626;
 
-
-// 泵浦效率對照表 (依據額定揚水量)
+// 泵浦效率對照表 (依據額定揚水量) - 根據截圖修正
 const efficiencyTable = [
-    { min: 150, max: 300, efficiency: 0.43 },
-    { min: 300, max: 450, efficiency: 0.47 },
-    { min: 450, max: 600, efficiency: 0.49 },
-    { min: 600, max: 750, efficiency: 0.525 },
-    { min: 750, max: 900, efficiency: 0.575 },
-    { min: 900, max: 1800, efficiency: 0.59 },
-    { min: 1800, max: 2700, efficiency: 0.59 }
+    { min: 150, max: 300, efficiency: 0.37 },
+    { min: 300, max: 450, efficiency: 0.44 },
+    { min: 450, max: 600, efficiency: 0.475 },
+    { min: 600, max: 750, efficiency: 0.495 },
+    { min: 750, max: 900, efficiency: 0.51 },
+    { min: 900, max: 1800, efficiency: 0.525 },
+    { min: 1800, max: 2700, efficiency: 0.57 }
 ];
+
+// 效率模式狀態
+let efficiencyMode = 'table'; // 'table' 或 'manual'
 
 // 根據流量取得對應效率值
 function getEfficiencyByFlow(flow) {
-    if (flow < 150) return 0.43;      // 低於150時使用最小值
+    if (flow < 150) return 0.37;      // 低於150時使用最小值
     if (flow >= 2700) return 0.59;    // 高於2700時使用最大值
     for (let item of efficiencyTable) {
         if (flow >= item.min && flow < item.max) {
@@ -511,6 +587,37 @@ function getEfficiencyByFlow(flow) {
         }
     }
     return 0.6; // 預設值
+}
+
+// 取得目前使用的效率值（根據模式）
+function getCurrentEfficiency() {
+    if (efficiencyMode === 'manual') {
+        return parseFloat(document.getElementById('manualEfficiencyInput').value) || 0.6;
+    } else {
+        const flow = parseFloat(document.getElementById('adoptedFlow').value) || 0;
+        return getEfficiencyByFlow(flow);
+    }
+}
+
+// 取得效率來源描述（用於報告）
+function getEfficiencySourceDescription() {
+    if (efficiencyMode === 'manual') {
+        const val = parseFloat(document.getElementById('manualEfficiencyInput').value) || 0.6;
+        return `手動輸入 E = ${val.toFixed(3)}`;
+    } else {
+        const flow = parseFloat(document.getElementById('adoptedFlow').value) || 0;
+        const eff = getEfficiencyByFlow(flow);
+        let rangeDesc = '';
+        for (let item of efficiencyTable) {
+            if (flow >= item.min && flow < item.max) {
+                rangeDesc = `${item.min}~${item.max} L/min`;
+                break;
+            }
+        }
+        if (flow < 150) rangeDesc = '< 150 L/min';
+        else if (flow >= 2700) rangeDesc = '≥ 2700 L/min';
+        return `查表（流量 ${flow} LPM，落在 ${rangeDesc} 區間）E = ${eff.toFixed(3)}`;
+    }
 }
 
 function getEquivalentValue(name, d) {
@@ -742,16 +849,87 @@ function updateFlowRateCalculations() {
     document.getElementById('kwFlow').textContent = flow;
     document.getElementById('pumpFlow').textContent = flow;
     
-    // 根據流量自動取得並更新效率
-    const eff = getEfficiencyByFlow(flow);
-    document.getElementById('efficiency').value = eff;
-    
-    // 更新顯示區塊
-    document.getElementById('currentFlowDisplay').textContent = flow;
-    document.getElementById('currentEfficiencyDisplay').textContent = eff.toFixed(3);
-    
+    // 更新效率顯示
+    updateEfficiencyDisplay();
     calculateMotorPower();
 }
+
+function updateEfficiencyDisplay() {
+    const flow = parseFloat(document.getElementById('adoptedFlow').value) || 0;
+    const isManual = efficiencyMode === 'manual';
+    
+    // 更新公式標題與提示
+    const formulaLine = document.getElementById('formulaDisplayLine');
+    const formulaHint = document.getElementById('formulaHint');
+    
+    if (isManual) {
+        // 手動模式
+        const manualVal = parseFloat(document.getElementById('manualEfficiencyInput').value) || 0.6;
+        document.getElementById('currentEfficiencyDisplay').textContent = manualVal.toFixed(3);
+        document.getElementById('effDisplayForFormula').textContent = manualVal.toFixed(3);
+        
+        if (formulaLine) formulaLine.textContent = '計算式: KW = (0.163 × H × Q) ÷ E × K';
+        if (formulaHint) formulaHint.textContent = '📐 手動模式：直接使用輸入的 E 值';
+        
+        // 顯示查表區塊
+        document.getElementById('tableEfficiencyDisplay').style.display = 'block';
+        // 更新標示
+        const badgeContainer = document.querySelector('#tableEfficiencyDisplay');
+        let badge = badgeContainer.querySelector('.efficiency-source-tag');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'efficiency-source-tag manual';
+            badge.style.marginLeft = '10px';
+            badge.style.padding = '2px 10px';
+            badge.style.borderRadius = '12px';
+            badge.style.fontSize = '12px';
+            badgeContainer.querySelector('div:last-child').appendChild(badge);
+        }
+        badge.textContent = '✏️ 手動輸入';
+        badge.className = 'efficiency-source-tag manual';
+        
+        document.getElementById('manualEfficiencyGroup').style.display = 'block';
+        document.getElementById('currentFlowDisplay').textContent = flow;
+    } else {
+        // 查表模式
+        const eff = getEfficiencyByFlow(flow);
+        document.getElementById('currentEfficiencyDisplay').textContent = eff.toFixed(3);
+        document.getElementById('effDisplayForFormula').textContent = eff.toFixed(3);
+        document.getElementById('currentFlowDisplay').textContent = flow;
+        
+        if (formulaLine) formulaLine.textContent = '計算式: KW = (0.163 × H × Q) ÷ E × K';
+        if (formulaHint) formulaHint.textContent = '📐 查表模式：E 值由流量對照表自動帶入';
+        
+        document.getElementById('tableEfficiencyDisplay').style.display = 'block';
+        const badgeContainer = document.querySelector('#tableEfficiencyDisplay');
+        let badge = badgeContainer.querySelector('.efficiency-source-tag');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'efficiency-source-tag table';
+            badge.style.marginLeft = '10px';
+            badge.style.padding = '2px 10px';
+            badge.style.borderRadius = '12px';
+            badge.style.fontSize = '12px';
+            badgeContainer.querySelector('div:last-child').appendChild(badge);
+        }
+        badge.textContent = '✓ 查表';
+        badge.className = 'efficiency-source-tag table';
+        
+        document.getElementById('manualEfficiencyGroup').style.display = 'none';
+    }
+}
+
+// 切換效率模式
+function setEfficiencyMode(mode) {
+    efficiencyMode = mode;
+    // 更新 radio 按鈕狀態
+    document.querySelectorAll('input[name="effMode"]').forEach(el => {
+        el.checked = (el.value === mode);
+    });
+    updateEfficiencyDisplay();
+    calculateMotorPower();
+}
+
 function updateTotalHeadCalculation(){
     const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
     if(isSprinkler){
@@ -786,23 +964,25 @@ function updateTotalHeadCalculation(){
     }
     calculateMotorPower();
 }
+
 function calculateMotorPower() {
     const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
     const H = isSprinkler ? parseFloat(document.getElementById('adoptedHead').value) || 0 : parseFloat(document.getElementById('adoptedHeadOther').value) || 0;
     const Q = parseFloat(document.getElementById('adoptedFlow').value) || 0;
     
-    // 根據流量自動取得效率
-    const eff = getEfficiencyByFlow(Q);
-    // 更新效率輸入框顯示（可選）
-    document.getElementById('efficiency').value = eff;
+    // 根據模式取得效率
+    const eff = getCurrentEfficiency();
     
+    // 兩種模式使用相同公式：KW = (0.163 × H × Q) ÷ E × K
     const kw = (0.163 * H * (Q / 1000)) / eff * 1.1;
+    
     document.getElementById('kwResult').textContent = kw.toFixed(2);
     if ((parseFloat(document.getElementById('selectedKw').value) || 0) === 0) {
         document.getElementById('selectedKw').value = Math.ceil(kw * 10) / 10;
     }
     document.getElementById('pumpKw').textContent = document.getElementById('selectedKw').value;
 }
+
 function updateEquipmentDefaults(){
     const type = document.getElementById('equipmentType').value;
     if(type==="一般撒水"){
@@ -833,9 +1013,25 @@ function initCalculationListeners(){
     document.getElementById('adoptedHeadOther')?.addEventListener('input',()=>{ document.getElementById('kwHead').textContent=document.getElementById('adoptedHeadOther').value; document.getElementById('pumpHead').textContent=document.getElementById('adoptedHeadOther').value; calculateMotorPower(); });
     document.getElementById('flowRate')?.addEventListener('input',()=>{ if((parseFloat(document.getElementById('adoptedFlow').value)||0)===0) document.getElementById('adoptedFlow').value=document.getElementById('flowRate').value; updateFlowRateCalculations(); });
     document.getElementById('adoptedFlow')?.addEventListener('input',updateFlowRateCalculations);
-    document.getElementById('efficiency')?.addEventListener('input',calculateMotorPower);
     document.getElementById('selectedKw')?.addEventListener('input',()=>document.getElementById('pumpKw').textContent=document.getElementById('selectedKw').value);
     document.getElementById('equipmentType')?.addEventListener('change',updateEquipmentDefaults);
+    
+    // 效率模式切換監聽
+    document.querySelectorAll('input[name="effMode"]').forEach(el => {
+        el.addEventListener('change', function() {
+            if (this.checked) {
+                setEfficiencyMode(this.value);
+            }
+        });
+    });
+    
+    // 手動輸入效率變更監聽
+    document.getElementById('manualEfficiencyInput')?.addEventListener('input', function() {
+        if (efficiencyMode === 'manual') {
+            updateEfficiencyDisplay();
+            calculateMotorPower();
+        }
+    });
 }
 let extraH3Count=0, extraH3OtherCount=0;
 function initExtraH3(){
@@ -889,7 +1085,7 @@ function collectAllData() {
         pipeSegments.push(seg);
     });
     
-    // 收集額外項目 - 修正重點
+    // 收集額外項目
     const extraItems = [];
     document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(item => {
         const label = item.querySelector('.extra-h3-label')?.value || '';
@@ -908,6 +1104,8 @@ function collectAllData() {
         customInfo: customInfo, 
         pipeSegments: pipeSegments, 
         database: currentDatabase, 
+        efficiencyMode: efficiencyMode,
+        manualEfficiency: parseFloat(document.getElementById('manualEfficiencyInput').value) || 0.6,
         pumpCalcData: {
             sprinkler: {
                 actualHead: parseFloat(document.getElementById('actualHead')?.value)||0,
@@ -925,7 +1123,6 @@ function collectAllData() {
             common: {
                 flowRate: parseFloat(document.getElementById('flowRate')?.value)||0,
                 adoptedFlow: parseFloat(document.getElementById('adoptedFlow')?.value)||0,
-                efficiency: parseFloat(document.getElementById('efficiency')?.value)||0.6,
                 selectedKw: parseFloat(document.getElementById('selectedKw')?.value)||0,
                 flowNote: document.getElementById('flowNote')?.value||''
             },
@@ -941,21 +1138,38 @@ function loadAllData(data) {
         switchDatabase(data.database); 
     }
     
-    // 2. 還原元件名稱
+    // 2. 還原效率模式
+    if(data.efficiencyMode) {
+        efficiencyMode = data.efficiencyMode;
+        document.querySelectorAll('input[name="effMode"]').forEach(el => {
+            el.checked = (el.value === data.efficiencyMode);
+        });
+        if(data.manualEfficiency !== undefined) {
+            document.getElementById('manualEfficiencyInput').value = data.manualEfficiency;
+        }
+        // 更新顯示
+        if (efficiencyMode === 'manual') {
+            document.getElementById('manualEfficiencyGroup').style.display = 'block';
+        } else {
+            document.getElementById('manualEfficiencyGroup').style.display = 'none';
+        }
+    }
+    
+    // 3. 還原元件名稱
     if(data.componentNames) {
         for(let i=1;i<=6;i++) {
             if(data.componentNames[i]) currentComponentNames[i] = data.componentNames[i];
         }
     }
     
-    // 3. 還原自訂元件
+    // 4. 還原自訂元件
     if(data.customInfo) customInfo = data.customInfo;
     
-    // 4. 清除現有管道段
+    // 5. 清除現有管道段
     document.querySelectorAll('#pipeSegments tbody tr').forEach(r=>r.remove()); 
     pipeSegmentCount = 0;
     
-    // 5. 還原管道段資料
+    // 6. 還原管道段資料
     if(data.pipeSegments && data.pipeSegments.length) {
         data.pipeSegments.forEach(seg => {
             addPipeSegment(); 
@@ -977,14 +1191,14 @@ function loadAllData(data) {
         });
     }
     
-    // 6. 還原案件資訊
+    // 7. 還原案件資訊
     if(data.caseInfo) { 
         document.getElementById('caseName').value = data.caseInfo.caseName || ''; 
         document.getElementById('equipmentType').value = data.caseInfo.equipmentType || '固定式'; 
         updateEquipmentDefaults(); 
     }
     
-    // 7. 還原泵浦計算數據
+    // 8. 還原泵浦計算數據
     if(data.pumpCalcData) {
         const pcd = data.pumpCalcData;
         
@@ -1009,7 +1223,6 @@ function loadAllData(data) {
         if(pcd.common) {
             if(document.getElementById('flowRate')) document.getElementById('flowRate').value = pcd.common.flowRate || 0;
             if(document.getElementById('adoptedFlow')) document.getElementById('adoptedFlow').value = pcd.common.adoptedFlow || 0;
-            if(document.getElementById('efficiency')) document.getElementById('efficiency').value = pcd.common.efficiency || 0.6;
             if(document.getElementById('selectedKw')) document.getElementById('selectedKw').value = pcd.common.selectedKw || 0;
             if(document.getElementById('flowNote')) document.getElementById('flowNote').value = pcd.common.flowNote || '';
         }
@@ -1044,19 +1257,19 @@ function loadAllData(data) {
         }
     }
     
-    // 8. 重新初始化表頭與計算
+    // 9. 重新初始化表頭與計算
     initHeader(); 
     calculateTotalFrictionLoss(); 
     updateFlowRateDisplay(); 
     updateTotalHeadCalculation(); 
     calculateMotorPower();
+    updateEfficiencyDisplay();
 }
 
 
 function downloadFile(content, filename, type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),100); }
 function getTimestamp(full=false){ const d=new Date(); const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'),h=String(d.getHours()).padStart(2,'0'),mi=String(d.getMinutes()).padStart(2,'0'),s=String(d.getSeconds()).padStart(2,'0'); return full?`${y}年${m}月${dd}日 ${h}時${mi}分${s}秒`:`${y}${m}${dd}_${h}${mi}${s}`; }
 
-// 完整替換 generateHtmlReport 函數
 function generateHtmlReport() {
     const caseName = document.getElementById('caseName').value || '未命名案件';
     const equipmentType = document.getElementById('equipmentType').value;
@@ -1087,10 +1300,23 @@ function generateHtmlReport() {
     }
     const flowRate = parseFloat(document.getElementById('flowRate').value)||0;
     const adoptedFlow = parseFloat(document.getElementById('adoptedFlow').value)||0;
-    const efficiency = parseFloat(document.getElementById('efficiency').value)||0.6;
-    const kwResult = parseFloat(document.getElementById('kwResult').textContent)||0;
-    const selectedKw = parseFloat(document.getElementById('selectedKw').value)||0;
-    const lastDiameter = document.getElementById('lastDiameter').textContent||'0';
+    // 取得效率值與來源描述
+    const eff = getCurrentEfficiency();
+    const effSourceDesc = getEfficiencySourceDescription();
+    // 根據模式產生不同的公式顯示文字
+    const isManualMode = efficiencyMode === 'manual';
+    const formulaDisplayText = `(0.163 × ${adoptedHeadVal.toFixed(1)} × ${adoptedFlow} ÷ 1000) ÷ ${eff.toFixed(3)} × 1.1`;
+    const formulaExplanation = isManualMode
+        ? `※ 手動模式：直接使用輸入的 E = ${eff.toFixed(3)}，K = 1.1（安全係數）`
+        : `※ 查表模式：E 值由流量對照表自動帶入，K = 1.1（安全係數）`;
+    const formulaTitle = 'KW = (0.163 × H × Q) ÷ E × K';
+    
+    // ===== 新增：正確取得 KW 結果和選用值 =====
+    const kwResult = parseFloat(document.getElementById('kwResult').textContent) || 0;
+    const selectedKw = parseFloat(document.getElementById('selectedKw').value) || 0;
+    const lastDiameter = document.getElementById('lastDiameter').textContent || '0';
+    // ===== 新增結束 =====
+
     
     // ========== 收集被採用的元件（數量 > 0 且等價管長 > 0） ==========
     let usedWithQty = {};
@@ -1292,6 +1518,36 @@ function generateEquivalentTableHtml() {
         .report-section table {
             font-size: 13px;
         }
+        .efficiency-source-tag {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .efficiency-source-tag.table {
+            background: #d4edda;
+            color: #155724;
+        }
+        .efficiency-source-tag.manual {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .efficiency-detail-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 4px;
+        }
+        .efficiency-detail-box strong {
+            color: #2c3e50;
+        }
+        .efficiency-detail-box .eff-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -1323,7 +1579,22 @@ function generateEquivalentTableHtml() {
             ${extraItemsHtml ? `<div class="report-section"><h2 class="section-title">額外揚程項目</h2><table><thead><tr><th>項目名稱</th><th>值(M)</th></tr></thead><tbody>${extraItemsHtml}</tbody><tfoot><tr><td><strong>額外項目總和</strong></td><td class="highlight">${extraTotal.toFixed(1)} M</td></tr><tr><td><strong>${isSprinkler ? 'h₂' : 'h₃'} 總和</strong></td><td class="highlight">${(isSprinkler ? h2_val : h3_val).toFixed(1)} M</td></tr></tfoot></table></div>` : ''}
         </div>
         <div class="column">
-            <div class="report-section"><h2 class="section-title">全揚程與幫浦規格計算</h2><h3>1. 全揚程計算: H = h₁ + h₂ + h₃ + h₄</h3><p>${isSprinkler ? `h₁（配管摩擦損失）：<span class="highlight">${h1_val.toFixed(2)} M</span><br/>h₂（實揚程+額外）：<span class="highlight">${h2_val.toFixed(1)} M</span><br/>h₃（密閉式放射壓力）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h₄（流水檢知裝置）：<span class="highlight">${h4_val.toFixed(1)} M</span>` : `h₁（噴嘴/噴頭+控制閥）：<span class="highlight">${h1_val.toFixed(1)} M</span><br/>h₂（配管摩擦損失）：<span class="highlight">${h2_val.toFixed(2)} M</span><br/>h₃（實揚程+額外）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h₄（放出口壓力）：<span class="highlight">${h4_val.toFixed(1)} M</span>`}<br/><strong>故全揚程 H = ${totalHead.toFixed(2)} M，採用 ${adoptedHeadVal.toFixed(1)} M</strong></p><h3>2. 出水量</h3><p>Q = ${flowRate} LPM，採用 <span class="highlight">${adoptedFlow} LPM</span></p>${flowNoteHtml}<h3>3. 電動機之輸出馬力</h3><p>KW = (0.163 × H × Q ÷ 1000) ÷ E × 1.1<br/>= (0.163 × ${adoptedHeadVal.toFixed(1)} × ${adoptedFlow} ÷ 1000) ÷ ${efficiency.toFixed(2)} × 1.1<br/>= <span class="highlight">${kwResult.toFixed(2)} KW</span> 選用 <span class="highlight">${selectedKw.toFixed(1)} KW</span></p><h3>4. 幫浦規格</h3><p>KW 選用 <span class="highlight">${selectedKw.toFixed(1)}</span>，H 採 <span class="highlight">${adoptedHeadVal.toFixed(1)} M</span>，Q 採 <span class="highlight">${adoptedFlow} LPM</span>，D（管徑最後一段）<span class="highlight">${lastDiameter} A</span></p></div>
+            <div class="report-section"><h2 class="section-title">全揚程與幫浦規格計算</h2><h3>1. 全揚程計算: H = h₁ + h₂ + h₃ + h₄</h3><p>${isSprinkler ? `h₁（配管摩擦損失）：<span class="highlight">${h1_val.toFixed(2)} M</span><br/>h₂（實揚程+額外）：<span class="highlight">${h2_val.toFixed(1)} M</span><br/>h₃（密閉式放射壓力）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h₄（流水檢知裝置）：<span class="highlight">${h4_val.toFixed(1)} M</span>` : `h₁（噴嘴/噴頭+控制閥）：<span class="highlight">${h1_val.toFixed(1)} M</span><br/>h₂（配管摩擦損失）：<span class="highlight">${h2_val.toFixed(2)} M</span><br/>h₃（實揚程+額外）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h₄（放出口壓力）：<span class="highlight">${h4_val.toFixed(1)} M</span>`}<br/><strong>故全揚程 H = ${totalHead.toFixed(2)} M，採用 ${adoptedHeadVal.toFixed(1)} M</strong></p><h3>2. 出水量</h3><p>Q = ${flowRate} LPM，採用 <span class="highlight">${adoptedFlow} LPM</span></p>${flowNoteHtml}<h3>3. 電動機之輸出馬力</h3>
+<div class="efficiency-detail-box">
+    <strong>泵效率 (E) 選用方式：</strong>
+    <span class="efficiency-source-tag ${isManualMode ? 'manual' : 'table'}">${isManualMode ? '✏️ 手動輸入' : '✓ 查表'}</span>
+    <br/>
+    <strong>效率來源說明：</strong> ${effSourceDesc}
+    <br/>
+    <strong>採用效率值：</strong> <span class="eff-value">E = ${eff.toFixed(3)}</span>
+</div>
+<p>計算式：${formulaTitle}<br/>
+= ${formulaDisplayText}<br/>
+= <span class="highlight">${kwResult.toFixed(2)} KW</span> 選用 <span class="highlight">${selectedKw.toFixed(1)} KW</span></p>
+<p style="font-size:0.9rem; color:#666; background:#f5f5f5; padding:5px 10px; border-radius:4px;">${formulaExplanation}</p>
+
+
+            <h3>4. 幫浦規格</h3><p>KW 選用 <span class="highlight">${selectedKw.toFixed(1)}</span>，H 採 <span class="highlight">${adoptedHeadVal.toFixed(1)} M</span>，Q 採 <span class="highlight">${adoptedFlow} LPM</span>，D（管徑最後一段）<span class="highlight">${lastDiameter} A</span></p></div>
         </div>
     </div>
 </body>
@@ -1342,6 +1613,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     initCalculationListeners();
     initExtraH3();
     updateEquipmentDefaults();
+    // 初始化效率顯示
+    setEfficiencyMode('table');
     document.getElementById('databaseSelect').addEventListener('change',(e)=>{ if(confirm('切換資料庫將清空現有管道段資料，確定嗎？')) switchDatabase(e.target.value); else e.target.value=currentDatabase; });
 });
 window.removePipeSegment = removePipeSegment;
