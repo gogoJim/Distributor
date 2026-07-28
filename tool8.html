@@ -416,18 +416,27 @@
 </div>
 <div class="section">
     <h2>管道段計算</h2>
-    <button id="addPipeSegment">添加管道段</button>
+ 
     <div style="overflow-x: auto;">
     <table id="pipeSegments">
         <thead id="dynamicHeaderRow"></thead>
         <tbody></tbody>
+		</table> 
+	<br>
+<button id="addPipeSegment" style="margin-top:5px;">添加管道段</button>	
+		
     </div>
 </div>
 <div class="section">
 <h2>總摩擦損失水頭</h2>
+
+
 <table>
 <tr><th>總摩擦損失水頭 (m):</th><td id="totalFrictionLoss">0.00</td></tr>
 </table>
+</div>
+
+
 </div>
 <div class="divider"></div>
 <div class="calculation-section">
@@ -534,7 +543,7 @@ const diameterOptions = [25,32,40,50,65,80,90,100,125,150,200,250,300,350];
 const equivalentData_4626 = {
     "45°彎頭(肘管)": [0.4,0.5,0.6,0.7,0.9,1.1,1.2,1.4,1.8,2.1,2.3,3.5,4.2,4.7],
     "90°彎頭": [0.8,1.1,1.2,1.6,2.0,2.4,2.6,3.1,3.8,4.5,6.0,7.5,9.0,10.0],
-    "回轉彎頭(180°)": [2.0,2.6,3.0,3.9,4.8,5.7,6.6,7.5,9.3,1.0,14.6,18.2,21.8,24.3],
+    "回轉彎頭(180°)": [2.0,2.6,3.0,3.9,4.8,5.7,6.6,7.5,9.3,11.0,14.6,18.2,21.8,24.3],
     "T型或十字型接頭(90°分流)": [1.6,2.1,2.5,3.2,4.0,4.7,5.2,6.1,7.6,9.1,12.0,15.0,18.0,20.0],
     "45°彎頭長": [0.2,0.2,0.3,0.3,0.4,0.5,0.5,0.6,0.8,0.9,1.2,1.5,1.8,2.0],
     "90°彎頭短": [0.4,0.6,0.7,0.9,1.1,1.3,1.4,1.6,2.0,2.4,3.2,4.0,4.8,5.3],
@@ -771,13 +780,25 @@ function initHeader(){
     });
 }
 function addPipeSegment(){
-    pipeSegmentCount++;
-    const name = pipeSegmentCount===1?'A-B':`${String.fromCharCode(64+pipeSegmentCount)}-${String.fromCharCode(65+pipeSegmentCount)}`;
+    // 計算現有管段數量，決定新管段的編號
+    const existingRows = document.querySelectorAll('#pipeSegments tbody tr');
+    const newIndex = existingRows.length + 1;  // 新管段的序號
+    
+    // 根據序號生成名稱
+    let name;
+    if (newIndex === 1) {
+        name = 'A-B';
+    } else {
+        const startChar = String.fromCharCode(64 + newIndex);
+        const endChar = String.fromCharCode(65 + newIndex);
+        name = `${startChar}-${endChar}`;
+    }
+    
     const row = document.createElement('tr');
-    row.dataset.segmentId = pipeSegmentCount;
+    row.dataset.segmentId = Date.now() + Math.random(); // 使用唯一ID避免衝突
     let html = `<td>${name}</td><td><select class="pipe-diameter">${diameterOptions.map(d=>`<option value="${d}">${d}</option>`).join('')}</select></td><td><input type="number" class="segment-flow-rate" value="500"></td>`;
     for(let i=1;i<=6;i++) html+=`<td><input type="number" class="comp-qty comp-qty-${i}" data-comp-index="${i}" value="0"></td><td><input type="number" class="comp-equivalent comp-equivalent-${i}" data-comp-index="${i}" value="0" readonly style="background:#f0f0f0;"></td>`;
-    html+=`<td><input type="number" class="straight-pipe" value="0"></td><td class="subtotal">0.0</td><td><input type="number" class="friction-loss" value="0.0" step="0.000001"></td><td class="head">0.0</td><td><button class="remove-btn" onclick="removePipeSegment(${pipeSegmentCount})">刪除</button></td>`;
+    html+=`<td><input type="number" class="straight-pipe" value="0"></td><td class="subtotal">0.0</td><td><input type="number" class="friction-loss" value="0.0" step="0.000001"></td><td class="head">0.0</td><td><button class="remove-btn" onclick="removePipeSegment(this)">刪除</button></td>`;
     row.innerHTML = html;
     document.querySelector('#pipeSegments tbody').appendChild(row);
     addEventListenersToRow(row);
@@ -785,6 +806,8 @@ function addPipeSegment(){
     updatePipeSegment(row);
     updateFlowRateDisplay();
 }
+
+
 function addEventListenersToRow(row){
     row.querySelector('.pipe-diameter').addEventListener('change',()=>{ updateAllEquivalentInRow(row); updatePipeSegment(row); });
     row.querySelector('.segment-flow-rate').addEventListener('input',()=>{ updatePipeSegment(row); updateFlowRateDisplay(); });
@@ -821,7 +844,33 @@ function updateHeadFromLoss(row){
     row.querySelector('.head').textContent = (sub*loss).toFixed(2);
     calculateTotalFrictionLoss();
 }
-function removePipeSegment(id){ document.querySelector(`tr[data-segment-id="${id}"]`)?.remove(); calculateTotalFrictionLoss(); updateFlowRateDisplay(); }
+
+function removePipeSegment(btn){
+    const row = btn.closest('tr');
+    if(row) {
+        row.remove();
+        // 重新命名所有管段（保持連續編號）
+        renameAllSegments();
+        calculateTotalFrictionLoss();
+        updateFlowRateDisplay();
+    }
+}
+
+function renameAllSegments() {
+    const rows = document.querySelectorAll('#pipeSegments tbody tr');
+    rows.forEach((row, index) => {
+        const seq = index + 1;
+        let name;
+        if (seq === 1) {
+            name = 'A-B';
+        } else {
+            const startChar = String.fromCharCode(64 + seq);
+            const endChar = String.fromCharCode(65 + seq);
+            name = `${startChar}-${endChar}`;
+        }
+        row.querySelector('td:first-child').textContent = name;
+    });
+}
 function calculateTotalFrictionLoss(){
     let total=0;
     document.querySelectorAll('#pipeSegments tbody tr').forEach(r=> total+= parseFloat(r.querySelector('.head').textContent)||0);
@@ -1264,6 +1313,8 @@ function loadAllData(data) {
     updateTotalHeadCalculation(); 
     calculateMotorPower();
     updateEfficiencyDisplay();
+	    // ⭐⭐⭐ 在這裡加入這一行 ⭐⭐⭐
+    renameAllSegments();
 }
 
 
