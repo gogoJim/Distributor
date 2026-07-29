@@ -9,128 +9,118 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
         }
         
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
             display: flex;
-            height: 100vh;
-            overflow: hidden;
             background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            overflow: hidden;
         }
         
-        h1 {
-            color: #333;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-            margin-top: 0;
+        /* 左側導航欄 - 與 tool1 相同 */
+        .sidebar {
+            width: 280px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 1000;
         }
-        h2 {
-            color: #444;
-            margin-top: 30px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        
+        .logo {
+            text-align: center;
+            padding: 15px;
+            border-bottom: 1px solid #34495e;
             margin-bottom: 20px;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .note {
-            font-style: italic;
-            color: #666;
-            margin: 10px 0;
-        }
-        .section {
-            margin-bottom: 30px;
+        
+        .logo h2 {
+            font-size: 1.3rem;
+            color: #ecf0f1;
         }
         
-        /* 左側面板 */
-        .left-panel {
-            width: 220px;
-            min-width: 220px;
-            height: 100%;
-            overflow-y: auto;
-            border-right: 1px solid #ddd;
-            padding: 20px 15px;
-            box-sizing: border-box;
-            background-color: #f9f9f9;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .version-info {
+        .logo p {
             font-size: 0.75rem;
-            color: #888;
-            text-align: right;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
+            color: #95a5a6;
+            margin-top: 5px;
         }
         
-        .left-panel h2 {
-            font-size: 1.1rem;
-            color: #2c3e50;
-            margin-top: 0;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #3498db;
+        .nav-menu {
+            flex-grow: 1;
         }
         
-        .menu-item {
+        .nav-item {
+            padding: 14px 20px;
             cursor: pointer;
-            padding: 10px 12px;
-            border-bottom: 1px solid #eee;
-            font-weight: bold;
-            font-size: 0.9rem;
-            border-radius: 4px;
-            transition: all 0.2s;
-            color: #333;
-        }
-        .menu-item:hover {
-            background-color: #e8f0fe;
-            color: #0066cc;
-        }
-        .menu-item.active {
-            background-color: #e0e0e0;
-            color: #0066cc;
-            border-left: 4px solid #0066cc;
-            padding-left: 8px;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
-        /* 右側面板 */
-        .right-panel {
-            margin-left: 220px;
-            width: calc(100% - 220px);
+        .nav-item:hover {
+            background-color: #34495e;
+            border-left-color: #3498db;
+        }
+        
+        .nav-item.active {
+            background-color: #34495e;
+            border-left-color: #3498db;
+        }
+        
+        .nav-item .nav-icon {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: center;
+        }
+        
+        .nav-item .nav-text {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .nav-item .nav-badge {
+            font-size: 0.7rem;
+            background: #3498db;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        /* 右側主內容區 */
+        .main-content {
+            flex-grow: 1;
+            margin-left: 280px;
             height: 100vh;
             display: flex;
             flex-direction: column;
             background: #e9ecef;
-            overflow: hidden;
         }
         
         /* 頂部工具欄 */
         .top-toolbar {
             background: white;
-            padding: 10px 24px;
-            display: flex;
+            padding: 12px 24px;
+            display: none;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid #dee2e6;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             flex-shrink: 0;
-            min-height: 56px;
+        }
+        
+        .top-toolbar.show {
+            display: flex;
         }
         
         .current-doc-info {
@@ -167,27 +157,9 @@
             transition: 0.2s;
             text-decoration: none;
         }
+        
         .download-btn:hover {
             background: #1e4663;
-        }
-        
-        /* 搜尋框 - 放在頂部工具欄 */
-        .search-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .search-input {
-            padding: 6px 12px;
-            width: 200px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 5px rgba(52,152,219,0.3);
         }
         
         /* PDF 檢視區域 */
@@ -195,8 +167,6 @@
             flex: 1;
             position: relative;
             background: #525659;
-            min-height: 400px;
-            overflow: hidden;
         }
         
         .pdf-iframe {
@@ -207,15 +177,53 @@
             background: #525659;
         }
         
-        .content-section {
-            display: none;
+        .pdf-iframe.show {
+            display: block;
+        }
+        
+        /* HTML 內容區域（LEVEL 2, LEVEL 3, 故障排除） */
+        .html-content-area {
+            width: 100%;
             height: 100%;
             overflow-y: auto;
-            padding: 20px;
+            padding: 30px 40px;
             background: white;
+            display: none;
         }
-        .content-section.active {
+        
+        .html-content-area.show {
             display: block;
+        }
+        
+        .html-content-area h1 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .html-content-area h2 {
+            color: #444;
+            margin-top: 30px;
+        }
+        .html-content-area table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .html-content-area th, 
+        .html-content-area td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .html-content-area th {
+            background-color: #f2f2f2;
+        }
+        .html-content-area .red-text {
+            color: red;
+        }
+        .html-content-area tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
         
         /* 歡迎畫面 */
@@ -226,19 +234,21 @@
             align-items: center;
             flex-direction: column;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 40px;
         }
+        
         .welcome-icon {
             font-size: 80px;
             margin-bottom: 25px;
             color: #3498db;
         }
+        
         .welcome-title {
             font-size: 2rem;
             color: #2c3e50;
             margin-bottom: 15px;
             text-align: center;
         }
+        
         .welcome-subtitle {
             font-size: 1rem;
             color: #7f8c8d;
@@ -261,6 +271,11 @@
             flex-direction: column;
             z-index: 100;
         }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
         .spinner {
             width: 50px;
             height: 50px;
@@ -270,10 +285,12 @@
             animation: spin 1s linear infinite;
             margin-bottom: 15px;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
         .loading-text {
             color: white;
             font-size: 0.9rem;
@@ -286,7 +303,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255,235,238,0.95);
+            background-color: #ffebee;
             display: none;
             justify-content: center;
             align-items: center;
@@ -295,6 +312,17 @@
             text-align: center;
             z-index: 100;
         }
+        
+        .error-message.show {
+            display: flex;
+        }
+        
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #e74c3c;
+        }
+        
         .error-box {
             background: white;
             border-radius: 20px;
@@ -302,11 +330,7 @@
             max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: #e74c3c;
-        }
+        
         .retry-btn {
             margin-top: 20px;
             padding: 10px 24px;
@@ -317,68 +341,60 @@
             cursor: pointer;
             font-size: 0.9rem;
         }
+        
         .retry-btn:hover {
             background-color: #2980b9;
         }
         
-        /* 其他樣式 */
-        .red-text {
-            color: red;
+        /* 搜尋框 */
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .image-container {
-            margin: 20px auto;
-            text-align: center;
-            max-width: 90%;
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
+        .search-input {
+            padding: 6px 12px;
+            width: 200px;
             border: 1px solid #ddd;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: block;
-            margin: 0 auto;
+            border-radius: 4px;
+            font-size: 0.85rem;
         }
-        .image-caption {
-            font-style: italic;
-            color: #666;
-            margin-top: 5px;
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52,152,219,0.3);
         }
         
-        /* 響應式 */
         @media (max-width: 768px) {
-            .left-panel {
+            .sidebar {
                 width: 100%;
-                min-width: auto;
                 position: relative;
                 height: auto;
-                max-height: 40vh;
-                border-right: none;
-                border-bottom: 1px solid #ddd;
+                max-height: 50vh;
             }
-            .right-panel {
+            
+            .main-content {
                 margin-left: 0;
-                width: 100%;
-                height: calc(100vh - 40vh);
+                height: calc(100vh - 50vh);
             }
-            .menu-item {
-                display: inline-block;
-                border-bottom: none;
-                margin: 2px 4px;
-                padding: 6px 12px;
-                font-size: 0.8rem;
+            
+            .nav-menu {
+                display: flex;
+                flex-wrap: wrap;
             }
-            .menu-item.active {
+            
+            .nav-item {
+                flex: 1;
+                min-width: 140px;
                 border-left: none;
-                border-bottom: 3px solid #0066cc;
-                padding-left: 12px;
+                border-bottom: 3px solid transparent;
             }
-            .search-container {
-                flex-shrink: 0;
+            
+            .nav-item.active {
+                border-left: none;
+                border-bottom-color: #3498db;
             }
+            
             .search-input {
                 width: 120px;
                 font-size: 0.75rem;
@@ -398,7 +414,7 @@
         }
     </style>
     
-    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
+    <!-- ========== 防護區塊 ========== -->
     <script>
         (function() {
             document.addEventListener('contextmenu', function(e) {
@@ -457,47 +473,317 @@
     <!-- ========== 防護區塊結束 ========== -->
 </head>
 <body>
-
     <!-- 左側導航 -->
-    <div class="left-panel">
-        <div class="version-info">Ver.1 2025/6/30 HTBO/Jim</div>	
-        <h2>HCVR-3 Series</h2>
-        <div class="menu-item active" data-target="wiring" data-type="pdf">外接配線</div>		
-        <div class="menu-item" data-target="level2" data-type="html">LEVEL 2</div>
-        <div class="menu-item" data-target="level3" data-type="html">LEVEL 3</div>
-        <div class="menu-item" data-target="troubleshooting" data-type="html">故障排除</div>
-        <div class="menu-item" data-target="flowchart" data-type="pdf">流程圖</div>
-        <div class="menu-item" data-target="datasheet" data-type="pdf">Data Sheet</div>
-        <div class="menu-item" data-target="usermanual" data-type="pdf">使用手冊</div>
-    </div>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>🔥 HCVR-3 Series</h2>
+            <p>技術文件資料庫</p>
+        </div>
 
+        <div class="nav-menu">
+            <div class="nav-item active" data-section="welcome">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">首頁</span>
+            </div>
+            <div class="nav-item" data-pdf="accessory_images/hcvr-3_wiring.pdf">
+                <span class="nav-icon">🔌</span>
+                <span class="nav-text">外接配線</span>
+                <span class="nav-badge">PDF</span>
+            </div>
+            <div class="nav-item" data-html="level2">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">LEVEL 2</span>
+            </div>
+            <div class="nav-item" data-html="level3">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">LEVEL 3</span>
+            </div>
+            <div class="nav-item" data-html="troubleshooting">
+                <span class="nav-icon">🔧</span>
+                <span class="nav-text">故障排除</span>
+            </div>
+            <div class="nav-item" data-pdf="accessory_images/hcvr-3_flowchart.pdf">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">流程圖</span>
+                <span class="nav-badge">PDF</span>
+            </div>
+            <div class="nav-item" data-pdf="accessory_images/hcvr-3_datasheet.pdf">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text">Data Sheet</span>
+                <span class="nav-badge">PDF</span>
+            </div>
+            <div class="nav-item" data-pdf="accessory_images/hcvr-3_manual.pdf">
+                <span class="nav-icon">📖</span>
+                <span class="nav-text">使用手冊</span>
+                <span class="nav-badge">PDF</span>
+            </div>
+        </div>
+        
+        <div style="padding: 20px; color: #bdc3c7; font-size: 0.75rem; margin-top: auto; border-top: 1px solid #34495e; text-align: center;">
+            <p>點擊左側按鈕直接開啟文件</p>
+            <p style="margin-top: 8px;">📁 檔案位置: accessory_images 資料夾</p>
+        </div>
+    </div>
+    
     <!-- 右側主內容 -->
-    <div class="right-panel">
+    <div class="main-content">
         <!-- 頂部工具欄 -->
         <div class="top-toolbar" id="topToolbar">
             <div class="current-doc-info">
-                <span class="doc-title" id="currentDocTitle">HCVR-3 外接配線說明</span>
+                <span class="doc-title" id="currentDocTitle">HCVR-3 文件</span>
                 <span class="doc-badge">PDF 文件</span>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
                 <div class="search-container">
-                    <input type="text" class="search-input" placeholder="搜索表格內容..." id="search-input">
+                    <input type="text" class="search-input" placeholder="搜索表格內容..." id="searchInput">
                 </div>
-                <a id="downloadCurrentBtn" class="download-btn" href="#" download>📥 下載 PDF</a>
+                <a id="downloadBtn" class="download-btn" href="#" download>📥 下載 PDF</a>
             </div>
         </div>
         
-        <!-- 內容區域 -->
+        <!-- PDF 檢視區域 -->
         <div class="pdf-viewer-area" id="pdfViewerArea">
             <!-- 歡迎畫面 -->
-            <div class="welcome-screen" id="welcomeScreen" style="display:none;">
-                <div class="welcome-icon">📄</div>
-                <h1 class="welcome-title">請選擇文件</h1>
-                <p class="welcome-subtitle">從左側選單選擇要查看的 PDF 文件</p>
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-icon">📚</div>
+                <h1 class="welcome-title">HCVR-3 技術文件庫</h1>
+                <p class="welcome-subtitle">
+                    請從左側選單選擇要查看的文件<br>
+                    PDF 將直接在右側顯示
+                </p>
             </div>
             
             <!-- PDF iframe -->
             <iframe id="pdfIframe" class="pdf-iframe" title="PDF 檢視器"></iframe>
+            
+            <!-- HTML 內容區域 -->
+            <div id="htmlContentArea" class="html-content-area">
+                <!-- LEVEL 2 -->
+                <div id="level2-content" style="display:none;">
+                    <h1>HCVR-3 Series - Conventional Fire Alarm Releasing System</h1>
+                    <h2>LEVEL 2 暫停功能</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>功能</th>
+                                <th>端子</th>
+                                <th>代碼</th>
+                                <th>描述</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="3">測試ZONE</td>
+                                <td>ZONE 1</td>
+                                <td>t1</td>
+                                <td rowspan="3">選擇代碼 t1, t2 或 t3 將ZONE 1, 2 或 3 置於測試模式。測試模式下的ZONE在操作後 3 秒自動重置。當ZONE 1, 2, 或 3 處於測試模式時，測試模式開啟和ZONE故障/測試中/停用指示燈會亮起。</td>
+                            </tr>
+                            <tr>
+                                <td>ZONE 2</td>
+                                <td>t2</td>
+                            </tr>
+                            <tr>
+                                <td>ZONE 3</td>
+                                <td>t3</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="3">停用ZONE</td>
+                                <td>ZONE 1</td>
+                                <td>d1</td>
+                                <td rowspan="3">選擇代碼 d1, d2 或 d3 停用ZONE 1, 2 或 3。停用ZONE不會在火災控制面板上提供火災或故障指示。當ZONE 1, 2, 或 3 被停用時，盤面停用和ZONE故障/測試中/停用指示燈會亮起。</td>
+                            </tr>
+                            <tr>
+                                <td>ZONE 2</td>
+                                <td>d2</td>
+                            </tr>
+                            <tr>
+                                <td>ZONE 3</td>
+                                <td>d3</td>
+                            </tr>
+                            <tr>
+                                <td>停用 NAC 1</td>
+                                <td>NAC1</td>
+                                <td>db</td>
+                                <td>選擇代碼 db 停用 NAC1 輸出。當 NAC1 被停用時，盤面停用和 NAC 故障/停用指示燈會亮起。</td>
+                            </tr>
+                            <tr>
+                                <td>停用第一階段繼電器</td>
+                                <td>1ST STAGE</td>
+                                <td>dP</td>
+                                <td>選擇代碼 dP 停用第一階段繼電器。當第一階段繼電器被停用時，盤面停用指示燈會亮起。</td>
+                            </tr>
+                            <tr>
+                                <td>停用第二階段繼電器</td>
+                                <td>2ND STAGE</td>
+                                <td>dA</td>
+                                <td>選擇代碼 dA 停用第二階段繼電器。當第二階段繼電器被停用時，盤面停用指示燈會亮起。</td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <td>停用排氣扇繼電器</td>
+                                <td>EXTRACT</td>
+                                <td>dc</td>
+                                <td>選擇代碼 dc 停用排氣扇繼電器。排氣扇停用指示燈停止亮起，盤面停用指示燈會亮起。</td>
+                            </tr>
+                            <tr>
+                                <td>停用手動釋放</td>
+                                <td>MAN. RELEASE</td>
+                                <td>dt</td>
+                                <td>選擇代碼 dt 停用手動釋放輸入。當手動釋放輸入被停用時，盤面停用指示燈會亮起。</td>
+                            </tr>
+                            <tr>
+                                <td>停用滅火劑釋放</td>
+                                <td>EXTING.</td>
+                                <td>dE</td>
+                                <td>選擇代碼 dE 停用預釋放計時器和滅火劑放射。當滅火劑釋放被停用時，滅火劑放射故障狀況會被忽略。</td>
+                            </tr>
+                            <tr>
+                                <td>啟動延遲</td>
+                                <td></td>
+                                <td>Ad</td>
+                                <td>選擇代碼 Ad 以啟動訪問級別 3 選項 C00 至 C09 的延遲。</td>
+                            </tr>
+                            <tr>
+                                <td>關閉排氣扇接觸器</td>
+                                <td>EXTRACT</td>
+                                <td>Ac</td>
+                                <td>選擇代碼 Ac 並按下 HCVR-3 釋放火災控制面板上的 Enter 按鈕，以關閉排氣扇終端的常開接觸器。再次按下 Enter 按鈕會打開接觸器。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- LEVEL 3 -->
+                <div id="level3-content" style="display:none;">
+                    <h1>HCVR-3 Series - Configuration Codes</h1>
+                    <h2>LEVEL 3 配置程式碼</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>代碼</th>
+                                <th>功能</th>
+                                <th>描述</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>UXX</td>
+                                <td>配置更新計數</td>
+                                <td>每次訪問級別 3 配置更改時數字遞增。當達到 99 時計數器重置為 00。</td>
+                            </tr>
+                            <tr>
+                                <td>C00</td>
+                                <td>NAC 延遲時間 = 30 秒</td>
+                                <td rowspan="10">在 NAC 操作前引入時間延遲。只能選擇一個延遲時間段。延遲通過訪問級別 2 中的 "Ad" 選項啟動。</td>
+                            </tr>
+                            <tr><td>C01</td><td>NAC 延遲時間 = 1 秒</td></tr>
+                            <tr><td>C02</td><td>NAC 延遲時間 = 2 秒</td></tr>
+                            <tr><td>C03</td><td>NAC 延遲時間 = 3 秒</td></tr>
+                            <tr><td>C04</td><td>NAC 延遲時間 = 4 秒</td></tr>
+                            <tr><td>C05</td><td>NAC 延遲時間 = 5 秒</td></tr>
+                            <tr><td>C06</td><td>NAC 延遲時間 = 6 秒</td></tr>
+                            <tr><td>C07</td><td>NAC 延遲時間 = 7 秒</td></tr>
+                            <tr><td>C08</td><td>NAC 延遲時間 = 8 秒</td></tr>
+                            <tr><td>C09</td><td>NAC 延遲時間 = 9 秒</td></tr>
+                        </tbody>
+                        <tbody>
+                            <tr><td>C11</td><td>ZONE 1 & ZONE 2 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C12</td><td>ZONE 2 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C13</td><td>ZONE 1 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td class="red-text">C14</td><td>ZONE 1 & ZONE 2 或 ZONE 2 & ZONE 3 或 ZONE 1 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C15</td><td>ZONE 1 & ZONE 2 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C16</td><td>ZONE 1 或 ZONE 2 或 ZONE 3 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C17</td><td>ZONE 1 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C18</td><td>ZONE 2 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C19</td><td>ZONE 3 探測器觸發自動釋放</td><td></td></tr>
+                            <tr><td>C21</td><td>停用火災蜂鳴器</td><td></td></tr>
+                            <tr><td>C22</td><td>停用火災輸出</td><td>火災繼電器</td></tr>
+                            <tr><td>C23</td><td>停用故障輸出</td><td></td></tr>
+                        </tbody>
+                        <tbody>
+                            <tr><td>C24</td><td>停用接地故障監控</td><td></td></tr>
+                            <tr><td>C25</td><td>脈衝 R0V 輸出</td><td></td></tr>
+                            <tr><td>C26</td><td>系統重置時移除 AUX 24V</td><td>啟用使用 AUX 電源重置系統</td></tr>
+                            <tr><td>C27</td><td>當 EXTING. 放射啟動時指示釋放</td><td>而不是在收到壓力開關信號時。</td></tr>
+                            <tr><td>C28</td><td>手動釋放時無啟動延遲</td><td>延遲仍適用於自動檢測。</td></tr>
+                            <tr><td class="red-text">C29</td><td>滅火劑放射可在即將階段重置</td><td>允許在倒計時定時器到期前重置滅火劑放射用於安裝和測試</td></tr>
+                            <tr><td>C2A</td><td>本地火災繼電器在釋放信號時操作</td><td>本地火災繼電器僅在滅火劑釋放時操作而不是在火災狀況時</td></tr>
+                            <tr><td>C2b</td><td>滅火劑放射保持至重置</td><td>滅火劑放射在釋放後保持開啟直到面板重置。（僅限軟件版本 1.2 及以上）</td></tr>
+                            <tr><td>C2C</td><td>低壓開關（常閉）</td><td>低壓開關輸入通常尋找啟動時的開路接觸閉合，允許使用常閉開關。</td></tr>
+                            <tr><td>C2D</td><td>延遲電源故障指示 30 分鐘</td><td>除非存在電池低電量故障，否則電源故障指示將延遲 30 分鐘。當報告電池低電量故障時，電源故障指示的延遲被取消，立即報告電源故障和電池低電量故障。</td></tr>
+                            <tr><td>C31</td><td>ZONE 1 探測器警報延遲</td><td rowspan="3">當ZONE僅由探測器觸發時，NAC 輸出延遲設定的時間（選項 0-9）。可以選擇任意組合。</td></tr>
+                            <tr><td>C32</td><td>ZONE 2 探測器警報延遲</td></tr>
+                            <tr><td>C33</td><td>ZONE 3 探測器警報延遲</td></tr>
+                        </tbody>
+                        <tbody>
+                            <tr><td>C41</td><td>ZONE 1 手動報警按鈕警報延遲</td><td rowspan="3">當ZONE僅由手動報警按鈕觸發時，NAC 輸出延遲設定的時間（選項 0-9）。可以選擇任意組合。</td></tr>
+                            <tr><td>C42</td><td>ZONE 2 手動報警按鈕警報延遲</td></tr>
+                            <tr><td>C43</td><td>ZONE 3 手動報警按鈕警報延遲</td></tr>
+                            <tr><td>C61</td><td>ZONE 1 通過本安屏障操作</td><td rowspan="3">僅當探測器連接到兼容的本安屏障時選擇。可以選擇任意組合。</td></tr>
+                            <tr><td>C62</td><td>ZONE 2 通過本安屏障操作</td></tr>
+                            <tr><td>C63</td><td>ZONE 3 通過本安屏障操作</td></tr>
+                            <tr><td class="red-text">C71</td><td>ZONE 1 短路指示警報</td><td rowspan="3">更改ZONE的觸發閾值，以便火災控制面板可用於沒有短路監控的舊系統。可以選擇任意組合。</td></tr>
+                            <tr><td class="red-text">C72</td><td>ZONE 2 短路指示警報</td></tr>
+                            <tr><td class="red-text">C73</td><td>ZONE 3 短路指示警報</td></tr>
+                            <tr><td>C81</td><td>ZONE 1 非鎖存</td><td rowspan="3">使ZONE自重置，以便可以用於接收來自其他系統的信號，並在輸入移除時重置。可以選擇任意組合。</td></tr>
+                            <tr><td>C82</td><td>ZONE 2 非鎖存</td></tr>
+                            <tr><td>C83</td><td>ZONE 3 非鎖存</td></tr>
+                            <tr><td>CA1</td><td>ZONE 1 設備警報必須持續 30 秒</td><td rowspan="3">輸入延遲。可以選擇任意組合。</td></tr>
+                            <tr><td>CA2</td><td>ZONE 2 設備警報必須持續 30 秒</td></tr>
+                            <tr><td>CA3</td><td>ZONE 3 設備警報必須持續 30 秒</td></tr>
+                        </tbody>
+                        <tbody>
+                            <tr><td class="red-text">E00</td><td>面板可在放射輸出操作後立即重置</td><td>允許在滅火劑放射完全完成前禁止重置面板。</td></tr>
+                            <tr><td>E01 TO E29</td><td>面板可在放射輸出操作後 1 分鐘至 29 分鐘重置</td><td></td></tr>
+                            <tr><td>E30</td><td>面板可在放射輸出操作後 30 分鐘重置</td><td></td></tr>
+                        </tbody>
+                        <tbody>
+                            <tr><td>-00</td><td>無滅火劑延遲</td><td rowspan="4">啟動與滅火劑釋放輸出操作之間的時間延遲。此菜單選項使用燈測試 (+100) 按鈕訪問。時間使用 Mode 按鈕調整 10 秒，Select 按鈕調整 5 秒。選擇時間後，使用 Enter 按鈕存儲值。</td></tr>
+                            <tr><td>-05</td><td>5 秒滅火劑延遲</td></tr>
+                            <tr><td>-10 TO -55</td><td>以五秒為增量增加滅火劑延遲</td></tr>
+                            <tr><td>-60</td><td>60 秒滅火劑延遲</td></tr>
+                        </tbody>
+                        <tbody>
+                            <tr><td>300</td><td>設置滅火劑持續時間至少 60 秒且不超過 500 秒。滅火劑持續時間可以 5 秒為增量增加。300 秒以上的值僅在版本 1.8 及以上支持</td><td>滅火劑釋放輸出啟動的時間。此菜單選項使用燈測試 (+100) 按鈕訪問。時間使用 Mode 按鈕調整 10 秒，Select 按鈕調整 5 秒。選擇時間後，使用 Enter 按鈕存儲值。面板在此時間到期前無法重置，除非操作位於前蓋下的終止滅火劑開關。</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 故障排除 -->
+                <div id="troubleshooting-content" style="display:none;">
+                    <h1>HCVR-3 釋放式火災控制面板 - 故障排除</h1>
+                    <p>當安裝或配置後出現衝突時，對HCVR-3釋放式火災控制面板進行故障排除。監控火災控制面板下方面板的指示燈以確定故障狀況的原因。打開HCVR-3釋放式火災控制面板的櫃門後即可看到下方面板的指示燈。</p>
+                    
+                    <p>下圖展示了HCVR-3釋放式火災控制面板的下方面板指示燈：</p>
+
+                    <table>
+                        <thead>
+                            <tr><th>Indicator</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Mains Fail</strong></td><td>115V/230V交流電源不存在，系統正在使用備用電池運行。如果沒有停電，請檢查主端子排的保險絲是否因電源丟失而熔斷。</td></tr>
+                            <tr><td><strong>Batt Fail</strong></td><td>備用電池已斷開或火災控制面板的充電電路故障。檢查兩塊電池是否已連接並相互連接。測試電池。斷開電池並確保在電池充電導線上可以測量到28伏電壓。</td></tr>
+                            <tr><td><strong>CPU Tribl</strong></td><td>中央處理單元未能執行代碼並已被系統Watchdog重新啟動。必須按下Watchdog重置開關以清除CPU故障狀況。按下Watchdog重置。如果系統未恢復正常，則面板可能已損壞，需要更換電路板。</td></tr>
+                            <tr><td><strong>Aux 24V Tribl</strong></td><td>Aux 24V和R0V端子提供500毫安、24V直流電源供火災報警輔助設備使用。此LED指示保護R0V輸出的保險絲已動作且此輸出的額定值已超出。保險絲為自恢復類型，當故障狀況消除後供電將恢復。</td></tr>
+                            <tr><td><strong>Batt Low</strong></td><td>當系統使用電池運行且電池電壓在21.5V至20.5V（最低電池電壓）之間時亮起。</td></tr>
+                            <tr><td><strong>Comms Tribl</strong></td><td>與遠程指示器或輔助板的通信已丟失。檢查所有遠程指示器和輔助板的通信故障以確定問題來源。通信故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Earth Tribl</strong></td><td>系統部分線路已接地。移除所有系統線路並逐一重新連接電纜，直到接地故障再次出現。這將指示哪條電纜存在接地故障。</td></tr>
+                        </tbody>
+                        <tbody>
+                            <tr><td><strong>Sys Fuse Trbl</strong></td><td>電源供應的額定功率已超出且系統保險絲已動作。移除並檢查所有負載，然後逐一重新連接，直到過載電路觸發保險絲以識別故障電路。</td></tr>
+                            <tr><td><strong>S1, S2 and S3 Trbl</strong></td><td>NAC輸出存在短路或開路。移除接線並重新連接終端電阻。檢查NAC電路接線。S3 LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Exting Trbl</strong></td><td>釋放劑輸出存在短路或開路。移除接線並重新連接終端電阻。檢查釋放劑電路接線。Exting故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Abort Trbl</strong></td><td>緊急停止開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查中止電路接線。Abort故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Manual Release Trbl</strong></td><td>手動釋放開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查手動釋放電路接線。手動釋放故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Mode Trbl</strong></td><td>模式開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查模式電路接線。Mode故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Release Trbl</strong></td><td>釋放壓力開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查釋放壓力開關電路接線。Released故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Low Pres Trbl</strong></td><td>低壓開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查低壓開關電路接線。低壓故障LED將伴隨前面板的故障LED，指示控制面板釋放劑部分的常見故障狀況。</td></tr>
+                            <tr><td><strong>Tell Tale</strong></td><td>面板安裝或遠程手動釋放按鈕已被按下。只能通過按下處理器重置和Watchdog重置或關閉火災控制面板電源來重置。</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             
             <!-- 載入動畫 -->
             <div class="loading-overlay" id="loadingOverlay">
@@ -514,230 +800,6 @@
                     <button class="retry-btn" id="retryBtn">重新載入</button>
                 </div>
             </div>
-            
-            <!-- HTML 內容區塊（LEVEL 2, LEVEL 3, 故障排除） -->
-            <div id="level2" class="content-section">
-                <h1>HCVR-3 Series - Conventional Fire Alarm Releasing System</h1>
-                <h2>LEVEL 2 暫停功能</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>功能</th>
-                            <th>端子</th>
-                            <th>代碼</th>
-                            <th>描述</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td rowspan="3">測試ZONE</td>
-                            <td>ZONE 1</td>
-                            <td>t1</td>
-                            <td rowspan="3">選擇代碼 t1, t2 或 t3 將ZONE 1, 2 或 3 置於測試模式。測試模式下的ZONE在操作後 3 秒自動重置。當ZONE 1, 2, 或 3 處於測試模式時，測試模式開啟和ZONE故障/測試中/停用指示燈會亮起。</td>
-                        </tr>
-                        <tr>
-                            <td>ZONE 2</td>
-                            <td>t2</td>
-                        </tr>
-                        <tr>
-                            <td>ZONE 3</td>
-                            <td>t3</td>
-                        </tr>
-                        <tr>
-                            <td rowspan="3">停用ZONE</td>
-                            <td>ZONE 1</td>
-                            <td>d1</td>
-                            <td rowspan="3">選擇代碼 d1, d2 或 d3 停用ZONE 1, 2 或 3。停用ZONE不會在火災控制面板上提供火災或故障指示。當ZONE 1, 2, 或 3 被停用時，盤面停用和ZONE故障/測試中/停用指示燈會亮起。</td>
-                        </tr>
-                        <tr>
-                            <td>ZONE 2</td>
-                            <td>d2</td>
-                        </tr>
-                        <tr>
-                            <td>ZONE 3</td>
-                            <td>d3</td>
-                        </tr>
-                        <tr>
-                            <td>停用 NAC 1</td>
-                            <td>NAC1</td>
-                            <td>db</td>
-                            <td>選擇代碼 db 停用 NAC1 輸出。當 NAC1 被停用時，盤面停用和 NAC 故障/停用指示燈會亮起。</td>
-                        </tr>
-                        <tr>
-                            <td>停用第一階段繼電器</td>
-                            <td>1ST STAGE</td>
-                            <td>dP</td>
-                            <td>選擇代碼 dP 停用第一階段繼電器。當第一階段繼電器被停用時，盤面停用指示燈會亮起。</td>
-                        </tr>
-                        <tr>
-                            <td>停用第二階段繼電器</td>
-                            <td>2ND STAGE</td>
-                            <td>dA</td>
-                            <td>選擇代碼 dA 停用第二階段繼電器。當第二階段繼電器被停用時，盤面停用指示燈會亮起。</td>
-                        </tr>
-                    </tbody>
-                    <tbody>
-                        <tr>
-                            <td>停用排氣扇繼電器</td>
-                            <td>EXTRACT</td>
-                            <td>dc</td>
-                            <td>選擇代碼 dc 停用排氣扇繼電器。排氣扇停用指示燈停止亮起，盤面停用指示燈會亮起。</td>
-                        </tr>
-                        <tr>
-                            <td>停用手動釋放</td>
-                            <td>MAN. RELEASE</td>
-                            <td>dt</td>
-                            <td>選擇代碼 dt 停用手動釋放輸入。當手動釋放輸入被停用時，盤面停用指示燈會亮起。</td>
-                        </tr>
-                        <tr>
-                            <td>停用滅火劑釋放</td>
-                            <td>EXTING.</td>
-                            <td>dE</td>
-                            <td>選擇代碼 dE 停用預釋放計時器和滅火劑放射。當滅火劑釋放被停用時，滅火劑放射故障狀況會被忽略。</td>
-                        </tr>
-                        <tr>
-                            <td>啟動延遲</td>
-                            <td></td>
-                            <td>Ad</td>
-                            <td>選擇代碼 Ad 以啟動訪問級別 3 選項 C00 至 C09 的延遲。</td>
-                        </tr>
-                        <tr>
-                            <td>關閉排氣扇接觸器</td>
-                            <td>EXTRACT</td>
-                            <td>Ac</td>
-                            <td>選擇代碼 Ac 並按下 HCVR-3 釋放火災控制面板上的 Enter 按鈕，以關閉排氣扇終端的常開接觸器。再次按下 Enter 按鈕會打開接觸器。</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="level3" class="content-section">
-                <h1>HCVR-3 Series - Configuration Codes</h1>
-                <h2>LEVEL 3 配置程式碼</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>代碼</th>
-                            <th>功能</th>
-                            <th>描述</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>UXX</td>
-                            <td>配置更新計數</td>
-                            <td>每次訪問級別 3 配置更改時數字遞增。當達到 99 時計數器重置為 00。</td>
-                        </tr>
-                        <tr>
-                            <td>C00</td>
-                            <td>NAC 延遲時間 = 30 秒</td>
-                            <td rowspan="10">在 NAC 操作前引入時間延遲。只能選擇一個延遲時間段。延遲通過訪問級別 2 中的 "Ad" 選項啟動。</td>
-                        </tr>
-                        <tr><td>C01</td><td>NAC 延遲時間 = 1 秒</td></tr>
-                        <tr><td>C02</td><td>NAC 延遲時間 = 2 秒</td></tr>
-                        <tr><td>C03</td><td>NAC 延遲時間 = 3 秒</td></tr>
-                        <tr><td>C04</td><td>NAC 延遲時間 = 4 秒</td></tr>
-                        <tr><td>C05</td><td>NAC 延遲時間 = 5 秒</td></tr>
-                        <tr><td>C06</td><td>NAC 延遲時間 = 6 秒</td></tr>
-                        <tr><td>C07</td><td>NAC 延遲時間 = 7 秒</td></tr>
-                        <tr><td>C08</td><td>NAC 延遲時間 = 8 秒</td></tr>
-                        <tr><td>C09</td><td>NAC 延遲時間 = 9 秒</td></tr>
-                    </tbody>
-                    <tbody>
-                        <tr><td>C11</td><td>ZONE 1 & ZONE 2 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C12</td><td>ZONE 2 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C13</td><td>ZONE 1 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td class="red-text">C14</td><td>ZONE 1 & ZONE 2 或 ZONE 2 & ZONE 3 或 ZONE 1 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C15</td><td>ZONE 1 & ZONE 2 & ZONE 3 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C16</td><td>ZONE 1 或 ZONE 2 或 ZONE 3 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C17</td><td>ZONE 1 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C18</td><td>ZONE 2 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C19</td><td>ZONE 3 探測器觸發自動釋放</td><td></td></tr>
-                        <tr><td>C21</td><td>停用火災蜂鳴器</td><td></td></tr>
-                        <tr><td>C22</td><td>停用火災輸出</td><td>火災繼電器</td></tr>
-                        <tr><td>C23</td><td>停用故障輸出</td><td></td></tr>
-                    </tbody>
-                    <tbody>
-                        <tr><td>C24</td><td>停用接地故障監控</td><td></td></tr>
-                        <tr><td>C25</td><td>脈衝 R0V 輸出</td><td></td></tr>
-                        <tr><td>C26</td><td>系統重置時移除 AUX 24V</td><td>啟用使用 AUX 電源重置系統</td></tr>
-                        <tr><td>C27</td><td>當 EXTING. 放射啟動時指示釋放</td><td>而不是在收到壓力開關信號時。</td></tr>
-                        <tr><td>C28</td><td>手動釋放時無啟動延遲</td><td>延遲仍適用於自動檢測。</td></tr>
-                        <tr><td class="red-text">C29</td><td>滅火劑放射可在即將階段重置</td><td>允許在倒計時定時器到期前重置滅火劑放射用於安裝和測試</td></tr>
-                        <tr><td>C2A</td><td>本地火災繼電器在釋放信號時操作</td><td>本地火災繼電器僅在滅火劑釋放時操作而不是在火災狀況時</td></tr>
-                        <tr><td>C2b</td><td>滅火劑放射保持至重置</td><td>滅火劑放射在釋放後保持開啟直到面板重置。（僅限軟件版本 1.2 及以上）</td></tr>
-                        <tr><td>C2C</td><td>低壓開關（常閉）</td><td>低壓開關輸入通常尋找啟動時的開路接觸閉合，允許使用常閉開關。</td></tr>
-                        <tr><td>C2D</td><td>延遲電源故障指示 30 分鐘</td><td>除非存在電池低電量故障，否則電源故障指示將延遲 30 分鐘。當報告電池低電量故障時，電源故障指示的延遲被取消，立即報告電源故障和電池低電量故障。</td></tr>
-                        <tr><td>C31</td><td>ZONE 1 探測器警報延遲</td><td rowspan="3">當ZONE僅由探測器觸發時，NAC 輸出延遲設定的時間（選項 0-9）。可以選擇任意組合。</td></tr>
-                        <tr><td>C32</td><td>ZONE 2 探測器警報延遲</td></tr>
-                        <tr><td>C33</td><td>ZONE 3 探測器警報延遲</td></tr>
-                    </tbody>
-                    <tbody>
-                        <tr><td>C41</td><td>ZONE 1 手動報警按鈕警報延遲</td><td rowspan="3">當ZONE僅由手動報警按鈕觸發時，NAC 輸出延遲設定的時間（選項 0-9）。可以選擇任意組合。</td></tr>
-                        <tr><td>C42</td><td>ZONE 2 手動報警按鈕警報延遲</td></tr>
-                        <tr><td>C43</td><td>ZONE 3 手動報警按鈕警報延遲</td></tr>
-                        <tr><td>C61</td><td>ZONE 1 通過本安屏障操作</td><td rowspan="3">僅當探測器連接到兼容的本安屏障時選擇。可以選擇任意組合。</td></tr>
-                        <tr><td>C62</td><td>ZONE 2 通過本安屏障操作</td></tr>
-                        <tr><td>C63</td><td>ZONE 3 通過本安屏障操作</td></tr>
-                        <tr><td class="red-text">C71</td><td>ZONE 1 短路指示警報</td><td rowspan="3">更改ZONE的觸發閾值，以便火災控制面板可用於沒有短路監控的舊系統。可以選擇任意組合。</td></tr>
-                        <tr><td class="red-text">C72</td><td>ZONE 2 短路指示警報</td></tr>
-                        <tr><td class="red-text">C73</td><td>ZONE 3 短路指示警報</td></tr>
-                        <tr><td>C81</td><td>ZONE 1 非鎖存</td><td rowspan="3">使ZONE自重置，以便可以用於接收來自其他系統的信號，並在輸入移除時重置。可以選擇任意組合。</td></tr>
-                        <tr><td>C82</td><td>ZONE 2 非鎖存</td></tr>
-                        <tr><td>C83</td><td>ZONE 3 非鎖存</td></tr>
-                        <tr><td>CA1</td><td>ZONE 1 設備警報必須持續 30 秒</td><td rowspan="3">輸入延遲。可以選擇任意組合。</td></tr>
-                        <tr><td>CA2</td><td>ZONE 2 設備警報必須持續 30 秒</td></tr>
-                        <tr><td>CA3</td><td>ZONE 3 設備警報必須持續 30 秒</td></tr>
-                    </tbody>
-                    <tbody>
-                        <tr><td class="red-text">E00</td><td>面板可在放射輸出操作後立即重置</td><td>允許在滅火劑放射完全完成前禁止重置面板。</td></tr>
-                        <tr><td>E01 TO E29</td><td>面板可在放射輸出操作後 1 分鐘至 29 分鐘重置</td><td></td></tr>
-                        <tr><td>E30</td><td>面板可在放射輸出操作後 30 分鐘重置</td><td></td></tr>
-                    </tbody>
-                    <tbody>
-                        <tr><td>-00</td><td>無滅火劑延遲</td><td rowspan="4">啟動與滅火劑釋放輸出操作之間的時間延遲。此菜單選項使用燈測試 (+100) 按鈕訪問。時間使用 Mode 按鈕調整 10 秒，Select 按鈕調整 5 秒。選擇時間後，使用 Enter 按鈕存儲值。</td></tr>
-                        <tr><td>-05</td><td>5 秒滅火劑延遲</td></tr>
-                        <tr><td>-10 TO -55</td><td>以五秒為增量增加滅火劑延遲</td></tr>
-                        <tr><td>-60</td><td>60 秒滅火劑延遲</td></tr>
-                    </tbody>
-                    <tbody>
-                        <tr><td>300</td><td>設置滅火劑持續時間至少 60 秒且不超過 500 秒。滅火劑持續時間可以 5 秒為增量增加。300 秒以上的值僅在版本 1.8 及以上支持</td><td>滅火劑釋放輸出啟動的時間。此菜單選項使用燈測試 (+100) 按鈕訪問。時間使用 Mode 按鈕調整 10 秒，Select 按鈕調整 5 秒。選擇時間後，使用 Enter 按鈕存儲值。面板在此時間到期前無法重置，除非操作位於前蓋下的終止滅火劑開關。</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="troubleshooting" class="content-section">
-                <h1>HCVR-3 釋放式火災控制面板 - 故障排除</h1>
-                <p>當安裝或配置後出現衝突時，對HCVR-3釋放式火災控制面板進行故障排除。監控火災控制面板下方面板的指示燈以確定故障狀況的原因。打開HCVR-3釋放式火災控制面板的櫃門後即可看到下方面板的指示燈。</p>
-                
-                <p>下圖展示了HCVR-3釋放式火災控制面板的下方面板指示燈：</p>
-
-                <table>
-                    <thead>
-                        <tr><th>Indicator</th><th>Description</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><strong>Mains Fail</strong></td><td>115V/230V交流電源不存在，系統正在使用備用電池運行。如果沒有停電，請檢查主端子排的保險絲是否因電源丟失而熔斷。</td></tr>
-                        <tr><td><strong>Batt Fail</strong></td><td>備用電池已斷開或火災控制面板的充電電路故障。檢查兩塊電池是否已連接並相互連接。測試電池。斷開電池並確保在電池充電導線上可以測量到28伏電壓。</td></tr>
-                        <tr><td><strong>CPU Tribl</strong></td><td>中央處理單元未能執行代碼並已被系統Watchdog重新啟動。必須按下Watchdog重置開關以清除CPU故障狀況。按下Watchdog重置。如果系統未恢復正常，則面板可能已損壞，需要更換電路板。</td></tr>
-                        <tr><td><strong>Aux 24V Tribl</strong></td><td>Aux 24V和R0V端子提供500毫安、24V直流電源供火災報警輔助設備使用。此LED指示保護R0V輸出的保險絲已動作且此輸出的額定值已超出。保險絲為自恢復類型，當故障狀況消除後供電將恢復。</td></tr>
-                        <tr><td><strong>Batt Low</strong></td><td>當系統使用電池運行且電池電壓在21.5V至20.5V（最低電池電壓）之間時亮起。</td></tr>
-                        <tr><td><strong>Comms Tribl</strong></td><td>與遠程指示器或輔助板的通信已丟失。檢查所有遠程指示器和輔助板的通信故障以確定問題來源。通信故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Earth Tribl</strong></td><td>系統部分線路已接地。移除所有系統線路並逐一重新連接電纜，直到接地故障再次出現。這將指示哪條電纜存在接地故障。</td></tr>
-                    </tbody>
-                    <tbody>
-                        <tr><td><strong>Sys Fuse Trbl</strong></td><td>電源供應的額定功率已超出且系統保險絲已動作。移除並檢查所有負載，然後逐一重新連接，直到過載電路觸發保險絲以識別故障電路。</td></tr>
-                        <tr><td><strong>S1, S2 and S3 Trbl</strong></td><td>NAC輸出存在短路或開路。移除接線並重新連接終端電阻。檢查NAC電路接線。S3 LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Exting Trbl</strong></td><td>釋放劑輸出存在短路或開路。移除接線並重新連接終端電阻。檢查釋放劑電路接線。Exting故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Abort Trbl</strong></td><td>緊急停止開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查中止電路接線。Abort故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Manual Release Trbl</strong></td><td>手動釋放開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查手動釋放電路接線。手動釋放故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Mode Trbl</strong></td><td>模式開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查模式電路接線。Mode故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Release Trbl</strong></td><td>釋放壓力開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查釋放壓力開關電路接線。Released故障LED將伴隨前面板的故障LED，指示火災控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Low Pres Trbl</strong></td><td>低壓開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查低壓開關電路接線。低壓故障LED將伴隨前面板的故障LED，指示控制面板釋放劑部分的常見故障狀況。</td></tr>
-                        <tr><td><strong>Tell Tale</strong></td><td>面板安裝或遠程手動釋放按鈕已被按下。只能通過按下處理器重置和Watchdog重置或關閉火災控制面板電源來重置。</td></tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 
@@ -747,255 +809,243 @@
         返回主選單
     </button>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // DOM 元素
-        const navItems = document.querySelectorAll('.menu-item');
-        const pdfIframe = document.getElementById('pdfIframe');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorDetail = document.getElementById('errorDetail');
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const topToolbar = document.getElementById('topToolbar');
-        const currentDocTitle = document.getElementById('currentDocTitle');
-        const downloadCurrentBtn = document.getElementById('downloadCurrentBtn');
-        const retryBtn = document.getElementById('retryBtn');
-        const searchInput = document.getElementById('search-input');
-        
-        // HTML 內容區塊
-        const htmlSections = ['level2', 'level3', 'troubleshooting'];
-        let currentPdfPath = null;
-        let currentPdfName = null;
-        let currentTarget = null;
-        
-        // PDF 檔案路徑對應（使用英文檔名，避免 GitHub Pages 中文編碼問題）
-        const pdfPathMap = {
-            'wiring': 'accessory_images/HCVR-3_Wiring.PDF',
-            'flowchart': 'accessory_images/HCVR-3_Flowchart.PDF',
-            'datasheet': 'accessory_images/HCVR-3_Datasheet.PDF',
-            'usermanual': 'accessory_images/HCVR-3_Manual.PDF'
-        };
-        
-        // PDF 標題對應
-        const pdfTitleMap = {
-            'wiring': 'HCVR-3 外接配線說明',
-            'flowchart': 'HCVR-3 流程圖',
-            'datasheet': 'HCVR-3 Data Sheet',
-            'usermanual': 'HCVR-3 使用手冊'
-        };
-        
-        // HTML 標題對應
-        const htmlTitleMap = {
-            'level2': 'LEVEL 2 暫停功能',
-            'level3': 'LEVEL 3 配置程式碼',
-            'troubleshooting': 'HCVR-3 故障排除'
-        };
-        
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-            errorMessage.style.display = 'none';
-        }
-        
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-        
-        function showError(message) {
-            hideLoading();
-            errorDetail.innerText = message || '無法載入 PDF 檔案，請確認檔案是否存在。';
-            errorMessage.style.display = 'flex';
-            pdfIframe.style.display = 'none';
-            welcomeScreen.style.display = 'none';
-        }
-        
-        function showWelcome() {
-            welcomeScreen.style.display = 'flex';
-            pdfIframe.style.display = 'none';
-            errorMessage.style.display = 'none';
-            hideLoading();
-            topToolbar.style.display = 'flex';
-            currentDocTitle.innerText = '請選擇文件';
-            downloadCurrentBtn.style.display = 'none';
-            // 隱藏所有 HTML 內容
-            document.querySelectorAll('.content-section').forEach(function(s) {
-                s.classList.remove('active');
-                s.style.display = 'none';
-            });
-            searchInput.style.display = 'block';
-            searchInput.placeholder = '搜索表格內容...';
-        }
-        
-        function showHTMLSection(target) {
-            // 隱藏 PDF 相關元素
-            pdfIframe.style.display = 'none';
-            welcomeScreen.style.display = 'none';
-            errorMessage.style.display = 'none';
-            hideLoading();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM 元素
+            const navItems = document.querySelectorAll('.nav-item');
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const pdfIframe = document.getElementById('pdfIframe');
+            const htmlContentArea = document.getElementById('htmlContentArea');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorDetail = document.getElementById('errorDetail');
+            const topToolbar = document.getElementById('topToolbar');
+            const currentDocTitle = document.getElementById('currentDocTitle');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const retryBtn = document.getElementById('retryBtn');
+            const searchInput = document.getElementById('searchInput');
             
-            // 顯示工具欄
-            topToolbar.style.display = 'flex';
-            currentDocTitle.innerText = htmlTitleMap[target] || target;
-            downloadCurrentBtn.style.display = 'none';
-            searchInput.style.display = 'block';
-            searchInput.placeholder = '搜索表格內容...';
+            let currentPdfPath = null;
+            let currentPdfName = null;
+            let currentHtmlId = null;
             
-            // 先隱藏所有 content-section
-            document.querySelectorAll('.content-section').forEach(function(s) {
-                s.classList.remove('active');
-                s.style.display = 'none';
-            });
-            
-            // 顯示對應的 HTML 內容
-            const targetSection = document.getElementById(target);
-            if (targetSection) {
-                targetSection.classList.add('active');
-                targetSection.style.display = 'block';
-            }
-        }
-        
-        function loadPDF(target) {
-            const pdfPath = pdfPathMap[target];
-            if (!pdfPath) {
-                showWelcome();
-                return;
-            }
-            
-            currentPdfPath = pdfPath;
-            currentPdfName = pdfTitleMap[target] || target;
-            currentTarget = target;
-            
-            // 更新 UI
-            currentDocTitle.innerText = currentPdfName;
-            downloadCurrentBtn.href = pdfPath;
-            downloadCurrentBtn.download = currentPdfName + '.pdf';
-            downloadCurrentBtn.style.display = 'inline-flex';
-            searchInput.style.display = 'block';
-            searchInput.placeholder = '搜索表格內容...';
-            
-            // 隱藏所有 HTML 內容
-            document.querySelectorAll('.content-section').forEach(function(s) {
-                s.classList.remove('active');
-                s.style.display = 'none';
-            });
-            
-            // 顯示 PDF iframe
-            welcomeScreen.style.display = 'none';
-            pdfIframe.style.display = 'block';
-            errorMessage.style.display = 'none';
-            topToolbar.style.display = 'flex';
-            showLoading();
-            
-            // 加入時間戳避免快取
-            const fileUrl = pdfPath + '?t=' + Date.now();
-            pdfIframe.src = fileUrl;
-            
-            // 設定載入逾時
-            let loadTimeout = setTimeout(function() {
-                if (loadingOverlay.style.display === 'flex') {
-                    hideLoading();
-                    showError('載入逾時，請檢查網路連線或檔案是否存在。');
-                }
-            }, 15000);
-            
-            pdfIframe.onload = function() {
-                clearTimeout(loadTimeout);
-                hideLoading();
-                
-                // 檢查是否載入成功
-                setTimeout(function() {
-                    try {
-                        const iframeDoc = pdfIframe.contentDocument || pdfIframe.contentWindow.document;
-                        if (iframeDoc && iframeDoc.body) {
-                            const bodyText = iframeDoc.body.innerText || '';
-                            if (bodyText.includes('404') || bodyText.includes('找不到') || 
-                                bodyText.includes('Not Found') || bodyText.includes('無法載入')) {
-                                showError('檔案不存在，請確認 PDF 檔案位於 accessory_images 資料夾中。');
-                            }
-                        }
-                    } catch (e) {
-                        // 跨域訪問被阻止是正常現象（PDF 成功載入）
-                        console.log('PDF 已成功載入');
-                    }
-                }, 500);
+            // PDF 標題對應
+            const pdfTitleMap = {
+                'accessory_images/hcvr-3_wiring.pdf': 'HCVR-3 外接配線說明',
+                'accessory_images/hcvr-3_flowchart.pdf': 'HCVR-3 流程圖',
+                'accessory_images/hcvr-3_datasheet.pdf': 'HCVR-3 Data Sheet',
+                'accessory_images/hcvr-3_manual.pdf': 'HCVR-3 使用手冊'
             };
             
-            pdfIframe.onerror = function() {
-                clearTimeout(loadTimeout);
-                hideLoading();
-                showError('無法載入 PDF 檔案，請確認檔案是否存在。');
+            // HTML 標題對應
+            const htmlTitleMap = {
+                'level2': 'LEVEL 2 暫停功能',
+                'level3': 'LEVEL 3 配置程式碼',
+                'troubleshooting': 'HCVR-3 故障排除'
             };
-        }
-        
-        // 選單點擊事件
-        navItems.forEach(function(item) {
-            item.addEventListener('click', function() {
-                // 更新 active 狀態
-                navItems.forEach(function(nav) {
-                    nav.classList.remove('active');
+            
+            function hideLoading() {
+                loadingOverlay.classList.remove('show');
+            }
+            
+            function showLoading() {
+                loadingOverlay.classList.add('show');
+                errorMessage.classList.remove('show');
+            }
+            
+            function showError(message) {
+                hideLoading();
+                errorDetail.innerText = message;
+                errorMessage.classList.add('show');
+                pdfIframe.classList.remove('show');
+                htmlContentArea.classList.remove('show');
+                topToolbar.classList.remove('show');
+            }
+            
+            function showWelcome() {
+                welcomeScreen.style.display = 'flex';
+                pdfIframe.classList.remove('show');
+                htmlContentArea.classList.remove('show');
+                topToolbar.classList.remove('show');
+                errorMessage.classList.remove('show');
+                hideLoading();
+                currentPdfPath = null;
+                currentHtmlId = null;
+                // 隱藏所有 HTML 內容
+                document.querySelectorAll('#htmlContentArea > div').forEach(function(div) {
+                    div.style.display = 'none';
                 });
-                this.classList.add('active');
-                
-                const target = this.getAttribute('data-target');
-                const type = this.getAttribute('data-type');
-                
-                // 如果是 HTML 內容
-                if (type === 'html' || htmlSections.includes(target)) {
-                    showHTMLSection(target);
-                    return;
-                }
-                
-                // 載入 PDF
-                loadPDF(target);
-            });
-        });
-        
-        // 重新載入按鈕
-        retryBtn.addEventListener('click', function() {
-            if (currentTarget) {
-                loadPDF(currentTarget);
             }
-        });
-        
-        // 搜尋功能（僅針對表格內容）
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
             
-            // 找出目前顯示的 content-section
-            let activeSection = null;
-            document.querySelectorAll('.content-section').forEach(function(s) {
-                if (s.style.display !== 'none' && s.classList.contains('active')) {
-                    activeSection = s;
+            function showPDF(pdfPath, pdfName) {
+                if (!pdfPath) return;
+                
+                currentPdfPath = pdfPath;
+                currentPdfName = pdfName;
+                currentHtmlId = null;
+                
+                // 更新 UI
+                currentDocTitle.innerText = pdfName;
+                downloadBtn.href = pdfPath;
+                downloadBtn.download = pdfName + '.pdf';
+                downloadBtn.style.display = 'inline-flex';
+                searchInput.style.display = 'none';
+                topToolbar.classList.add('show');
+                
+                // 顯示 PDF
+                welcomeScreen.style.display = 'none';
+                htmlContentArea.classList.remove('show');
+                pdfIframe.classList.add('show');
+                showLoading();
+                errorMessage.classList.remove('show');
+                
+                // 加入時間戳避免快取
+                const fileUrl = pdfPath + '?t=' + Date.now();
+                pdfIframe.src = fileUrl;
+                
+                // 設定載入逾時
+                let loadTimeout = setTimeout(function() {
+                    if (loadingOverlay.classList.contains('show')) {
+                        hideLoading();
+                        showError('載入逾時，請檢查網路連線或檔案是否存在。');
+                    }
+                }, 15000);
+                
+                pdfIframe.onload = function() {
+                    clearTimeout(loadTimeout);
+                    hideLoading();
+                    
+                    // 檢查是否真的載入了 PDF
+                    setTimeout(function() {
+                        try {
+                            const iframeDoc = pdfIframe.contentDocument || pdfIframe.contentWindow.document;
+                            if (iframeDoc && iframeDoc.body) {
+                                const bodyText = iframeDoc.body.innerText || '';
+                                if (bodyText.includes('404') || bodyText.includes('找不到') || 
+                                    bodyText.includes('Not Found') || bodyText.includes('無法載入')) {
+                                    showError('檔案不存在，請確認 PDF 檔案位於 accessory_images 資料夾中。');
+                                }
+                            }
+                        } catch (e) {
+                            console.log('PDF 已成功載入');
+                        }
+                    }, 500);
+                };
+                
+                pdfIframe.onerror = function() {
+                    clearTimeout(loadTimeout);
+                    hideLoading();
+                    showError('無法載入 PDF 檔案，請確認檔案是否存在。');
+                };
+            }
+            
+            function showHTML(htmlId) {
+                currentHtmlId = htmlId;
+                currentPdfPath = null;
+                
+                // 更新 UI
+                currentDocTitle.innerText = htmlTitleMap[htmlId] || htmlId;
+                downloadBtn.style.display = 'none';
+                searchInput.style.display = 'block';
+                searchInput.value = '';
+                topToolbar.classList.add('show');
+                
+                // 隱藏所有 HTML 內容
+                document.querySelectorAll('#htmlContentArea > div').forEach(function(div) {
+                    div.style.display = 'none';
+                });
+                
+                // 顯示對應的 HTML 內容
+                const targetDiv = document.getElementById(htmlId + '-content');
+                if (targetDiv) {
+                    targetDiv.style.display = 'block';
                 }
-            });
-            
-            if (!activeSection) return;
-            
-            const rows = activeSection.querySelectorAll('tbody tr');
-            
-            if (searchTerm.length === 0) {
+                
+                // 顯示 HTML 區域
+                welcomeScreen.style.display = 'none';
+                pdfIframe.classList.remove('show');
+                htmlContentArea.classList.add('show');
+                errorMessage.classList.remove('show');
+                hideLoading();
+                
+                // 重置搜尋
+                const rows = htmlContentArea.querySelectorAll('tbody tr');
                 rows.forEach(function(row) {
                     row.style.display = '';
                 });
-                return;
             }
             
-            rows.forEach(function(row) {
-                const cells = row.querySelectorAll('td');
-                let rowContainsText = false;
-                cells.forEach(function(cell) {
-                    if (cell.textContent.toLowerCase().includes(searchTerm)) {
-                        rowContainsText = true;
+            // 重新載入按鈕
+            retryBtn.addEventListener('click', function() {
+                if (currentPdfPath) {
+                    showPDF(currentPdfPath, currentPdfName);
+                }
+            });
+            
+            // 搜尋功能
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                if (!currentHtmlId) return;
+                
+                const targetDiv = document.getElementById(currentHtmlId + '-content');
+                if (!targetDiv) return;
+                
+                const rows = targetDiv.querySelectorAll('tbody tr');
+                
+                if (searchTerm.length === 0) {
+                    rows.forEach(function(row) {
+                        row.style.display = '';
+                    });
+                    return;
+                }
+                
+                rows.forEach(function(row) {
+                    const cells = row.querySelectorAll('td');
+                    let rowContainsText = false;
+                    cells.forEach(function(cell) {
+                        if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                            rowContainsText = true;
+                        }
+                    });
+                    row.style.display = rowContainsText ? '' : 'none';
+                });
+            });
+            
+            // 導航點擊事件
+            navItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    // 更新 active 狀態
+                    navItems.forEach(function(nav) {
+                        nav.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const pdfPath = this.getAttribute('data-pdf');
+                    const htmlId = this.getAttribute('data-html');
+                    const section = this.getAttribute('data-section');
+                    
+                    if (section === 'welcome') {
+                        showWelcome();
+                        return;
+                    }
+                    
+                    if (pdfPath) {
+                        const pdfName = pdfTitleMap[pdfPath] || this.querySelector('.nav-text')?.innerText || 'PDF 文件';
+                        showPDF(pdfPath, pdfName);
+                        return;
+                    }
+                    
+                    if (htmlId) {
+                        showHTML(htmlId);
+                        return;
                     }
                 });
-                row.style.display = rowContainsText ? '' : 'none';
             });
+            
+            // 初始顯示歡迎畫面
+            showWelcome();
         });
-        
-        // 預設載入外接配線
-        const defaultTarget = 'wiring';
-        document.querySelector('.menu-item[data-target="' + defaultTarget + '"]')?.classList.add('active');
-        loadPDF(defaultTarget);
-    });
-</script>
+    </script>
 </body>
 </html>
