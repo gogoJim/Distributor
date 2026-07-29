@@ -380,7 +380,7 @@
 
 </head>
 <body>
-<div class="version-info">Ver.13 2026/7/27 HTBO/Jim (修正效率對照表 + 手動模式公式)</div>
+<div class="version-info">Ver.14 2026/7/29 HTBO/Jim </div>
 <h1>管道摩擦損失計算工具</h1>
 <h5>可切換壓力配管用碳鋼管等價管長資料庫：CNS4626 (SCH40) 或 CNS6445 (SGP)</h5>
 
@@ -450,7 +450,7 @@
     <div style="margin-left:50px;">額外項目總和: <span id="extraH3Total">0.0</span> M<br/>h₂總和: <span id="h3TotalSum">0.0</span> M</div>
     h₃: 密閉式放射壓力 1.0kg/cm² = <input class="calculation-input" id="outletPressure" min="0" step="0.1" type="number" value="10"/> M<br/>
     h₄: 流水檢知裝置 = <input class="calculation-input" id="flowDetector" min="0" step="0.1" type="number" value="5"/> M<br/>
-    故全揚程 H = h1(<span id="h1Display">0.00</span>)M + h2(<span id="h2Display">0.0</span>)M + h3(<span id="h3Display">10.0</span>)M + h4(<span id="h4Display">5.0</span>)M = <span id="totalHeadResult">0.00</span> M, 採 <input class="calculation-input" id="adoptedHead" min="0" step="0.1" type="number" value="0"/> M</p>
+    故全揚程 H = h1(<span id="h1Display">0.00</span>)M + h2(<span id="h2Display">0.0</span>)M + h3(<span id="h3Display">10.0</span>)M + h4(<span id="h4Display">5.0</span>)M = <span id="totalHeadResult">0.00</span> M, 採 <input class="calculation-input" id="adoptedHead" min="0" step="0.1" type="number" value="0" data-user-modified="false"/> M</p>
 </div>
 <div id="otherEquipmentCalc">
     <p>h₁: 放水鎗噴嘴損失水頭 + 控制閥損失水頭 = <input class="calculation-input" id="nozzleLoss" min="0" step="0.1" type="number" value="0"/> + <input class="calculation-input" id="valveLoss" min="0" step="0.1" type="number" value="0"/> = <span id="h1ResultOther">0.0</span> M<br/>
@@ -460,14 +460,14 @@
     <div id="extraH3ContainerOther" style="margin-left:50px; margin-top:5px;"></div>
     <div style="margin-left:50px;">額外項目總和: <span id="extraH3TotalOther">0.0</span> M<br/>h₃總和: <span id="h3TotalSumOther">0.0</span> M</div>
     h₄: 放出口之放出壓力水頭 = <input class="calculation-input" id="outletPressureOther" min="0" step="0.1" type="number" value="0"/> M<br/>
-    故全揚程 H = h1(<span id="h1DisplayOther">0.0</span>)M + h2(<span id="h2DisplayOther">0.00</span>)M + h3(<span id="h3DisplayOther">0.0</span>)M + h4(<span id="h4DisplayOther">0.0</span>)M = <span class="highlight" id="totalHeadResultOther">0.00</span> M, 採 <input class="calculation-input" id="adoptedHeadOther" min="0" step="0.1" type="number" value="0"/> M</p>
+    故全揚程 H = h1(<span id="h1DisplayOther">0.0</span>)M + h2(<span id="h2DisplayOther">0.00</span>)M + h3(<span id="h3DisplayOther">0.0</span>)M + h4(<span id="h4DisplayOther">0.0</span>)M = <span class="highlight" id="totalHeadResultOther">0.00</span> M, 採 <input class="calculation-input" id="adoptedHeadOther" min="0" step="0.1" type="number" value="0" data-user-modified="false"/> M</p>
 </div>
 <h3>2. 出水量計算</h3>
 <div class="flow-note-area">
     <label for="flowNote">📝 出水量備註 / 補充說明 :</label>
     <textarea id="flowNote" class="resizable-textarea" rows="2" placeholder="例如：依據現場測試需求調整水量、配合泵浦特性曲線選用..."></textarea>
 </div>
-<p>Q = <input class="calculation-input" id="flowRate" min="0" type="number" value="0"/> LPM, 採 <input class="calculation-input highlight" id="adoptedFlow" min="0" type="number" value="0"/> LPM</p>
+<p>Q = <input class="calculation-input" id="flowRate" min="0" type="number" value="0"/> LPM, 採 <input class="calculation-input highlight" id="adoptedFlow" min="0" type="number" value="0" data-user-modified="false"/> LPM</p>
 <h3>3. 電動機之輸出馬力</h3>
 <!-- ===== 效率模式切換區塊 ===== -->
 <div style="background:#f8f9fa; padding:12px; border-radius:5px; margin-bottom:15px; border:1px solid #ddd;">
@@ -530,9 +530,9 @@
 <!-- ===== 區塊結束 ===== -->
 
 <p id="formulaDisplayLine">計算式: KW = (0.163 × H × Q) ÷ E × K</p>
-<p>KW = (0.163 × 採 <span id="kwHead">0</span> M × (採 <span class="highlight" id="kwFlow">0</span> LPM / 1000)) / <span id="effDisplayForFormula" style="font-weight:bold; color:#e74c3c;">0.00</span> × 1.1 = <span class="highlight" id="kwResult">0.00</span> KW 選用 <input class="calculation-input" id="selectedKw" min="0" step="0.1" type="number" value="0"/></p>
+<p>KW = (0.163 × 採 <span id="kwHead">0</span> M × (採 <span class="highlight" id="kwFlow">0</span> LPM / 1000)) / <span id="effDisplayForFormula" style="font-weight:bold; color:#e74c3c;">0.00</span> × 1.1 = <span class="highlight" id="kwResult">0.00</span> KW 選用<input class="calculation-input" id="selectedKw" min="0" step="0.1" type="number" value="0" data-user-modified="false"/></p>
 <div id="formulaHint" style="font-size:0.85rem; color:#555; margin-top:3px;"></div>
-<h3>4. 放水鎗幫浦規格</h3>
+<h3>4. 幫浦規格</h3>
 <p>KW 選用 <span id="pumpKw">0</span>, H 採 <span id="pumpHead">0</span> M, Q 採 <span class="highlight" id="pumpFlow">0</span> LPM, D (管徑最後一段) <span id="lastDiameter">0</span>A</p>
 </div>
 
@@ -884,35 +884,55 @@ function updateLastDiameter(){
     const rows = document.querySelectorAll('#pipeSegments tbody tr');
     if(rows.length) document.getElementById('lastDiameter').textContent = rows[rows.length-1].querySelector('.pipe-diameter').value;
 }
+
+// ==================== 更新流量顯示 ====================
 function updateFlowRateDisplay(){
     const rows = document.querySelectorAll('#pipeSegments tbody tr');
     if(rows.length){
         const flow = rows[0].querySelector('.segment-flow-rate').value;
         document.getElementById('flowRate').value = flow;
-        if((parseFloat(document.getElementById('adoptedFlow').value)||0)===0) document.getElementById('adoptedFlow').value = flow;
+        
+        // 如果使用者尚未手動修改，則自動同步
+        const adoptedFlowInput = document.getElementById('adoptedFlow');
+        if (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false') {
+            document.getElementById('adoptedFlow').value = flow;
+        }
         updateFlowRateCalculations();
     }
 }
+
+// ==================== 更新流量計算 ====================
 function updateFlowRateCalculations() {
     const flow = parseFloat(document.getElementById('adoptedFlow').value) || 0;
+    
+    // 更新各處顯示
     document.getElementById('kwFlow').textContent = flow;
     document.getElementById('pumpFlow').textContent = flow;
+    
+    // 如果使用者尚未手動修改，則自動更新 adoptedFlow
+    const adoptedFlowInput = document.getElementById('adoptedFlow');
+    const flowRateInput = document.getElementById('flowRate');
+    const flowRateVal = parseFloat(flowRateInput.value) || 0;
+    
+    if (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false') {
+        // 自動同步 flowRate 到 adoptedFlow
+        adoptedFlowInput.value = flowRateVal;
+    }
     
     // 更新效率顯示
     updateEfficiencyDisplay();
     calculateMotorPower();
 }
 
+// ==================== 更新效率顯示 ====================
 function updateEfficiencyDisplay() {
     const flow = parseFloat(document.getElementById('adoptedFlow').value) || 0;
     const isManual = efficiencyMode === 'manual';
     
-    // 更新公式標題與提示
     const formulaLine = document.getElementById('formulaDisplayLine');
     const formulaHint = document.getElementById('formulaHint');
     
     if (isManual) {
-        // 手動模式
         const manualVal = parseFloat(document.getElementById('manualEfficiencyInput').value) || 0.6;
         document.getElementById('currentEfficiencyDisplay').textContent = manualVal.toFixed(3);
         document.getElementById('effDisplayForFormula').textContent = manualVal.toFixed(3);
@@ -920,9 +940,7 @@ function updateEfficiencyDisplay() {
         if (formulaLine) formulaLine.textContent = '計算式: KW = (0.163 × H × Q) ÷ E × K';
         if (formulaHint) formulaHint.textContent = '📐 手動模式：直接使用輸入的 E 值';
         
-        // 顯示查表區塊
         document.getElementById('tableEfficiencyDisplay').style.display = 'block';
-        // 更新標示
         const badgeContainer = document.querySelector('#tableEfficiencyDisplay');
         let badge = badgeContainer.querySelector('.efficiency-source-tag');
         if (!badge) {
@@ -940,7 +958,6 @@ function updateEfficiencyDisplay() {
         document.getElementById('manualEfficiencyGroup').style.display = 'block';
         document.getElementById('currentFlowDisplay').textContent = flow;
     } else {
-        // 查表模式
         const eff = getEfficiencyByFlow(flow);
         document.getElementById('currentEfficiencyDisplay').textContent = eff.toFixed(3);
         document.getElementById('effDisplayForFormula').textContent = eff.toFixed(3);
@@ -979,6 +996,7 @@ function setEfficiencyMode(mode) {
     calculateMotorPower();
 }
 
+// ==================== 更新全揚程計算 ====================
 function updateTotalHeadCalculation(){
     const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
     if(isSprinkler){
@@ -992,9 +1010,15 @@ function updateTotalHeadCalculation(){
         document.getElementById('h3Display').textContent=h3.toFixed(1);
         document.getElementById('h4Display').textContent=h4.toFixed(1);
         document.getElementById('totalHeadResult').textContent=total.toFixed(2);
-        if((parseFloat(document.getElementById('adoptedHead').value)||0)===0) document.getElementById('adoptedHead').value=Math.ceil(total*10)/10;
-        document.getElementById('kwHead').textContent=document.getElementById('adoptedHead').value;
-        document.getElementById('pumpHead').textContent=document.getElementById('adoptedHead').value;
+        
+        // 自動填入加總結果（保留使用者修改權限）
+        const adoptedInput = document.getElementById('adoptedHead');
+        if (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false') {
+            adoptedInput.value = Math.ceil(total * 10) / 10;
+        }
+        
+        document.getElementById('kwHead').textContent = document.getElementById('adoptedHead').value;
+        document.getElementById('pumpHead').textContent = document.getElementById('adoptedHead').value;
     } else {
         const h1=(parseFloat(document.getElementById('nozzleLoss').value)||0)+(parseFloat(document.getElementById('valveLoss').value)||0);
         const h2=parseFloat(document.getElementById('totalFrictionLoss').textContent)||0;
@@ -1007,31 +1031,40 @@ function updateTotalHeadCalculation(){
         document.getElementById('h3DisplayOther').textContent=h3.toFixed(1);
         document.getElementById('h4DisplayOther').textContent=h4.toFixed(1);
         document.getElementById('totalHeadResultOther').textContent=total.toFixed(2);
-        if((parseFloat(document.getElementById('adoptedHeadOther').value)||0)===0) document.getElementById('adoptedHeadOther').value=Math.ceil(total*10)/10;
-        document.getElementById('kwHead').textContent=document.getElementById('adoptedHeadOther').value;
-        document.getElementById('pumpHead').textContent=document.getElementById('adoptedHeadOther').value;
+        
+        // 自動填入加總結果（保留使用者修改權限）
+        const adoptedInput = document.getElementById('adoptedHeadOther');
+        if (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false') {
+            adoptedInput.value = Math.ceil(total * 10) / 10;
+        }
+        
+        document.getElementById('kwHead').textContent = document.getElementById('adoptedHeadOther').value;
+        document.getElementById('pumpHead').textContent = document.getElementById('adoptedHeadOther').value;
     }
     calculateMotorPower();
 }
 
+
+// ==================== 計算馬力 ====================
 function calculateMotorPower() {
     const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
     const H = isSprinkler ? parseFloat(document.getElementById('adoptedHead').value) || 0 : parseFloat(document.getElementById('adoptedHeadOther').value) || 0;
     const Q = parseFloat(document.getElementById('adoptedFlow').value) || 0;
     
-    // 根據模式取得效率
     const eff = getCurrentEfficiency();
-    
-    // 兩種模式使用相同公式：KW = (0.163 × H × Q) ÷ E × K
     const kw = (0.163 * H * (Q / 1000)) / eff * 1.1;
     
     document.getElementById('kwResult').textContent = kw.toFixed(2);
-    if ((parseFloat(document.getElementById('selectedKw').value) || 0) === 0) {
-        document.getElementById('selectedKw').value = Math.ceil(kw * 10) / 10;
+    
+    // 自動填入選用 KW（保留使用者修改權限）
+    const selectedKwInput = document.getElementById('selectedKw');
+    if (!selectedKwInput.dataset.userModified || selectedKwInput.dataset.userModified === 'false') {
+        selectedKwInput.value = Math.ceil(kw * 10) / 10;
     }
     document.getElementById('pumpKw').textContent = document.getElementById('selectedKw').value;
 }
 
+// ==================== 設備預設值更新 ====================
 function updateEquipmentDefaults(){
     const type = document.getElementById('equipmentType').value;
     if(type==="一般撒水"){
@@ -1039,6 +1072,8 @@ function updateEquipmentDefaults(){
         document.getElementById('otherEquipmentCalc').style.display='none';
         document.getElementById('outletPressure').value=10;
         document.getElementById('flowDetector').value=5;
+        // 重置手動標記
+        document.getElementById('adoptedHead').dataset.userModified = 'false';
         calculateTotalFrictionLoss();
     } else {
         document.getElementById('generalSprinklerCalc').style.display='none';
@@ -1051,21 +1086,108 @@ function updateEquipmentDefaults(){
         document.getElementById('nozzleLoss').value=nl;
         document.getElementById('outletPressureOther').value=op;
         document.getElementById('valveLoss').value=vl;
-        if(flow){ document.getElementById('flowRate').value=flow; document.getElementById('adoptedFlow').value=flow; updateFlowRateCalculations(); }
+        // 重置手動標記
+        document.getElementById('adoptedHeadOther').dataset.userModified = 'false';
+        if(flow){ 
+            document.getElementById('flowRate').value=flow; 
+            document.getElementById('adoptedFlow').value=flow; 
+            document.getElementById('adoptedFlow').dataset.userModified = 'false';
+            updateFlowRateCalculations(); 
+        }
         updateTotalHeadCalculation();
     }
 }
+
+
+// ==================== 初始化監聽器 ====================
 function initCalculationListeners(){
-    const ids = ['nozzleLoss','valveLoss','actualHead','outletPressure','flowDetector','actualHeadOther','outletPressureOther'];
-    ids.forEach(id=>document.getElementById(id)?.addEventListener('input',updateTotalHeadCalculation));
-    document.getElementById('adoptedHead')?.addEventListener('input',()=>{ document.getElementById('kwHead').textContent=document.getElementById('adoptedHead').value; document.getElementById('pumpHead').textContent=document.getElementById('adoptedHead').value; calculateMotorPower(); });
-    document.getElementById('adoptedHeadOther')?.addEventListener('input',()=>{ document.getElementById('kwHead').textContent=document.getElementById('adoptedHeadOther').value; document.getElementById('pumpHead').textContent=document.getElementById('adoptedHeadOther').value; calculateMotorPower(); });
-    document.getElementById('flowRate')?.addEventListener('input',()=>{ if((parseFloat(document.getElementById('adoptedFlow').value)||0)===0) document.getElementById('adoptedFlow').value=document.getElementById('flowRate').value; updateFlowRateCalculations(); });
-    document.getElementById('adoptedFlow')?.addEventListener('input',updateFlowRateCalculations);
-    document.getElementById('selectedKw')?.addEventListener('input',()=>document.getElementById('pumpKw').textContent=document.getElementById('selectedKw').value);
-    document.getElementById('equipmentType')?.addEventListener('change',updateEquipmentDefaults);
+    // 計算參數變動時重置手動標記並重新計算
+    const calcParamIds = ['nozzleLoss','valveLoss','actualHead','outletPressure','flowDetector','actualHeadOther','outletPressureOther'];
+    calcParamIds.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            el.addEventListener('input', function() {
+                const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
+                if (isSprinkler) {
+                    document.getElementById('adoptedHead').dataset.userModified = 'false';
+                } else {
+                    document.getElementById('adoptedHeadOther').dataset.userModified = 'false';
+                }
+                updateTotalHeadCalculation();
+            });
+        }
+    });
     
-    // 效率模式切換監聽
+    // ===== 全揚程 "採" 輸入框 =====
+    const adoptedHead = document.getElementById('adoptedHead');
+    if (adoptedHead) {
+        adoptedHead.addEventListener('input', function() {
+            this.dataset.userModified = 'true';
+            document.getElementById('kwHead').textContent = this.value || 0;
+            document.getElementById('pumpHead').textContent = this.value || 0;
+            calculateMotorPower();
+        });
+        adoptedHead.dataset.userModified = 'false';
+    }
+    
+    const adoptedHeadOther = document.getElementById('adoptedHeadOther');
+    if (adoptedHeadOther) {
+        adoptedHeadOther.addEventListener('input', function() {
+            this.dataset.userModified = 'true';
+            document.getElementById('kwHead').textContent = this.value || 0;
+            document.getElementById('pumpHead').textContent = this.value || 0;
+            calculateMotorPower();
+        });
+        adoptedHeadOther.dataset.userModified = 'false';
+    }
+    
+    // ===== 出水量 "採" 輸入框 =====
+    const adoptedFlow = document.getElementById('adoptedFlow');
+    if (adoptedFlow) {
+        adoptedFlow.addEventListener('input', function() {
+            this.dataset.userModified = 'true';
+            document.getElementById('kwFlow').textContent = this.value || 0;
+            document.getElementById('pumpFlow').textContent = this.value || 0;
+            updateEfficiencyDisplay();
+            calculateMotorPower();
+        });
+        adoptedFlow.dataset.userModified = 'false';
+    }
+    
+    // ===== 選用 KW 輸入框 =====
+    const selectedKw = document.getElementById('selectedKw');
+    if (selectedKw) {
+        selectedKw.addEventListener('input', function() {
+            this.dataset.userModified = 'true';
+            document.getElementById('pumpKw').textContent = this.value || 0;
+        });
+        selectedKw.dataset.userModified = 'false';
+    }
+    
+    // ===== 流量來源輸入框（同步到 adoptedFlow） =====
+    const flowRate = document.getElementById('flowRate');
+    if (flowRate) {
+        flowRate.addEventListener('input', function() {
+            // 如果使用者尚未手動修改 adoptedFlow，則自動同步
+            const adoptedFlowInput = document.getElementById('adoptedFlow');
+            if (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false') {
+                adoptedFlowInput.value = this.value || 0;
+                updateFlowRateCalculations();
+            }
+        });
+    }
+    
+    // ===== 設備類型切換 =====
+    document.getElementById('equipmentType')?.addEventListener('change', function() {
+        // 重置所有手動標記
+        document.getElementById('adoptedHead').dataset.userModified = 'false';
+        document.getElementById('adoptedHeadOther').dataset.userModified = 'false';
+        document.getElementById('adoptedFlow').dataset.userModified = 'false';
+        document.getElementById('selectedKw').dataset.userModified = 'false';
+        updateEquipmentDefaults();
+    });
+    
+    // ===== 效率模式切換 =====
     document.querySelectorAll('input[name="effMode"]').forEach(el => {
         el.addEventListener('change', function() {
             if (this.checked) {
@@ -1074,7 +1196,7 @@ function initCalculationListeners(){
         });
     });
     
-    // 手動輸入效率變更監聽
+    // ===== 手動效率輸入 =====
     document.getElementById('manualEfficiencyInput')?.addEventListener('input', function() {
         if (efficiencyMode === 'manual') {
             updateEfficiencyDisplay();
@@ -1082,6 +1204,8 @@ function initCalculationListeners(){
         }
     });
 }
+
+
 let extraH3Count=0, extraH3OtherCount=0;
 function initExtraH3(){
     document.getElementById('addExtraH3')?.addEventListener('click',()=>{
