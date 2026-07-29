@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCVR-3 故障排除</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft JhengHei', Arial, sans-serif; }
+        body { padding: 20px; background: #f5f5f5; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #c0392b; padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { color: #34495e; margin: 25px 0 15px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        th { background: #2c3e50; color: white; font-weight: 600; padding: 12px 15px; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #ecf0f1; vertical-align: top; }
+        tr:hover { background: #f8f9fa; }
+        .badge { background: #c0392b; color: white; font-size: 0.7rem; padding: 2px 10px; border-radius: 20px; display: inline-block; }
+        .section { margin-bottom: 30px; }
+        .tip { background: #fdedec; padding: 12px 18px; border-left: 4px solid #c0392b; border-radius: 4px; margin: 15px 0; }
+        .back-link { display: inline-block; margin-top: 20px; color: #3498db; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .indicator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 700px) { .indicator-grid { grid-template-columns: 1fr; } }
+        .indicator-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        .indicator-card strong { color: #2c3e50; display: block; margin-bottom: 5px; font-size: 1rem; }
+        .indicator-card .desc { color: #555; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+    <h1>HCVR-3 釋放式火災控制面板 — 故障排除</h1>
+    <p style="margin-bottom: 15px; color: #555;">當安裝或配置後出現衝突時，對 HCVR-3 釋放式火災控制面板進行故障排除。監控火災控制面板下方面板的指示燈以確定故障狀況的原因。</p>
+
+    <div class="section">
+        <h2>📋 下方面板指示燈一覽</h2>
+        <div class="indicator-grid">
+            <div class="indicator-card"><strong>Mains Fail</strong><div class="desc">115V/230V 交流電源不存在，系統正在使用備用電池運行。如果沒有停電，請檢查主端子排的保險絲是否因電源丟失而熔斷。</div></div>
+            <div class="indicator-card"><strong>Batt Fail</strong><div class="desc">備用電池已斷開或火災控制面板的充電電路故障。檢查兩塊電池是否已連接並相互連接。測試電池。斷開電池並確保在電池充電導線上可以測量到 28 伏電壓。</div></div>
+            <div class="indicator-card"><strong>CPU Tribl</strong><div class="desc">中央處理單元未能執行代碼並已被系統看門狗重新啟動。必須按下看門狗重置開關以清除 CPU 故障狀況。按下看門狗重置。如果系統未恢復正常，則面板可能已損壞，需要更換電路板。</div></div>
+            <div class="indicator-card"><strong>Aux 24V Tribl</strong><div class="desc">Aux 24V 和 R0V 端子提供 500mA、24V 直流電源供火災報警輔助設備使用。此 LED 指示保護 R0V 輸出的保險絲已動作且此輸出的額定值已超出。保險絲為自恢復類型，當故障狀況消除後供電將恢復。</div></div>
+            <div class="indicator-card"><strong>Batt Low</strong><div class="desc">當系統使用電池運行且電池電壓在 21.5V 至 20.5V（最低電池電壓）之間時亮起。</div></div>
+            <div class="indicator-card"><strong>Comms Tribl</strong><div class="desc">與遠程指示器或輔助板的通信已丟失。檢查所有遠程指示器和輔助板的通信故障以確定問題來源。通信故障 LED 將伴隨前面板的 Flooding 區域故障 LED，指示火災控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Earth Tribl</strong><div class="desc">系統部分線路已接地。移除所有系統線路並逐一重新連接電纜，直到接地故障再次出現。這將指示哪條電纜存在接地故障。</div></div>
+            <div class="indicator-card"><strong>Sys Fuse Trbl</strong><div class="desc">電源供應的額定功率已超出且系統保險絲已動作。移除並檢查所有負載，然後逐一重新連接，直到過載電路觸發保險絲以識別故障電路。</div></div>
+            <div class="indicator-card"><strong>S1, S2 and S3 Trbl</strong><div class="desc">NAC 輸出存在短路或開路。移除接線並重新連接終端電阻。檢查 NAC 電路接線。S3 LED 將伴隨前面板的 Flooding 區域故障 LED，指示火災控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Exting Trbl</strong><div class="desc">釋放劑輸出存在短路或開路。移除接線並重新連接終端電阻。檢查釋放劑電路接線。Exting 故障 LED 將伴隨前面板的 Flooding 區域故障 LED，指示火災控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Abort Trbl</strong><div class="desc">中止開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查中止電路接線。Abort 故障 LED 將伴隨前面板的 Flooding 區域故障 LED，指示火災控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Manual Release Trbl</strong><div class="desc">手動釋放開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查手動釋放電路接線。手動釋放故障 LED 將伴隨前面板的 Flooding 區域故障 LED，指示火災控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Mode Trbl</strong><div class="desc">模式開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查模式電路接線。Mode 故障 LED 將伴隨前面板的 Flooding 區域故障 LED，指示火災控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Release Trbl</strong><div class="desc">釋放壓力開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查釋放壓力開關電路接線。Released 故障 LED 將伴隨前面板的 Flooding 區域故障 LED，指示火災控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Low Pres Trbl</strong><div class="desc">低壓開關輸入存在短路或開路。移除接線並重新連接終端電阻。檢查低壓開關電路接線。低壓故障 LED 將伴隨前面板的 Flooding 區域故障 LED，指示控制面板釋放劑部分的常見故障狀況。</div></div>
+            <div class="indicator-card"><strong>Tell Tale</strong><div class="desc">面板安裝或遠程手動釋放按鈕已被按下。只能通過按下處理器重置和看門狗重置或關閉火災控制面板電源來重置。</div></div>
+        </div>
+        <div class="tip">🛠️ 故障排除時，請先確認所有外部接線是否正確，並檢查終端電阻是否安裝在正確位置。</div>
+    </div>
+
+    <a href="javascript:history.back()" class="back-link">⬅ 返回文件庫</a>
+</body>
+</html>

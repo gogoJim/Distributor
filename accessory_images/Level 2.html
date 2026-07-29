@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCVR-3 LEVEL 2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft JhengHei', Arial, sans-serif; }
+        body { padding: 20px; background: #f5f5f5; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { color: #34495e; margin: 25px 0 15px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        th { background: #2c3e50; color: white; font-weight: 600; padding: 12px 15px; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #ecf0f1; vertical-align: top; }
+        tr:hover { background: #f8f9fa; }
+        .note { background: #eaf2f8; padding: 12px 18px; border-left: 4px solid #3498db; border-radius: 4px; margin: 15px 0; }
+        .badge { background: #3498db; color: white; font-size: 0.7rem; padding: 2px 10px; border-radius: 20px; display: inline-block; }
+        .section { margin-bottom: 30px; }
+        .red-text { color: #e74c3c; font-weight: 600; }
+        .back-link { display: inline-block; margin-top: 20px; color: #3498db; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>HCVR-3 Series — Conventional Fire Alarm Releasing System</h1>
+    <h2>LEVEL 2 — 測試 / 禁用 / 控制功能</h2>
+
+    <div class="section">
+        <table>
+            <thead>
+                <tr><th>功能</th><th>端子</th><th>代碼</th><th>描述</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="3"><strong>測試區域</strong></td>
+                    <td>ZONE 1</td>
+                    <td>t1</td>
+                    <td rowspan="3">選擇代碼 t1, t2 或 t3 將區域 1, 2 或 3 置於測試模式。測試模式下的區域在操作後 3 秒自動重置。當區域 1, 2, 或 3 處於測試模式時，測試模式開啟和區域故障/測試中/禁用指示燈會亮起。</td>
+                </tr>
+                <tr><td>ZONE 2</td><td>t2</td></tr>
+                <tr><td>ZONE 3</td><td>t3</td></tr>
+                <tr>
+                    <td rowspan="3"><strong>禁用區域</strong></td>
+                    <td>ZONE 1</td>
+                    <td>d1</td>
+                    <td rowspan="3">選擇代碼 d1, d2 或 d3 禁用區域 1, 2 或 3。禁用區域不會在火災控制面板上提供火災或故障指示。當區域 1, 2, 或 3 被禁用時，通用禁用和區域故障/測試中/禁用指示燈會亮起。</td>
+                </tr>
+                <tr><td>ZONE 2</td><td>d2</td></tr>
+                <tr><td>ZONE 3</td><td>d3</td></tr>
+                <tr>
+                    <td><strong>禁用 NAC 1</strong></td>
+                    <td>NAC1</td>
+                    <td>db</td>
+                    <td>選擇代碼 db 禁用 NAC1 輸出。當 NAC1 被禁用時，通用禁用和 NAC 故障/禁用指示燈會亮起。</td>
+                </tr>
+                <tr>
+                    <td><strong>禁用第一階段繼電器</strong></td>
+                    <td>1ST STAGE</td>
+                    <td>dP</td>
+                    <td>選擇代碼 dP 禁用第一階段繼電器。當第一階段繼電器被禁用時，通用禁用指示燈會亮起。</td>
+                </tr>
+                <tr>
+                    <td><strong>禁用第二階段繼電器</strong></td>
+                    <td>2ND STAGE</td>
+                    <td>dA</td>
+                    <td>選擇代碼 dA 禁用第二階段繼電器。當第二階段繼電器被禁用時，通用禁用指示燈會亮起。</td>
+                </tr>
+                <tr>
+                    <td><strong>禁用排氣扇繼電器</strong></td>
+                    <td>EXTRACT</td>
+                    <td>dc</td>
+                    <td>選擇代碼 dc 禁用排氣扇繼電器。排氣扇禁用指示燈停止亮起，通用禁用指示燈會亮起。</td>
+                </tr>
+                <tr>
+                    <td><strong>禁用手動釋放</strong></td>
+                    <td>MAN. RELEASE</td>
+                    <td>dt</td>
+                    <td>選擇代碼 dt 禁用手動釋放輸入。當手動釋放輸入被禁用時，通用禁用指示燈會亮起。</td>
+                </tr>
+                <tr>
+                    <td><strong>禁用滅火劑釋放</strong></td>
+                    <td>EXTING.</td>
+                    <td>dE</td>
+                    <td>選擇代碼 dE 禁用預釋放計時器和滅火劑輸出。當滅火劑釋放被禁用時，滅火劑輸出故障狀況會被忽略。</td>
+                </tr>
+                <tr>
+                    <td><strong>激活延遲</strong></td>
+                    <td>—</td>
+                    <td>Ad</td>
+                    <td>選擇代碼 Ad 以激活訪問級別 3 選項 C00 至 C09 的延遲。</td>
+                </tr>
+                <tr>
+                    <td><strong>關閉排氣扇接觸器</strong></td>
+                    <td>EXTRACT</td>
+                    <td>Ac</td>
+                    <td>選擇代碼 Ac 並按下 HCVR-3 釋放火災控制面板上的 Enter 按鈕，以關閉排氣扇終端的常開接觸器。再次按下 Enter 按鈕會打開接觸器。</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="note">💡 所有 Level 2 功能皆透過面板操作介面輸入對應代碼執行。</div>
+    </div>
+
+    <a href="javascript:history.back()" class="back-link">⬅ 返回文件庫</a>
+</body>
+</html>

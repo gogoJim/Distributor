@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCVR-3 LEVEL 3</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft JhengHei', Arial, sans-serif; }
+        body { padding: 20px; background: #f5f5f5; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { color: #34495e; margin: 25px 0 15px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        th { background: #2c3e50; color: white; font-weight: 600; padding: 12px 15px; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #ecf0f1; vertical-align: top; }
+        tr:hover { background: #f8f9fa; }
+        .note { background: #fef9e7; padding: 12px 18px; border-left: 4px solid #f1c40f; border-radius: 4px; margin: 15px 0; }
+        .badge { background: #e67e22; color: white; font-size: 0.7rem; padding: 2px 10px; border-radius: 20px; display: inline-block; }
+        .section { margin-bottom: 30px; }
+        .red-text { color: #e74c3c; font-weight: 600; }
+        .back-link { display: inline-block; margin-top: 20px; color: #3498db; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>HCVR-3 Series — Configuration Codes</h1>
+    <h2>LEVEL 3 — 進階設定與延遲配置</h2>
+
+    <div class="section">
+        <table>
+            <thead><tr><th>代碼</th><th>功能</th><th>描述</th></tr></thead>
+            <tbody>
+                <tr><td>UXX</td><td>配置更新計數</td><td>每次訪問級別 3 配置更改時數字遞增。當達到 99 時計數器重置為 00。</td></tr>
+                <tr><td>C00</td><td>NAC 延遲時間 = 30 秒</td><td rowspan="10">在 NAC 操作前引入時間延遲。只能選擇一個延遲時間段。延遲通過訪問級別 2 中的 "Ad" 選項激活。</td></tr>
+                <tr><td>C01</td><td>NAC 延遲時間 = 1 秒</td></tr>
+                <tr><td>C02</td><td>NAC 延遲時間 = 2 秒</td></tr>
+                <tr><td>C03</td><td>NAC 延遲時間 = 3 秒</td></tr>
+                <tr><td>C04</td><td>NAC 延遲時間 = 4 秒</td></tr>
+                <tr><td>C05</td><td>NAC 延遲時間 = 5 秒</td></tr>
+                <tr><td>C06</td><td>NAC 延遲時間 = 6 秒</td></tr>
+                <tr><td>C07</td><td>NAC 延遲時間 = 7 秒</td></tr>
+                <tr><td>C08</td><td>NAC 延遲時間 = 8 秒</td></tr>
+                <tr><td>C09</td><td>NAC 延遲時間 = 9 秒</td></tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead><tr><th>代碼</th><th>功能</th><th>備註</th></tr></thead>
+            <tbody>
+                <tr><td>C11</td><td>區域 1 & 區域 2 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C12</td><td>區域 2 & 區域 3 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C13</td><td>區域 1 & 區域 3 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td class="red-text">C14</td><td>區域 1 & 區域 2 或 區域 2 & 區域 3 或 區域 1 & 區域 3 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C15</td><td>區域 1 & 區域 2 & 區域 3 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C16</td><td>區域 1 或 區域 2 或 區域 3 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C17</td><td>區域 1 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C18</td><td>區域 2 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C19</td><td>區域 3 探測器觸發自動釋放</td><td></td></tr>
+                <tr><td>C21</td><td>禁用火災蜂鳴器</td><td></td></tr>
+                <tr><td>C22</td><td>禁用火災輸出（火災繼電器）</td><td></td></tr>
+                <tr><td>C23</td><td>禁用故障輸出</td><td></td></tr>
+                <tr><td>C24</td><td>禁用接地故障監控</td><td></td></tr>
+                <tr><td>C25</td><td>脈衝 R0V 輸出</td><td></td></tr>
+                <tr><td>C26</td><td>系統重置時移除 AUX 24V</td><td>啟用使用 AUX 電源重置系統</td></tr>
+                <tr><td>C27</td><td>當 EXTING. 輸出激活時指示釋放</td><td>而不是在收到流量開關信號時。</td></tr>
+                <tr><td>C28</td><td>手動釋放時無激活延遲</td><td>延遲仍適用於自動檢測。</td></tr>
+                <tr><td class="red-text">C29</td><td>滅火劑輸出可在即將階段重置</td><td>允許在倒計時定時器到期前重置滅火劑輸出用於安裝和測試</td></tr>
+                <tr><td>C2A</td><td>本地火災繼電器在釋放信號時操作</td><td>本地火災繼電器僅在滅火劑釋放時操作而不是在火災狀況時</td></tr>
+                <tr><td>C2b</td><td>滅火劑輸出保持至重置</td><td>滅火劑輸出在釋放後保持開啟直到面板重置。（僅限軟件版本 1.2 及以上）</td></tr>
+                <tr><td>C2C</td><td>低壓開關（常閉）</td><td>低壓開關輸入通常尋找激活時的開路接觸閉合，允許使用常閉開關。</td></tr>
+                <tr><td>C2D</td><td>延遲電源故障指示 30 分鐘</td><td>除非存在電池低電量故障，否則電源故障指示將延遲 30 分鐘。</td></tr>
+                <tr><td>C31</td><td>區域 1 探測器警報延遲</td><td rowspan="3">當區域僅由探測器觸發時，NAC 輸出延遲設定的時間（選項 0-9）。</td></tr>
+                <tr><td>C32</td><td>區域 2 探測器警報延遲</td></tr>
+                <tr><td>C33</td><td>區域 3 探測器警報延遲</td></tr>
+                <tr><td>C41</td><td>區域 1 手動報警按鈕警報延遲</td><td rowspan="3">當區域僅由手動報警按鈕觸發時，NAC 輸出延遲設定的時間（選項 0-9）。</td></tr>
+                <tr><td>C42</td><td>區域 2 手動報警按鈕警報延遲</td></tr>
+                <tr><td>C43</td><td>區域 3 手動報警按鈕警報延遲</td></tr>
+                <tr><td>C61</td><td>區域 1 通過本安屏障操作</td><td rowspan="3">僅當探測器連接到兼容的本安屏障時選擇。</td></tr>
+                <tr><td>C62</td><td>區域 2 通過本安屏障操作</td></tr>
+                <tr><td>C63</td><td>區域 3 通過本安屏障操作</td></tr>
+                <tr><td class="red-text">C71</td><td>區域 1 短路指示警報</td><td rowspan="3">更改區域的觸發閾值，以便火災控制面板可用於沒有短路監控的舊系統。</td></tr>
+                <tr><td class="red-text">C72</td><td>區域 2 短路指示警報</td></tr>
+                <tr><td class="red-text">C73</td><td>區域 3 短路指示警報</td></tr>
+                <tr><td>C81</td><td>區域 1 非鎖存</td><td rowspan="3">使區域自重置，以便可以用於接收來自其他系統的信號，並在輸入移除時重置。</td></tr>
+                <tr><td>C82</td><td>區域 2 非鎖存</td></tr>
+                <tr><td>C83</td><td>區域 3 非鎖存</td></tr>
+                <tr><td>CA1</td><td>區域 1 設備警報必須持續 30 秒</td><td rowspan="3">輸入延遲。</td></tr>
+                <tr><td>CA2</td><td>區域 2 設備警報必須持續 30 秒</td></tr>
+                <tr><td>CA3</td><td>區域 3 設備警報必須持續 30 秒</td></tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead><tr><th>代碼</th><th>功能</th><th>描述</th></tr></thead>
+            <tbody>
+                <tr><td class="red-text">E00</td><td>面板可在放電輸出操作後立即重置</td><td>允許在滅火劑放電完全完成前禁止重置面板。</td></tr>
+                <tr><td>E01 TO E29</td><td>面板可在放電輸出操作後 1 分鐘至 29 分鐘重置</td><td></td></tr>
+                <tr><td>E30</td><td>面板可在放電輸出操作後 30 分鐘重置</td><td></td></tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead><tr><th>代碼</th><th>功能</th><th>描述</th></tr></thead>
+            <tbody>
+                <tr><td>-00</td><td>無滅火劑延遲</td><td rowspan="4">激活與滅火劑釋放輸出操作之間的時間延遲。此菜單選項使用燈測試 (+100) 按鈕訪問。</td></tr>
+                <tr><td>-05</td><td>5 秒滅火劑延遲</td></tr>
+                <tr><td>-10 TO -55</td><td>以五秒為增量增加滅火劑延遲</td></tr>
+                <tr><td>-60</td><td>60 秒滅火劑延遲</td></tr>
+                <tr><td>300</td><td>設置滅火劑持續時間（60–500 秒）</td><td>滅火劑釋放輸出激活的時間。此菜單選項使用燈測試 (+100) 按鈕訪問。時間使用 Mode/Select 按鈕調整，Enter 存儲。</td></tr>
+            </tbody>
+        </table>
+        <div class="note">⚙️ Level 3 配置需謹慎操作，不當設定可能影響滅火系統正常運作。</div>
+    </div>
+
+    <a href="javascript:history.back()" class="back-link">⬅ 返回文件庫</a>
+</body>
+</html>
