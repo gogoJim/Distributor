@@ -258,9 +258,9 @@
         }
 		
 		@media print {
-    body {
-        font-family: "微軟正黑體", "Microsoft JhengHei", "標楷體", sans-serif;
-    }
+body {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
     table {
         font-size: 12pt;
     }
@@ -1674,10 +1674,42 @@ function generateEquivalentTableHtml() {
     <meta charset="utf-8"/>
     <title>管道摩擦損失計算報告 - ${escapeHtml(caseName)}</title>
     <style>
-		body {
-    font-family: "微軟正黑體", "Microsoft JhengHei", "PingFang TC", "標楷體", "Segoe UI", Arial, sans-serif;
-    margin: 20px;
-    line-height: 1.6;}
+/* 強制所有元素使用 Arial，並鎖定尺寸 */
+* {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+    font-size: 12pt !important;  /* 固定所有文字大小 */
+}
+
+/* 特別處理表格標題 */
+th, td, caption {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+    font-size: 12pt !important;
+}
+
+/* 禁止瀏覽器對上下標進行縮放 */
+sub, sup {
+    font-size: 12pt !important;
+    vertical-align: baseline !important;
+}
+
+/* 強制所有文字為黑色（除了 .highlight 保留紅色） */
+* {
+    color: #000000 !important;
+}
+
+/* 但讓 .highlight 保持紅色 */
+.highlight {
+    color: #e74c3c !important;
+}
+
+/* 確保灰色背景的文字也是黑色 */
+.report-section p,
+.report-section div,
+.report-section span:not(.highlight) {
+    color: #000000 !important;
+}
+
+
         h1, h2, h3 { color: #2c3e50; }
         .report-header { border-bottom: 2px solid #3498db; margin-bottom: 30px; padding-bottom: 15px; }
         .report-section { margin-bottom: 30px; }
@@ -1751,10 +1783,10 @@ function generateEquivalentTableHtml() {
     <div class="two-column-container">
         <div class="column">
             <div class="report-section"><h2 class="section-title">摩擦損失計算公式</h2><div class="formula">每100m摩擦損失 = 1.2 × (Q<sub>k</sub><sup>1.85</sup> / D<sub>k</sub><sup>4.87</sup>) ÷ 100</div><p>Q<sub>k</sub>: 流量(L/min) &nbsp; D<sub>k</sub>: 管內徑(cm)</p><h3>管徑內徑對照表</h3><table><thead><tr><th>口徑(A)</th><th>25</th><th>32</th><th>40</th><th>50</th><th>65</th><th>80</th><th>100</th><th>125</th><th>150</th><th>200</th></tr></thead><tbody><tr><td>內徑(cm)</td><td>2.72</td><td>3.55</td><td>4.12</td><td>5.27</td><td>6.59</td><td>7.81</td><td>10.23</td><td>12.66</td><td>15.1</td><td>20.32</td></tr></tbody></table><h3>各管段摩擦損失詳細計算</h3><table><thead><tr><th>管段名稱</th><th>計算過程</th><th>每100m損失</th><th>等效管長</th><th>該段損失</th></tr></thead><tbody>${frictionDetailRows}</tbody></table></div>
-            ${extraItemsHtml ? `<div class="report-section"><h2 class="section-title">額外揚程項目</h2><table><thead><tr><th>項目名稱</th><th>值(M)</th></tr></thead><tbody>${extraItemsHtml}</tbody><tfoot><tr><td><strong>額外項目總和</strong></td><td class="highlight">${extraTotal.toFixed(1)} M</td></tr><tr><td><strong>${isSprinkler ? 'h₂' : 'h₃'} 總和</strong></td><td class="highlight">${(isSprinkler ? h2_val : h3_val).toFixed(1)} M</td></tr></tfoot></table></div>` : ''}
+            ${extraItemsHtml ? `<div class="report-section"><h2 class="section-title">額外揚程項目</h2><table><thead><tr><th>項目名稱</th><th>值(M)</th></tr></thead><tbody>${extraItemsHtml}</tbody><tfoot><tr><td><strong>額外項目總和</strong></td><td class="highlight">${extraTotal.toFixed(1)} M</td></tr><tr><td><strong>${isSprinkler ? 'h2' : 'h3'} 總和</strong></td><td class="highlight">${(isSprinkler ? h2_val : h3_val).toFixed(1)} M</td></tr></tfoot></table></div>` : ''}
         </div>
         <div class="column">
-            <div class="report-section"><h2 class="section-title">全揚程與幫浦規格計算</h2><h3>1. 全揚程計算: H = h₁ + h₂ + h₃ + h₄</h3><p>${isSprinkler ? `h₁（配管摩擦損失）：<span class="highlight">${h1_val.toFixed(2)} M</span><br/>h₂（實揚程+額外）：<span class="highlight">${h2_val.toFixed(1)} M</span><br/>h₃（密閉式放射壓力）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h₄（流水檢知裝置）：<span class="highlight">${h4_val.toFixed(1)} M</span>` : `h₁（噴嘴/噴頭+控制閥）：<span class="highlight">${h1_val.toFixed(1)} M</span><br/>h₂（配管摩擦損失）：<span class="highlight">${h2_val.toFixed(2)} M</span><br/>h₃（實揚程+額外）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h₄（放出口壓力）：<span class="highlight">${h4_val.toFixed(1)} M</span>`}<br/><strong>故全揚程 H = ${totalHead.toFixed(2)} M，採用 ${adoptedHeadVal.toFixed(1)} M</strong></p><h3>2. 出水量</h3><p>Q = ${flowRate} LPM，採用 <span class="highlight">${adoptedFlow} LPM</span></p>${flowNoteHtml}<h3>3. 電動機之輸出馬力</h3>
+            <div class="report-section"><h2 class="section-title">全揚程與幫浦規格計算</h2><h3>1. 全揚程計算: H = h1 + h2 + h3 + h4</h3><p>${isSprinkler ? `h1（配管摩擦損失）：<span class="highlight">${h1_val.toFixed(2)} M</span><br/>h2（實揚程+額外）：<span class="highlight">${h2_val.toFixed(1)} M</span><br/>h3（密閉式放射壓力）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h4（流水檢知裝置）：<span class="highlight">${h4_val.toFixed(1)} M</span>` : `h1（噴嘴/噴頭+控制閥）：<span class="highlight">${h1_val.toFixed(1)} M</span><br/>h2（配管摩擦損失）：<span class="highlight">${h2_val.toFixed(2)} M</span><br/>h3（實揚程+額外）：<span class="highlight">${h3_val.toFixed(1)} M</span><br/>h4（放出口壓力）：<span class="highlight">${h4_val.toFixed(1)} M</span>`}<br/><strong>故全揚程 H = ${totalHead.toFixed(2)} M，採用 ${adoptedHeadVal.toFixed(1)} M</strong></p><h3>2. 出水量</h3><p>Q = ${flowRate} LPM，採用 <span class="highlight">${adoptedFlow} LPM</span></p>${flowNoteHtml}<h3>3. 電動機之輸出馬力</h3>
 <div class="efficiency-detail-box">
     <strong>泵效率 (E) 選用方式：</strong>
     <span class="efficiency-source-tag ${isManualMode ? 'manual' : 'table'}">${isManualMode ? '✏️ 手動輸入' : '✓ 查表'}</span>
