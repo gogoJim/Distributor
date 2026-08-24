@@ -411,7 +411,7 @@
 <body>
 
     <div class="container">
-	        <div class="version-info">Ver.3.0  2025/8/28 HTBO/Jim</div>
+	        <div class="version-info">Ver.3.2  2026/8/24 HTBO/Jim</div>
         <h1>案件設備資料輸入表單</h1>
         
         <div class="progress-bar">
@@ -1095,8 +1095,9 @@
             reader.readAsText(file);
         }
         
-        // 導出HTML
-        function exportHTML() {
+
+		// 導出HTML
+function exportHTML() {
     // 确保保存最新数据
     saveFormData();
     
@@ -1140,6 +1141,19 @@
                     font-weight: bold;
                     border-bottom: 2px solid #555;
                 }
+                
+                /* ===== 樓層點數行和設備數量行之間的虛線 ===== */
+                /* 點數行的底部邊框改為虛線 */
+                .exported-html .floor-points-row td {
+                    border-bottom: 2px dotted #888;
+                }
+                
+                /* 設備數量行的底部邊框維持實線（樓層分隔） */
+                .exported-html .floor-devices-row td {
+                    border-bottom: 2px solid #555;
+                }
+                
+                /* 原有的樣式保留 */
                 .exported-html .fire-row {
                     background-color: #ffebee;
                 }
@@ -1272,15 +1286,15 @@
     htmlContent += '</tr></thead><tbody>';
     
     // 添加每層樓的行
-    floors.forEach(floor => {
+    floors.forEach((floor, index) => {
         // 檢查是否屬於某個群組
         const groupInfo = formData.groups.find(g => g.floors.includes(floor));
         const groupName = groupInfo ? groupInfo.name : '';
         const groupClass = groupName ? groupColors[groupName] : '';
         const groupTotal = groupInfo ? calculateGroupTotal(groupInfo) : '';
         
-        // 點數行
-        htmlContent += `<tr class="floor-header"><td>${floor} (點數)</td>`;
+        // ===== 點數行 (使用 floor-points-row class) =====
+        htmlContent += `<tr class="floor-points-row"><td>${floor} (點數)</td>`;
         
         let floorTotalPoints = 0;
         let floorTotalDevices = 0;
@@ -1301,13 +1315,13 @@
             });
         }
         
-        // 群组小计和群组栏位使用相同底色
+        // 群組小計和群組欄位使用相同底色
         htmlContent += `<td>${floorTotalPoints === 0 ? '' : floorTotalPoints}</td>`;
         htmlContent += `<td class="${groupClass}">${groupTotal === 0 ? '' : groupTotal}</td>`;
         htmlContent += `<td class="${groupClass}">${groupName}</td></tr>`;
         
-        // 設備數量行
-        htmlContent += `<tr><td>${floor} (設備數量)</td>`;
+        // ===== 設備數量行 (使用 floor-devices-row class) =====
+        htmlContent += `<tr class="floor-devices-row"><td>${floor} (設備數量)</td>`;
         
         // 設備數量數據
         for (const category in groupedDevices) {
@@ -1390,7 +1404,7 @@
             // 添加電流警告檢查
             let currentWarning = '';
             if (groupCurrent > 117) {
-                currentWarning = `<span style="color: red; font-weight: bold;">電流值警告，最大不可超過147mA，現在設計已大於80%</span>`;
+                currentWarning = `<span style="color: red; font-weight: bold;">電流值警告，最大不可超過147mA，設計階段不可超過 117mA (80%)</span>`;
             }
             
             htmlContent += `
@@ -1428,7 +1442,10 @@
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-} 
+}
+
+
+        
         
         // 根據名稱查找設備
         function findDeviceByName(category, name) {
@@ -1564,46 +1581,47 @@
         }
         
         // 切換步驟函數
-        function goToStep(step) {
-            // 保存當前步驟的數據
-            saveFormData();
-            
-            // 隱藏所有步驟
-            document.querySelectorAll('.step').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            // 顯示當前步驟
-            document.getElementById(`step${step}`).classList.add('active');
-            
-            // 更新進度條
-            document.querySelectorAll('.progress-step').forEach((el, index) => {
-                el.classList.remove('active', 'completed');
-                if (index + 1 === step) {
-                    el.classList.add('active');
-                } else if (index + 1 < step) {
-                    el.classList.add('completed');
-                }
-            });
-            
-            // 如果是步驟3，生成數量輸入表格
-            if (step === 3) {
-                generateFloorQuantityTable();
-            }
-            
-            // 如果是步驟4，生成設備數量整合表格
-            if (step === 4) {
-                generateEquipmentSummary();
-            }
-            
-            // 如果是步驟5，生成群組管理表格
-            if (step === 5) {
-                generateGroupManagementTable();
-            }
-            
-            currentStep = step;
+        // 修改 goToStep 函數，確保步驟4總是重新生成
+function goToStep(step) {
+    // 保存當前步驟的數據
+    saveFormData();
+    
+    // 隱藏所有步驟
+    document.querySelectorAll('.step').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // 顯示當前步驟
+    document.getElementById(`step${step}`).classList.add('active');
+    
+    // 更新進度條
+    document.querySelectorAll('.progress-step').forEach((el, index) => {
+        el.classList.remove('active', 'completed');
+        if (index + 1 === step) {
+            el.classList.add('active');
+        } else if (index + 1 < step) {
+            el.classList.add('completed');
         }
-        
+    });
+    
+    // 如果是步驟3，生成數量輸入表格
+    if (step === 3) {
+        generateFloorQuantityTable();
+    }
+    
+    // 如果是步驟4，生成設備數量整合表格
+    if (step === 4) {
+        // ** 修改這裡：確保步驟4總是重新生成最新數據 **
+        generateEquipmentSummary();
+    }
+    
+    // 如果是步驟5，生成群組管理表格
+    if (step === 5) {
+        generateGroupManagementTable();
+    }
+    
+    currentStep = step;
+}
         // 解析樓層輸入
         function parseFloorInput(input, isBelowGround = false) {
             const floors = [];
@@ -1710,26 +1728,45 @@
         }
         
         // 下一步
-        function nextStep(current) {
-            // 驗證當前步驟的輸入
-            if (current === 1) {
-                const caseName = document.getElementById('caseName').value.trim();
-                if (!caseName) {
-                    alert('請輸入案件名稱');
-                    return;
-                }
-                
-                const aboveGround = document.getElementById('aboveGroundFloors').value.trim();
-                const belowGround = document.getElementById('belowGroundFloors').value.trim();
-                
-                if (!aboveGround && !belowGround) {
-                    alert('請至少輸入地上或地下樓層');
-                    return;
-                }
-            }
-            
-            goToStep(current + 1);
+		// 修改 nextStep 函數，確保從步驟3到步驟4時內容會重新生成
+function nextStep(current) {
+    // 驗證當前步驟的輸入
+    if (current === 1) {
+        const caseName = document.getElementById('caseName').value.trim();
+        if (!caseName) {
+            alert('請輸入案件名稱');
+            return;
         }
+        
+        const aboveGround = document.getElementById('aboveGroundFloors').value.trim();
+        const belowGround = document.getElementById('belowGroundFloors').value.trim();
+        
+        if (!aboveGround && !belowGround) {
+            alert('請至少輸入地上或地下樓層');
+            return;
+        }
+    }
+    
+    // ** 修改這裡：確保在步驟3時保存所有數量數據 **
+    if (current === 3) {
+        // 保存所有輸入框的數據
+        document.querySelectorAll('.qty-input').forEach(input => {
+            const value = parseInt(input.value) || 0;
+            const parts = input.id.split('_');
+            if (parts.length === 3) {
+                const floor = parts[1];
+                const deviceId = parts[2];
+                
+                if (!formData.quantities[floor]) {
+                    formData.quantities[floor] = {};
+                }
+                formData.quantities[floor][deviceId] = value;
+            }
+        });
+    }
+    
+    goToStep(current + 1);
+}
         
         // 上一步
         function prevStep(current) {
@@ -1847,66 +1884,75 @@
             calculateTotals();
         }
         
-        // 計算各類別的小計和總計
-        function calculateTotals() {
-            // 保存當前輸入的數量（確保自定義設備的數量被保存）
-            saveFormData();
+		// 修改 calculateTotals 函數，在計算完成後檢查當前步驟
+function calculateTotals() {
+    // 保存當前輸入的數量（確保自定義設備的數量被保存）
+    saveFormData();
+    
+    document.querySelectorAll('.category table').forEach(table => {
+        const rows = table.querySelectorAll('tbody tr:not(.total-row)');
+        const totalRow = table.querySelector('tr.total-row');
+        const totalCells = totalRow.querySelectorAll('td');
+        
+        // 重置設備總計
+        const deviceTotals = new Array(totalCells.length - 2).fill(0);
+        let grandTotal = 0;
+        
+        // 計算每行的值
+        rows.forEach(row => {
+            const inputs = row.querySelectorAll('input.qty-input');
+            let rowSubtotal = 0;
             
-            document.querySelectorAll('.category table').forEach(table => {
-                const rows = table.querySelectorAll('tbody tr:not(.total-row)');
-                const totalRow = table.querySelector('tr.total-row');
-                const totalCells = totalRow.querySelectorAll('td');
+            inputs.forEach((input, index) => {
+                // 確保使用最新的值
+                const value = parseInt(input.value) || 0;
+                rowSubtotal += value;
+                deviceTotals[index] += value;
                 
-                // 重置設備總計
-                const deviceTotals = new Array(totalCells.length - 2).fill(0);
-                let grandTotal = 0;
-                
-                // 計算每行的值
-                rows.forEach(row => {
-                    const inputs = row.querySelectorAll('input.qty-input');
-                    let rowSubtotal = 0;
+                // 更新formData中的數量
+                const parts = input.id.split('_');
+                if (parts.length === 3) {
+                    const floor = parts[1];
+                    const deviceId = parts[2];
                     
-                    inputs.forEach((input, index) => {
-                        // 確保使用最新的值
-                        const value = parseInt(input.value) || 0;
-                        rowSubtotal += value;
-                        deviceTotals[index] += value;
-                        
-                        // 更新formData中的數量
-                        const parts = input.id.split('_');
-                        if (parts.length === 3) {
-                            const floor = parts[1];
-                            const deviceId = parts[2];
-                            
-                            if (!formData.quantities[floor]) {
-                                formData.quantities[floor] = {};
-                            }
-                            formData.quantities[floor][deviceId] = value;
-                        }
-                    });
-                    
-                    // 更新小計
-                    const subtotalCell = row.querySelector('.subtotal');
-                    if (subtotalCell) {
-                        subtotalCell.textContent = rowSubtotal;
-                        grandTotal += rowSubtotal;
+                    if (!formData.quantities[floor]) {
+                        formData.quantities[floor] = {};
                     }
-                });
-                
-                // 更新設備總計
-                deviceTotals.forEach((total, index) => {
-                    totalCells[index + 1].textContent = total;
-                });
-                
-                // 更新總計
-                totalCells[totalCells.length - 1].textContent = grandTotal;
+                    formData.quantities[floor][deviceId] = value;
+                }
             });
             
-            // 如果當前在步驟4，則重新生成摘要
-            if (currentStep === 4) {
-                generateEquipmentSummary();
+            // 更新小計
+            const subtotalCell = row.querySelector('.subtotal');
+            if (subtotalCell) {
+                subtotalCell.textContent = rowSubtotal;
+                grandTotal += rowSubtotal;
             }
-        }
+        });
+        
+        // 更新設備總計
+        deviceTotals.forEach((total, index) => {
+            totalCells[index + 1].textContent = total;
+        });
+        
+        // 更新總計
+        totalCells[totalCells.length - 1].textContent = grandTotal;
+    });
+    
+    // ** 修改這裡：只要數量有變化，就更新步驟4的內容 **
+    // 但只有在步驟4可見時才重新生成，避免干擾其他步驟
+    const step4 = document.getElementById('step4');
+    if (step4.classList.contains('active')) {
+        generateEquipmentSummary();
+    }
+    
+    // 如果步驟5可見，也更新群組管理
+    const step5 = document.getElementById('step5');
+    if (step5.classList.contains('active')) {
+        generateGroupManagementTable();
+    }
+}
+        
         
         // 生成設備數量整合表格
         function generateEquipmentSummary() {
@@ -2165,7 +2211,7 @@ formData.groups.forEach(group => {
     // 添加電流警告檢查
     let currentWarning = '';
     if (groupCurrent > 117) {
-        currentWarning = `<span style="color: red; font-weight: bold;">電流值警告，最大不可超過147mA，現在設計已大於80%</span>`;
+        currentWarning = `<span style="color: red; font-weight: bold;">電流值警告，最大不可超過147mA,設計階段不可超過 117mA (80%)</span>`;
     }
     
     let rowHtml = `
@@ -2241,7 +2287,7 @@ function updateSelectionSummary() {
     // 添加電流警告檢查
     let currentWarning = '';
     if (currentTotal > 117) {
-        currentWarning = `<br><span style="color: red; font-weight: bold;">電流值警告，最大不可超過147mA，現在設計已大於80%</span>`;
+        currentWarning = `<br><span style="color: red; font-weight: bold;">電流值警告，最大不可超過147mA,設計階段不可超過 117mA (80%)</span>`;
     }
     
     document.getElementById('selectionSummary').innerHTML = `
