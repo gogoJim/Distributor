@@ -1117,25 +1117,37 @@ function exportHTML() {
             <meta charset="UTF-8">
             <title>${formData.caseName || '未命名案件'} - 設備統計</title>
             <style>
-                .exported-html {
-                    font-family: Arial, sans-serif;
-                    margin: 20px;
-                }
-                .exported-html h1 {
-                    text-align: center;
-                    color: #2c3e50;
-                }
-                .exported-html table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 20px;
-                    border: 2px solid #555;
-                }
-                .exported-html th, .exported-html td {
-                    border: 1px solid #555;
-                    padding: 8px;
-                    text-align: center;
-                }
+    .exported-html {
+        font-family: "細明體", "MingLiU", "標楷體", "KaiTi", "Arial Unicode MS", sans-serif;
+        font-size: 12pt;
+        margin: 20px;
+    }
+    .exported-html h1 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 18pt;
+        font-family: "標楷體", "KaiTi", "細明體", "MingLiU", sans-serif;
+    }
+
+
+    .exported-html h2 {
+        font-size: 14pt;          /* 新增：次標題字體大小 */
+    }
+    .exported-html table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 10pt;          /* 新增：表格字體大小 */
+    }
+
+    .exported-html th, .exported-html td {
+        border: 1px solid #555;
+        padding: 4px 6px;
+        text-align: center;
+        font-size: 10pt;
+        font-family: "細明體", "MingLiU", "標楷體", "KaiTi", sans-serif;
+    }
+
                 .exported-html th {
                     background-color: #f2f2f2;
                     font-weight: bold;
