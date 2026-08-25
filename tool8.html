@@ -159,7 +159,6 @@
         .efficiency-source-tag.table { background: #d4edda; color: #155724; }
         .efficiency-source-tag.manual { background: #fff3cd; color: #856404; }
         .version-info { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
-        /* 固定式專屬顯示控制 */
         .fixed-only { display: none; }
         .non-fixed { display: inline; }
         .equipment-fixed .fixed-only { display: inline; }
@@ -196,7 +195,7 @@
     </script>
 </head>
 <body>
-<div class="version-info">Ver.14 2026/8/24 HTBO/Jim </div>
+<div class="version-info">Ver.15 2026/8/25 HTBO/Jim - 修正JSON匯入保留手動值</div>
 <h1>管道摩擦損失計算工具</h1>
 <h5>可切換壓力配管用碳鋼管等價管長資料庫：CNS4626 (SCH40) 或 CNS6445 (SGP)</h5>
 <div class="db-selector">
@@ -311,6 +310,9 @@
 </div>
 
 <script>
+    // ==================== 全域變數 ====================
+    let isImporting = false;  // 匯入模式標記
+
     // ==================== 資料庫定義 ====================
     const diameterOptions = [25,32,40,50,65,80,90,100,125,150,200,250,300,350];
     const equivalentData_4626 = {
@@ -425,7 +427,7 @@
     let customInfo = {};
     let currentComponentNames = {1:"90°彎頭",2:"90°彎頭",3:"閘閥",4:"逆止閥(擺動型)",5:"球閥",6:"過濾器"};
 
-    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>"]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])); }
 
     function showCustomDialog(compIndex, selectElement, callback) {
         const existing = customInfo[compIndex];
@@ -614,7 +616,6 @@
         if(rows.length) document.getElementById('lastDiameter').textContent = rows[rows.length-1].querySelector('.pipe-diameter').value;
     }
 
-    // 核心調整：將最後一段管道的流量導入 Q=
     function updateFlowRateDisplay(){
         const rows = document.querySelectorAll('#pipeSegments tbody tr');
         if(rows.length){
@@ -622,7 +623,7 @@
             const flowVal = lastRow.querySelector('.segment-flow-rate').value;
             document.getElementById('flowRate').value = flowVal;
             const adoptedFlowInput = document.getElementById('adoptedFlow');
-            if (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false') {
+            if (!isImporting && (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false')) {
                 document.getElementById('adoptedFlow').value = flowVal;
             }
             updateFlowRateCalculations();
@@ -636,7 +637,7 @@
         const adoptedFlowInput = document.getElementById('adoptedFlow');
         const flowRateInput = document.getElementById('flowRate');
         const flowRateVal = parseFloat(flowRateInput.value) || 0;
-        if (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false') {
+        if (!isImporting && (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false')) {
             adoptedFlowInput.value = flowRateVal;
         }
         updateEfficiencyDisplay();
@@ -702,31 +703,102 @@
         calculateMotorPower();
     }
 
-    function updateTotalHeadCalculation(){
+    // ==================== 核心修改：updateDisplayOnly（只更新顯示，不覆蓋手動值） ====================
+    function updateDisplayOnly() {
         const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
-        if(isSprinkler){
-            const h1=parseFloat(document.getElementById('totalFrictionLoss').textContent)||0;
-            const h2=(parseFloat(document.getElementById('actualHead').value)||0)+(parseFloat(document.getElementById('extraH3Total').textContent)||0);
-            const h3=parseFloat(document.getElementById('outletPressure').value)||10;
-            const h4=parseFloat(document.getElementById('flowDetector').value)||5;
-            const total=h1+h2+h3+h4;
-            document.getElementById('h3TotalSum').textContent=h2.toFixed(1);
-            document.getElementById('h2Display').textContent=h2.toFixed(1);
-            document.getElementById('h3Display').textContent=h3.toFixed(1);
-            document.getElementById('h4Display').textContent=h4.toFixed(1);
-            document.getElementById('totalHeadResult').textContent=total.toFixed(2);
+        const totalLoss = parseFloat(document.getElementById('totalFrictionLoss').textContent) || 0;
+        
+        if(isSprinkler) {
+            document.getElementById('h1Result').textContent = totalLoss.toFixed(2);
+            document.getElementById('h1Display').textContent = totalLoss.toFixed(2);
+            
+            const h2 = (parseFloat(document.getElementById('actualHead').value)||0) + (parseFloat(document.getElementById('extraH3Total').textContent)||0);
+            document.getElementById('h3TotalSum').textContent = h2.toFixed(1);
+            document.getElementById('h2Display').textContent = h2.toFixed(1);
+            
+            const h1 = totalLoss;
+            const h3 = parseFloat(document.getElementById('outletPressure').value)||10;
+            const h4 = parseFloat(document.getElementById('flowDetector').value)||5;
+            const total = h1 + h2 + h3 + h4;
+            document.getElementById('totalHeadResult').textContent = total.toFixed(2);
+            document.getElementById('h3Display').textContent = h3.toFixed(1);
+            document.getElementById('h4Display').textContent = h4.toFixed(1);
+            
             const adoptedInput = document.getElementById('adoptedHead');
-            if (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false') {
+            if (!isImporting && (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false')) {
                 adoptedInput.value = Math.ceil(total * 10) / 10;
             }
-            document.getElementById('kwHead').textContent = document.getElementById('adoptedHead').value;
-            document.getElementById('pumpHead').textContent = document.getElementById('adoptedHead').value;
         } else {
             const equipmentType = document.getElementById('equipmentType').value;
             const isFixed = (equipmentType === '固定式');
+            
             let nozzleVal = parseFloat(document.getElementById('nozzleLoss').value)||0;
             let valveVal = parseFloat(document.getElementById('valveLoss').value)||0;
-            // 固定式：只顯示控制閥，強制噴嘴損失為0，控制閥預設6
+            
+            if (isFixed) {
+                document.getElementById('nozzleLoss').value = 0;
+                nozzleVal = 0;
+            }
+            
+            const h1 = nozzleVal + valveVal;
+            const h2 = totalLoss;
+            const h3 = (parseFloat(document.getElementById('actualHeadOther').value)||0) + (parseFloat(document.getElementById('extraH3TotalOther').textContent)||0);
+            const h4 = parseFloat(document.getElementById('outletPressureOther').value)||0;
+            const total = h1 + h2 + h3 + h4;
+            
+            document.getElementById('h1ResultOther').textContent = h1.toFixed(1);
+            document.getElementById('h1DisplayOther').textContent = h1.toFixed(1);
+            document.getElementById('h3TotalSumOther').textContent = h3.toFixed(1);
+            document.getElementById('h3DisplayOther').textContent = h3.toFixed(1);
+            document.getElementById('h4DisplayOther').textContent = h4.toFixed(1);
+            document.getElementById('totalHeadResultOther').textContent = total.toFixed(2);
+            
+            const adoptedInput = document.getElementById('adoptedHeadOther');
+            if (!isImporting && (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false')) {
+                adoptedInput.value = Math.ceil(total * 10) / 10;
+            }
+        }
+        
+        const isSprinklerMode = document.getElementById('equipmentType').value === '一般撒水';
+        const headValue = isSprinklerMode ? 
+            (document.getElementById('adoptedHead').value || 0) : 
+            (document.getElementById('adoptedHeadOther').value || 0);
+        document.getElementById('kwHead').textContent = headValue;
+        document.getElementById('pumpHead').textContent = headValue;
+        
+        const flow = parseFloat(document.getElementById('adoptedFlow').value) || 0;
+        document.getElementById('kwFlow').textContent = flow;
+        document.getElementById('pumpFlow').textContent = flow;
+    }
+
+    // ==================== 核心修改：updateTotalHeadCalculation（加入 isImporting 保護） ====================
+    function updateTotalHeadCalculation() {
+        const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
+        
+        if(isSprinkler) {
+            const h1 = parseFloat(document.getElementById('totalFrictionLoss').textContent)||0;
+            const h2 = (parseFloat(document.getElementById('actualHead').value)||0) + (parseFloat(document.getElementById('extraH3Total').textContent)||0);
+            const h3 = parseFloat(document.getElementById('outletPressure').value)||10;
+            const h4 = parseFloat(document.getElementById('flowDetector').value)||5;
+            const total = h1 + h2 + h3 + h4;
+            
+            document.getElementById('h3TotalSum').textContent = h2.toFixed(1);
+            document.getElementById('h2Display').textContent = h2.toFixed(1);
+            document.getElementById('h3Display').textContent = h3.toFixed(1);
+            document.getElementById('h4Display').textContent = h4.toFixed(1);
+            document.getElementById('totalHeadResult').textContent = total.toFixed(2);
+            
+            const adoptedInput = document.getElementById('adoptedHead');
+            if (!isImporting && (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false')) {
+                adoptedInput.value = Math.ceil(total * 10) / 10;
+            }
+        } else {
+            const equipmentType = document.getElementById('equipmentType').value;
+            const isFixed = (equipmentType === '固定式');
+            
+            let nozzleVal = parseFloat(document.getElementById('nozzleLoss').value)||0;
+            let valveVal = parseFloat(document.getElementById('valveLoss').value)||0;
+            
             if (isFixed) {
                 const valveInput = document.getElementById('valveLoss');
                 if (!valveInput.dataset.userModified || valveInput.dataset.userModified === 'false') {
@@ -735,10 +807,8 @@
                 } else {
                     valveVal = parseFloat(valveInput.value)||0;
                 }
-                // 固定式噴嘴強制為0
                 document.getElementById('nozzleLoss').value = 0;
                 nozzleVal = 0;
-                // 隱藏噴嘴欄位
                 document.getElementById('h1NozzleSpan').style.display = 'none';
                 document.getElementById('h1LabelFixed').style.display = 'inline';
                 document.getElementById('h1LabelNonFixed').style.display = 'none';
@@ -746,28 +816,36 @@
                 document.getElementById('h1NozzleSpan').style.display = 'inline';
                 document.getElementById('h1LabelFixed').style.display = 'none';
                 document.getElementById('h1LabelNonFixed').style.display = 'inline';
-                // 非固定式: 噴嘴損失由使用者輸入
                 nozzleVal = parseFloat(document.getElementById('nozzleLoss').value)||0;
                 valveVal = parseFloat(document.getElementById('valveLoss').value)||0;
             }
-            const h1=nozzleVal + valveVal;
-            const h2=parseFloat(document.getElementById('totalFrictionLoss').textContent)||0;
-            const h3=(parseFloat(document.getElementById('actualHeadOther').value)||0)+(parseFloat(document.getElementById('extraH3TotalOther').textContent)||0);
-            const h4=parseFloat(document.getElementById('outletPressureOther').value)||0;
-            const total=h1+h2+h3+h4;
-            document.getElementById('h1ResultOther').textContent=h1.toFixed(1);
-            document.getElementById('h1DisplayOther').textContent=h1.toFixed(1);
-            document.getElementById('h3TotalSumOther').textContent=h3.toFixed(1);
-            document.getElementById('h3DisplayOther').textContent=h3.toFixed(1);
-            document.getElementById('h4DisplayOther').textContent=h4.toFixed(1);
-            document.getElementById('totalHeadResultOther').textContent=total.toFixed(2);
+            
+            const h1 = nozzleVal + valveVal;
+            const h2 = parseFloat(document.getElementById('totalFrictionLoss').textContent)||0;
+            const h3 = (parseFloat(document.getElementById('actualHeadOther').value)||0) + (parseFloat(document.getElementById('extraH3TotalOther').textContent)||0);
+            const h4 = parseFloat(document.getElementById('outletPressureOther').value)||0;
+            const total = h1 + h2 + h3 + h4;
+            
+            document.getElementById('h1ResultOther').textContent = h1.toFixed(1);
+            document.getElementById('h1DisplayOther').textContent = h1.toFixed(1);
+            document.getElementById('h3TotalSumOther').textContent = h3.toFixed(1);
+            document.getElementById('h3DisplayOther').textContent = h3.toFixed(1);
+            document.getElementById('h4DisplayOther').textContent = h4.toFixed(1);
+            document.getElementById('totalHeadResultOther').textContent = total.toFixed(2);
+            
             const adoptedInput = document.getElementById('adoptedHeadOther');
-            if (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false') {
+            if (!isImporting && (!adoptedInput.dataset.userModified || adoptedInput.dataset.userModified === 'false')) {
                 adoptedInput.value = Math.ceil(total * 10) / 10;
             }
-            document.getElementById('kwHead').textContent = document.getElementById('adoptedHeadOther').value;
-            document.getElementById('pumpHead').textContent = document.getElementById('adoptedHeadOther').value;
         }
+        
+        const isSprinklerMode = document.getElementById('equipmentType').value === '一般撒水';
+        const headValue = isSprinklerMode ? 
+            (document.getElementById('adoptedHead').value || 0) : 
+            (document.getElementById('adoptedHeadOther').value || 0);
+        document.getElementById('kwHead').textContent = headValue;
+        document.getElementById('pumpHead').textContent = headValue;
+        
         calculateMotorPower();
     }
 
@@ -779,21 +857,24 @@
         const kw = (0.163 * H * (Q / 1000)) / eff * 1.1;
         document.getElementById('kwResult').textContent = kw.toFixed(2);
         const selectedKwInput = document.getElementById('selectedKw');
-        if (!selectedKwInput.dataset.userModified || selectedKwInput.dataset.userModified === 'false') {
+        if (!isImporting && (!selectedKwInput.dataset.userModified || selectedKwInput.dataset.userModified === 'false')) {
             selectedKwInput.value = Math.ceil(kw * 10) / 10;
         }
         document.getElementById('pumpKw').textContent = document.getElementById('selectedKw').value;
     }
 
+    // ==================== 核心修改：updateEquipmentDefaults（加入 isImporting 保護） ====================
     function updateEquipmentDefaults(){
         const type = document.getElementById('equipmentType').value;
         const isFixed = (type === '固定式');
         if(type==="一般撒水"){
             document.getElementById('generalSprinklerCalc').style.display='block';
             document.getElementById('otherEquipmentCalc').style.display='none';
-            document.getElementById('outletPressure').value=10;
-            document.getElementById('flowDetector').value=5;
-            document.getElementById('adoptedHead').dataset.userModified = 'false';
+            if (!isImporting) {
+                document.getElementById('outletPressure').value=10;
+                document.getElementById('flowDetector').value=5;
+                document.getElementById('adoptedHead').dataset.userModified = 'false';
+            }
             calculateTotalFrictionLoss();
         } else {
             document.getElementById('generalSprinklerCalc').style.display='none';
@@ -803,12 +884,15 @@
             else if(type==="小規模水鎗"){ nl=2; op=51; flow=500; vl=4; }
             else if(type==="中規模水鎗"){ nl=4; op=81.6; flow=2800; vl=9.2; }
             else if(type==="大規模水鎗"){ nl=11; op=92; flow=3100; vl=3.4; }
-            document.getElementById('nozzleLoss').value=nl;
-            document.getElementById('outletPressureOther').value=op;
-            document.getElementById('valveLoss').value=vl;
-            document.getElementById('adoptedHeadOther').dataset.userModified = 'false';
-            document.getElementById('valveLoss').dataset.userModified = 'false';
-            // 固定式：強制噴嘴為0，隱藏噴嘴欄位
+            
+            if (!isImporting) {
+                document.getElementById('nozzleLoss').value=nl;
+                document.getElementById('outletPressureOther').value=op;
+                document.getElementById('valveLoss').value=vl;
+                document.getElementById('adoptedHeadOther').dataset.userModified = 'false';
+                document.getElementById('valveLoss').dataset.userModified = 'false';
+            }
+            
             if(isFixed){
                 document.getElementById('h1NozzleSpan').style.display = 'none';
                 document.getElementById('h1LabelFixed').style.display = 'inline';
@@ -818,7 +902,7 @@
                 document.getElementById('h1LabelFixed').style.display = 'none';
                 document.getElementById('h1LabelNonFixed').style.display = 'inline';
             }
-            if(flow){
+            if(flow && !isImporting){
                 document.getElementById('flowRate').value=flow;
                 document.getElementById('adoptedFlow').value=flow;
                 document.getElementById('adoptedFlow').dataset.userModified = 'false';
@@ -885,7 +969,7 @@
         if (flowRate) {
             flowRate.addEventListener('input', function() {
                 const adoptedFlowInput = document.getElementById('adoptedFlow');
-                if (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false') {
+                if (!isImporting && (!adoptedFlowInput.dataset.userModified || adoptedFlowInput.dataset.userModified === 'false')) {
                     adoptedFlowInput.value = this.value || 0;
                     updateFlowRateCalculations();
                 }
@@ -945,6 +1029,7 @@
         updateTotalHeadCalculation();
     }
 
+    // ==================== 核心修改：collectAllData（完整匯出） ====================
     function collectAllData() {
         const pipeSegments = [];
         document.querySelectorAll('#pipeSegments tbody tr').forEach(row => {
@@ -961,20 +1046,52 @@
             }
             pipeSegments.push(seg);
         });
-        const extraItems = [];
-        document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(item => {
+
+        // 分別收集兩個容器的額外項目
+        const extraItemsSprinkler = [];
+        document.querySelectorAll('#extraH3Container .extra-h3-item').forEach(item => {
             const label = item.querySelector('.extra-h3-label')?.value || '';
             const value = parseFloat(item.querySelector('.extra-h3-value')?.value) || 0;
-            if (label.trim() || value !== 0) extraItems.push({ label: label, value: value });
+            if (label.trim() || value !== 0) extraItemsSprinkler.push({ label: label, value: value });
         });
+
+        const extraItemsOther = [];
+        document.querySelectorAll('#extraH3ContainerOther .extra-h3-item').forEach(item => {
+            const label = item.querySelector('.extra-h3-label')?.value || '';
+            const value = parseFloat(item.querySelector('.extra-h3-value')?.value) || 0;
+            if (label.trim() || value !== 0) extraItemsOther.push({ label: label, value: value });
+        });
+
+        const isFixed = document.getElementById('equipmentType').value === '固定式';
+        const nozzleLossRaw = parseFloat(document.getElementById('nozzleLoss')?.value) || 0;
+        const nozzleLossStored = isFixed ? nozzleLossRaw : nozzleLossRaw;
+
         return {
-            caseInfo: { caseName: document.getElementById('caseName').value, equipmentType: document.getElementById('equipmentType').value },
-            componentNames: currentComponentNames,
-            customInfo: customInfo,
+            caseInfo: { 
+                caseName: document.getElementById('caseName').value, 
+                equipmentType: document.getElementById('equipmentType').value 
+            },
+            componentNames: JSON.parse(JSON.stringify(currentComponentNames)),
+            customInfo: JSON.parse(JSON.stringify(customInfo)),
             pipeSegments: pipeSegments,
             database: currentDatabase,
             efficiencyMode: efficiencyMode,
             manualEfficiency: parseFloat(document.getElementById('manualEfficiencyInput').value) || 0.6,
+            fixedNozzleLossStored: nozzleLossStored,
+            // 儲存所有手動輸入的採用值（用於匯入時保留）
+            userModifiedValues: {
+                adoptedHead: document.getElementById('adoptedHead')?.value || 0,
+                adoptedHeadOther: document.getElementById('adoptedHeadOther')?.value || 0,
+                adoptedFlow: document.getElementById('adoptedFlow')?.value || 0,
+                selectedKw: document.getElementById('selectedKw')?.value || 0,
+                valveLoss: document.getElementById('valveLoss')?.value || 0,
+                nozzleLoss: document.getElementById('nozzleLoss')?.value || 0,
+                actualHead: document.getElementById('actualHead')?.value || 0,
+                outletPressure: document.getElementById('outletPressure')?.value || 10,
+                flowDetector: document.getElementById('flowDetector')?.value || 5,
+                actualHeadOther: document.getElementById('actualHeadOther')?.value || 0,
+                outletPressureOther: document.getElementById('outletPressureOther')?.value || 0
+            },
             pumpCalcData: {
                 sprinkler: {
                     actualHead: parseFloat(document.getElementById('actualHead')?.value)||0,
@@ -983,7 +1100,7 @@
                     adoptedHead: parseFloat(document.getElementById('adoptedHead')?.value)||0
                 },
                 other: {
-                    nozzleLoss: parseFloat(document.getElementById('nozzleLoss')?.value)||0,
+                    nozzleLoss: nozzleLossStored,
                     valveLoss: parseFloat(document.getElementById('valveLoss')?.value)||0,
                     actualHeadOther: parseFloat(document.getElementById('actualHeadOther')?.value)||0,
                     outletPressureOther: parseFloat(document.getElementById('outletPressureOther')?.value)||0,
@@ -995,103 +1112,237 @@
                     selectedKw: parseFloat(document.getElementById('selectedKw')?.value)||0,
                     flowNote: document.getElementById('flowNote')?.value||''
                 },
-                extraItems: extraItems
+                extraItemsSprinkler: extraItemsSprinkler,
+                extraItemsOther: extraItemsOther
             }
         };
     }
 
+    // ==================== 核心修改：loadAllData（完整匯入，保留手動值） ====================
     function loadAllData(data) {
-        if(data.database) { document.getElementById('databaseSelect').value = data.database; switchDatabase(data.database); }
-        if(data.efficiencyMode) {
-            efficiencyMode = data.efficiencyMode;
-            document.querySelectorAll('input[name="effMode"]').forEach(el => { el.checked = (el.value === data.efficiencyMode); });
-            if(data.manualEfficiency !== undefined) document.getElementById('manualEfficiencyInput').value = data.manualEfficiency;
-            if (efficiencyMode === 'manual') document.getElementById('manualEfficiencyGroup').style.display = 'block';
-            else document.getElementById('manualEfficiencyGroup').style.display = 'none';
-        }
-        if(data.componentNames) { for(let i=1;i<=6;i++) { if(data.componentNames[i]) currentComponentNames[i] = data.componentNames[i]; } }
-        if(data.customInfo) customInfo = data.customInfo;
-        document.querySelectorAll('#pipeSegments tbody tr').forEach(r=>r.remove());
-        if(data.pipeSegments && data.pipeSegments.length) {
-            data.pipeSegments.forEach(seg => {
-                addPipeSegment();
-                const row = document.querySelector('#pipeSegments tbody tr:last-child');
-                if(row) {
-                    row.querySelector('.pipe-diameter').value = seg.diameter || 20;
-                    row.querySelector('.segment-flow-rate').value = seg.flowRate || 0;
-                    row.querySelector('.straight-pipe').value = seg.straightPipe || 0;
-                    row.querySelector('.friction-loss').value = seg.frictionLoss || 0;
-                    for(let i=1;i<=6;i++) {
-                        const qtyInput = row.querySelector(`.comp-qty-${i}`);
-                        const eqInput = row.querySelector(`.comp-equivalent-${i}`);
-                        if(qtyInput) qtyInput.value = seg[`qty_${i}`] || 0;
-                        if(eqInput) eqInput.value = seg[`eq_${i}`] || 0;
-                    }
-                    updateAllEquivalentInRow(row);
-                    updatePipeSegment(row);
+        isImporting = true;
+        
+        try {
+            // 1. 切換資料庫
+            if(data.database) { 
+                document.getElementById('databaseSelect').value = data.database; 
+                currentDatabase = data.database;
+                if(data.database === "4626") { 
+                    equivalentFullData = equivalentData_4626; 
+                    document.getElementById("dbActiveBadge").innerHTML = "目前使用: CNS4626 (STPG SCH40)"; 
+                } else { 
+                    equivalentFullData = equivalentData_6445; 
+                    document.getElementById("dbActiveBadge").innerHTML = "目前使用: CNS6445 (SGP)"; 
                 }
-            });
-        }
-        if(data.caseInfo) {
-            document.getElementById('caseName').value = data.caseInfo.caseName || '';
-            document.getElementById('equipmentType').value = data.caseInfo.equipmentType || '固定式';
-            updateEquipmentDefaults();
-        }
-        if(data.pumpCalcData) {
-            const pcd = data.pumpCalcData;
-            if(pcd.sprinkler) {
-                if(document.getElementById('actualHead')) document.getElementById('actualHead').value = pcd.sprinkler.actualHead || 0;
-                if(document.getElementById('outletPressure')) document.getElementById('outletPressure').value = pcd.sprinkler.outletPressure || 10;
-                if(document.getElementById('flowDetector')) document.getElementById('flowDetector').value = pcd.sprinkler.flowDetector || 5;
-                if(document.getElementById('adoptedHead')) document.getElementById('adoptedHead').value = pcd.sprinkler.adoptedHead || 0;
             }
-            if(pcd.other) {
-                if(document.getElementById('nozzleLoss')) document.getElementById('nozzleLoss').value = pcd.other.nozzleLoss || 0;
-                if(document.getElementById('valveLoss')) document.getElementById('valveLoss').value = pcd.other.valveLoss || 0;
-                if(document.getElementById('actualHeadOther')) document.getElementById('actualHeadOther').value = pcd.other.actualHeadOther || 0;
-                if(document.getElementById('outletPressureOther')) document.getElementById('outletPressureOther').value = pcd.other.outletPressureOther || 0;
-                if(document.getElementById('adoptedHeadOther')) document.getElementById('adoptedHeadOther').value = pcd.other.adoptedHeadOther || 0;
-            }
-            if(pcd.common) {
-                if(document.getElementById('flowRate')) document.getElementById('flowRate').value = pcd.common.flowRate || 0;
-                if(document.getElementById('adoptedFlow')) document.getElementById('adoptedFlow').value = pcd.common.adoptedFlow || 0;
-                if(document.getElementById('selectedKw')) document.getElementById('selectedKw').value = pcd.common.selectedKw || 0;
-                if(document.getElementById('flowNote')) document.getElementById('flowNote').value = pcd.common.flowNote || '';
-            }
-            if(pcd.extraItems && pcd.extraItems.length > 0) {
-                document.querySelectorAll('#extraH3Container .extra-h3-item, #extraH3ContainerOther .extra-h3-item').forEach(el => el.remove());
-                const isSprinkler = document.getElementById('equipmentType').value === '一般撒水';
-                const containerId = isSprinkler ? 'extraH3Container' : 'extraH3ContainerOther';
-                const updateFunc = isSprinkler ? updateExtraH3Total : updateExtraH3TotalOther;
-                pcd.extraItems.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'extra-h3-item';
-                    div.innerHTML = `<input type="text" class="extra-h3-label" placeholder="項目名稱" style="width:100px;" value="${escapeHtml(item.label || '')}"><input type="number" class="extra-h3-value" min="0" step="0.1" value="${item.value || 0}" style="width:60px;"> M<button class="remove-extra-h3" style="margin-left:5px;">×</button>`;
-                    document.getElementById(containerId).appendChild(div);
-                    div.querySelector('.extra-h3-value').addEventListener('input', updateFunc);
-                    div.querySelector('.remove-extra-h3').addEventListener('click', function() { div.remove(); updateFunc(); });
+
+            // 2. 還原效率模式
+            if(data.efficiencyMode) {
+                efficiencyMode = data.efficiencyMode;
+                document.querySelectorAll('input[name="effMode"]').forEach(el => {
+                    el.checked = (el.value === data.efficiencyMode);
                 });
-                updateFunc();
+                if(data.manualEfficiency !== undefined) {
+                    document.getElementById('manualEfficiencyInput').value = data.manualEfficiency;
+                }
+                if (data.efficiencyMode === 'manual') {
+                    document.getElementById('manualEfficiencyGroup').style.display = 'block';
+                } else {
+                    document.getElementById('manualEfficiencyGroup').style.display = 'none';
+                }
             }
+
+            // 3. 還原組件名稱與自訂資訊
+            if(data.componentNames) {
+                for(let i=1;i<=6;i++) {
+                    if(data.componentNames[i]) currentComponentNames[i] = data.componentNames[i];
+                }
+            }
+            if(data.customInfo) {
+                customInfo = JSON.parse(JSON.stringify(data.customInfo));
+            }
+
+            // 4. 重新初始化標頭
+            initHeader();
+
+            // 5. 清空現有管道段並重建
+            document.querySelectorAll('#pipeSegments tbody tr').forEach(r => r.remove());
+            if(data.pipeSegments && data.pipeSegments.length) {
+                data.pipeSegments.forEach(seg => {
+                    addPipeSegment();
+                    const row = document.querySelector('#pipeSegments tbody tr:last-child');
+                    if(row) {
+                        row.querySelector('.pipe-diameter').value = seg.diameter || 20;
+                        row.querySelector('.segment-flow-rate').value = seg.flowRate || 0;
+                        row.querySelector('.straight-pipe').value = seg.straightPipe || 0;
+                        row.querySelector('.friction-loss').value = seg.frictionLoss || 0;
+                        for(let i=1;i<=6;i++) {
+                            const qtyInput = row.querySelector(`.comp-qty-${i}`);
+                            const eqInput = row.querySelector(`.comp-equivalent-${i}`);
+                            if(qtyInput) qtyInput.value = seg[`qty_${i}`] || 0;
+                            if(eqInput) eqInput.value = seg[`eq_${i}`] || 0;
+                        }
+                        updateAllEquivalentInRow(row);
+                        updatePipeSegment(row);
+                    }
+                });
+            }
+
+            // 6. 還原案件資訊
+            if(data.caseInfo) {
+                document.getElementById('caseName').value = data.caseInfo.caseName || '';
+                document.getElementById('equipmentType').value = data.caseInfo.equipmentType || '固定式';
+            }
+
+            // 7. 還原泵浦計算資料（先還原所有值，標記為使用者修改）
+            if(data.pumpCalcData) {
+                const pcd = data.pumpCalcData;
+                
+                if(pcd.sprinkler) {
+                    if(document.getElementById('actualHead')) {
+                        document.getElementById('actualHead').value = pcd.sprinkler.actualHead || 0;
+                        document.getElementById('actualHead').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('outletPressure')) {
+                        document.getElementById('outletPressure').value = pcd.sprinkler.outletPressure || 10;
+                        document.getElementById('outletPressure').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('flowDetector')) {
+                        document.getElementById('flowDetector').value = pcd.sprinkler.flowDetector || 5;
+                        document.getElementById('flowDetector').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('adoptedHead')) {
+                        document.getElementById('adoptedHead').value = pcd.sprinkler.adoptedHead || 0;
+                        document.getElementById('adoptedHead').dataset.userModified = 'true';
+                    }
+                }
+                
+                if(pcd.other) {
+                    const nozzleVal = pcd.other.nozzleLoss || 0;
+                    if(document.getElementById('nozzleLoss')) {
+                        document.getElementById('nozzleLoss').value = nozzleVal;
+                        document.getElementById('nozzleLoss').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('valveLoss')) {
+                        document.getElementById('valveLoss').value = pcd.other.valveLoss || 0;
+                        document.getElementById('valveLoss').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('actualHeadOther')) {
+                        document.getElementById('actualHeadOther').value = pcd.other.actualHeadOther || 0;
+                        document.getElementById('actualHeadOther').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('outletPressureOther')) {
+                        document.getElementById('outletPressureOther').value = pcd.other.outletPressureOther || 0;
+                        document.getElementById('outletPressureOther').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('adoptedHeadOther')) {
+                        document.getElementById('adoptedHeadOther').value = pcd.other.adoptedHeadOther || 0;
+                        document.getElementById('adoptedHeadOther').dataset.userModified = 'true';
+                    }
+                }
+                
+                if(pcd.common) {
+                    if(document.getElementById('flowRate')) {
+                        document.getElementById('flowRate').value = pcd.common.flowRate || 0;
+                    }
+                    if(document.getElementById('adoptedFlow')) {
+                        document.getElementById('adoptedFlow').value = pcd.common.adoptedFlow || 0;
+                        document.getElementById('adoptedFlow').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('selectedKw')) {
+                        document.getElementById('selectedKw').value = pcd.common.selectedKw || 0;
+                        document.getElementById('selectedKw').dataset.userModified = 'true';
+                    }
+                    if(document.getElementById('flowNote')) {
+                        document.getElementById('flowNote').value = pcd.common.flowNote || '';
+                    }
+                }
+
+                // 8. 還原額外項目
+                document.querySelectorAll('#extraH3Container .extra-h3-item').forEach(el => el.remove());
+                document.querySelectorAll('#extraH3ContainerOther .extra-h3-item').forEach(el => el.remove());
+
+                if(pcd.extraItemsSprinkler && pcd.extraItemsSprinkler.length > 0) {
+                    pcd.extraItemsSprinkler.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'extra-h3-item';
+                        div.innerHTML = `<input type="text" class="extra-h3-label" placeholder="項目名稱" style="width:100px;" value="${escapeHtml(item.label || '')}"><input type="number" class="extra-h3-value" min="0" step="0.1" value="${item.value || 0}" style="width:60px;"> M<button class="remove-extra-h3" style="margin-left:5px;">×</button>`;
+                        document.getElementById('extraH3Container').appendChild(div);
+                        div.querySelector('.extra-h3-value').addEventListener('input', updateExtraH3Total);
+                        div.querySelector('.remove-extra-h3').addEventListener('click', function() { div.remove(); updateExtraH3Total(); });
+                    });
+                    updateExtraH3Total();
+                }
+
+                if(pcd.extraItemsOther && pcd.extraItemsOther.length > 0) {
+                    pcd.extraItemsOther.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'extra-h3-item';
+                        div.innerHTML = `<input type="text" class="extra-h3-label" placeholder="項目名稱" style="width:100px;" value="${escapeHtml(item.label || '')}"><input type="number" class="extra-h3-value" min="0" step="0.1" value="${item.value || 0}" style="width:60px;"> M<button class="remove-extra-h3" style="margin-left:5px;">×</button>`;
+                        document.getElementById('extraH3ContainerOther').appendChild(div);
+                        div.querySelector('.extra-h3-value').addEventListener('input', updateExtraH3TotalOther);
+                        div.querySelector('.remove-extra-h3').addEventListener('click', function() { div.remove(); updateExtraH3TotalOther(); });
+                    });
+                    updateExtraH3TotalOther();
+                }
+            }
+
+            // 9. 如果有儲存 userModifiedValues，優先還原這些手動值
+            if(data.userModifiedValues) {
+                const umv = data.userModifiedValues;
+                if(document.getElementById('adoptedHead') && umv.adoptedHead !== undefined) {
+                    document.getElementById('adoptedHead').value = umv.adoptedHead;
+                    document.getElementById('adoptedHead').dataset.userModified = 'true';
+                }
+                if(document.getElementById('adoptedHeadOther') && umv.adoptedHeadOther !== undefined) {
+                    document.getElementById('adoptedHeadOther').value = umv.adoptedHeadOther;
+                    document.getElementById('adoptedHeadOther').dataset.userModified = 'true';
+                }
+                if(document.getElementById('adoptedFlow') && umv.adoptedFlow !== undefined) {
+                    document.getElementById('adoptedFlow').value = umv.adoptedFlow;
+                    document.getElementById('adoptedFlow').dataset.userModified = 'true';
+                }
+                if(document.getElementById('selectedKw') && umv.selectedKw !== undefined) {
+                    document.getElementById('selectedKw').value = umv.selectedKw;
+                    document.getElementById('selectedKw').dataset.userModified = 'true';
+                }
+                if(document.getElementById('valveLoss') && umv.valveLoss !== undefined) {
+                    document.getElementById('valveLoss').value = umv.valveLoss;
+                    document.getElementById('valveLoss').dataset.userModified = 'true';
+                }
+                if(document.getElementById('nozzleLoss') && umv.nozzleLoss !== undefined) {
+                    document.getElementById('nozzleLoss').value = umv.nozzleLoss;
+                    document.getElementById('nozzleLoss').dataset.userModified = 'true';
+                }
+            }
+
+            // 10. 修復固定式顯示狀態
+            const type = document.getElementById('equipmentType').value;
+            if(type === '固定式'){
+                document.getElementById('nozzleLoss').value = 0;
+                document.getElementById('h1NozzleSpan').style.display = 'none';
+                document.getElementById('h1LabelFixed').style.display = 'inline';
+                document.getElementById('h1LabelNonFixed').style.display = 'none';
+            } else {
+                document.getElementById('h1NozzleSpan').style.display = 'inline';
+                document.getElementById('h1LabelFixed').style.display = 'none';
+                document.getElementById('h1LabelNonFixed').style.display = 'inline';
+                if(data.fixedNozzleLossStored !== undefined) {
+                    document.getElementById('nozzleLoss').value = data.fixedNozzleLossStored;
+                    document.getElementById('nozzleLoss').dataset.userModified = 'true';
+                }
+            }
+
+            // 11. 重新計算（使用 updateDisplayOnly 避免覆蓋手動值）
+            calculateTotalFrictionLoss();
+            updateDisplayOnly();
+            updateEfficiencyDisplay();
+            calculateMotorPower();
+            renameAllSegments();
+
+        } finally {
+            isImporting = false;
         }
-        // 修復固定式顯示狀態
-        const type = document.getElementById('equipmentType').value;
-        if(type === '固定式'){
-            document.getElementById('h1NozzleSpan').style.display = 'none';
-            document.getElementById('h1LabelFixed').style.display = 'inline';
-            document.getElementById('h1LabelNonFixed').style.display = 'none';
-        } else {
-            document.getElementById('h1NozzleSpan').style.display = 'inline';
-            document.getElementById('h1LabelFixed').style.display = 'none';
-            document.getElementById('h1LabelNonFixed').style.display = 'inline';
-        }
-        initHeader();
-        calculateTotalFrictionLoss();
-        updateFlowRateDisplay();
-        updateTotalHeadCalculation();
-        calculateMotorPower();
-        updateEfficiencyDisplay();
-        renameAllSegments();
     }
 
     function downloadFile(content, filename, type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),100); }
@@ -1235,7 +1486,6 @@
         });
         const flowNoteHtml = flowNote ? `<div class="report-section"><h3 class="section-title">📌 出水量備註</h3><div style="background:#fef9e6; padding:12px; border-left: 4px solid #ff9800; white-space: pre-wrap;">${escapeHtml(flowNote)}</div></div>` : '';
 
-        // 處理 h1 顯示文字
         let h1Label = isFixed ? '控制閥損失水頭' : '噴嘴/噴頭+控制閥';
 
         return `<!DOCTYPE html>
