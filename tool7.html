@@ -296,7 +296,7 @@
         .delete-device-btn:hover {
             background-color: #ff5252;
         }
-		
+        
 
     /* 步驟2：設備勾選框放大 */
     .checkbox-item input[type="checkbox"] {
@@ -318,8 +318,8 @@
         align-items: center; /* 垂直居中 */
         min-height: 40px;   /* 增加最小高度，避免放大後重疊 */
     }
-		
-	        /* 群组颜色样式 - 为不同群组分配不同底色 */
+        
+            /* 群组颜色样式 - 为不同群组分配不同底色 */
         .exported-html .group-color-1 {
             background-color: #e6f7ff; /* 浅蓝色 */
         }
@@ -343,58 +343,58 @@
         }
         .exported-html .group-color-8 {
             background-color: #ffebee; /* 淡红色 */
-        }	
-		
-		/* 步驟4 顯示模式切換按鈕群組 */
-		.view-mode-toggle {
-			display: flex;
-			gap: 10px;
-			margin-bottom: 15px;
-			align-items: center;
-			flex-wrap: wrap;
-		}
-		.view-mode-toggle label {
-			font-weight: bold;
-			margin-right: 5px;
-		}
-		.view-mode-toggle button {
-			padding: 6px 16px;
-			background-color: #e0e0e0;
-			color: #333;
-			border: 2px solid #bbb;
-			border-radius: 4px;
-			cursor: pointer;
-			font-size: 14px;
-		}
-		.view-mode-toggle button.active-mode {
-			background-color: #3498db;
-			color: white;
-			border-color: #2980b9;
-		}
-		.view-mode-toggle button:hover {
-			background-color: #cfd8dc;
-		}
-		.view-mode-toggle button.active-mode:hover {
-			background-color: #2980b9;
-		}
-		.view-mode-toggle .mode-hint {
-			font-size: 13px;
-			color: #666;
-			margin-left: 10px;
-		}
-		
-		/* 緊湊模式 - 設備數量合併欄位樣式 */
-		.compact-merged-count {
-			background-color: #fff3e0 !important;
-			font-weight: bold;
-			color: #e65100;
-		}
-		
-		/* 匯出HTML的緊湊模式樣式 */
-		.exported-html .compact-merged-count {
-			background-color: #fff3e0 !important;
-			font-weight: bold;
-		}
+        }    
+        
+        /* 步驟4 顯示模式切換按鈕群組 */
+        .view-mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .view-mode-toggle label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .view-mode-toggle button {
+            padding: 6px 16px;
+            background-color: #e0e0e0;
+            color: #333;
+            border: 2px solid #bbb;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .view-mode-toggle button.active-mode {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        .view-mode-toggle button:hover {
+            background-color: #cfd8dc;
+        }
+        .view-mode-toggle button.active-mode:hover {
+            background-color: #2980b9;
+        }
+        .view-mode-toggle .mode-hint {
+            font-size: 13px;
+            color: #666;
+            margin-left: 10px;
+        }
+        
+        /* 緊湊模式 - 設備數量合併欄位樣式 */
+        .compact-merged-count {
+            background-color: #fff3e0 !important;
+            font-weight: bold;
+            color: #e65100;
+        }
+        
+        /* 匯出HTML的緊湊模式樣式 */
+        .exported-html .compact-merged-count {
+            background-color: #fff3e0 !important;
+            font-weight: bold;
+        }
 
         /* 樓層區分選擇器樣式 */
         .zone-selector {
@@ -423,9 +423,141 @@
             margin-top: 5px;
             font-style: italic;
         }
-		
+        /* 步驟5 固定工具列 */
+#groupToolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #f9f9f9;
+    padding: 10px 15px;
+    border-bottom: 2px solid #3498db;
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+#groupToolbar .toolbar-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#groupToolbar .toolbar-buttons button {
+    padding: 8px 20px;
+    font-size: 14px;
+}
+
+#groupToolbar .selection-summary {
+    margin-bottom: 5px;
+    background-color: #e8f4fd;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#groupToolbar .error-message {
+    margin-top: 0;
+}
+
+/* 當表格很長時，讓群組管理內容區域可以滾動 */
+#groupManagementContent {
+    max-height: calc(100vh - 350px);
+    overflow-y: auto;
+}
+
+/* 表格標題行固定在頂部（配合滾動） */
+#groupManagementContent table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#groupManagementContent table thead th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+        
+        /* ====== 新增：棟別選擇器樣式 ====== */
+.building-selector {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    background-color: #e8f0fe;
+    border-radius: 4px;
+    border: 1px solid #b8d4e8;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.building-selector label {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0;
+}
+
+.building-selector select {
+    width: auto;
+    min-width: 120px;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+}
+
+.building-selector .building-hint {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+
+/* ====== 棟別標籤樣式 ====== */
+.building-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    margin-left: 5px;
+}
+.building-badge-A { background-color: #e74c3c; }
+.building-badge-B { background-color: #3498db; }
+.building-badge-C { background-color: #2ecc71; }
+.building-badge-D { background-color: #f39c12; }
+.building-badge-E { background-color: #9b59b6; }
+.building-badge-F { background-color: #1abc9c; }
+.building-badge-G { background-color: #e67e22; }
+.building-badge-H { background-color: #e74c3c; }
+.building-badge-I { background-color: #3498db; }
+.building-badge-J { background-color: #2ecc71; }
+
+/* 棟別區塊分隔線 */
+.building-divider {
+    margin: 20px 0 15px 0;
+    padding: 8px 15px;
+    background-color: #2c3e50;
+    color: white;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 16px;
+}
+.building-divider-A { background-color: #e74c3c; }
+.building-divider-B { background-color: #3498db; }
+.building-divider-C { background-color: #2ecc71; }
+.building-divider-D { background-color: #f39c12; }
+.building-divider-E { background-color: #9b59b6; }
+.building-divider-F { background-color: #1abc9c; }
+.building-divider-G { background-color: #e67e22; }
+.building-divider-H { background-color: #e74c3c; }
+.building-divider-I { background-color: #3498db; }
+.building-divider-J { background-color: #2ecc71; }
+        
     </style>
-	    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
+        <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
     <script>
         (function() {
             // 1. 禁止右鍵選單 (contextmenu)
@@ -494,13 +626,13 @@
         })();
     </script>
     <!-- ========== 防護區塊結束 ========== -->
-	
-	
+    
+    
 </head>
 <body>
 
     <div class="container">
-	        <div class="version-info">Ver.5.3  2026/9/2 HTBO/Jim</div>
+            <div class="version-info">Ver.5.5  2026/9/3 HTBO/Jim (新增「分棟」模式)</div>
         <h1>案件設備資料輸入表單</h1>
         
         <div class="progress-bar">
@@ -521,18 +653,25 @@
             </div>
             
             <!-- ====== 新增：樓層區分選擇器 ====== -->
-            <div class="zone-selector">
-                <label for="zoneMode" class="required-field">樓層區分:</label>
-                <select id="zoneMode" onchange="onZoneModeChange()">
-                    <option value="none">不分區</option>
-                    <option value="2">分2區 (A、B)</option>
-                    <option value="3">分3區 (A、B、C)</option>
-                </select>
-                <div class="zone-hint">
-                    選擇「分2區」會將每個樓層分為 A、B 兩個部分 (例如: 2F → 2F-A、2F-B)<br>
-                    選擇「分3區」會將每個樓層分為 A、B、C 三個部分 (例如: 2F → 2F-A、2F-B、2F-C)
-                </div>
-            </div>
+<div class="zone-selector">
+    <label for="zoneMode" class="required-field">樓層區分:</label>
+    <select id="zoneMode" onchange="onZoneModeChange()">
+        <option value="none">不分區</option>
+        <option value="2">分2區 (A、B)</option>
+        <option value="3">分3區 (A、B、C)</option>
+        <option value="4">分4區 (A、B、C、D)</option>
+        <option value="5">分5區 (A、B、C、D、E)</option>
+        <option value="6">分6區 (A、B、C、D、E、F)</option>
+        <option value="7">分7區 (A、B、C、D、E、F、G)</option>
+        <option value="8">分8區 (A、B、C、D、E、F、G、H)</option>
+        <option value="9">分9區 (A、B、C、D、E、F、G、H、I)</option>
+        <option value="10">分10區 (A、B、C、D、E、F、G、H、I、J)</option>
+    </select>
+    <div class="zone-hint">
+        選擇「分N區」會將每個樓層分為 A、B、C... 等多個部分 (例如: 2F → 2F-A、2F-B、2F-C...)<br>
+        最多可區分為 10 個區域 (A~J)
+    </div>
+</div>
             <!-- ====== 樓層區分選擇器結束 ====== -->
             
             <div class="floor-inputs">
@@ -557,7 +696,7 @@
                         範例說明:<br>
                         - BM1 表示地下夾層，會出現在1F與B1之間<br>
                         - B1 表示地下1樓<br>
-						- BM2 表示地下2夾層，會出現在B1與B2F之間
+                        - BM2 表示地下2夾層，會出現在B1與B2F之間
                     </div>
                 </div>
             </div>
@@ -580,12 +719,12 @@
                 <h3>定址設備</h3>
                 <div class="checkbox-group" id="fire-devices">
 
-					
+                    
                     <div class="checkbox-item">
                         <input type="checkbox" id="fire4" name="fire" value="定址發信機" checked>
                         <label for="fire4">定址發信機</label>
                     </div>
-					
+                    
                     <div class="checkbox-item">
                         <input type="checkbox" id="fire1" name="fire" value="定址偵煙" checked>
                         <label for="fire1">定址偵煙</label>
@@ -616,7 +755,7 @@
                     </div>
                 </div>
             </div>              
-			
+            
 
             
             <!-- ========== 新增：瓦斯設備區塊 ========== -->
@@ -626,7 +765,7 @@
                     <div class="checkbox-item">
                         <input type="checkbox" id="fire10" name="fire" value="定址信號隔離" checked>
                         <label for="fire10">定址信號隔離</label>
-                    </div>		
+                    </div>        
                     <div class="checkbox-item">
                         <input type="checkbox" id="fire8" name="fire" value="警鈴模組" checked>
                         <label for="fire8">警鈴模組</label>
@@ -638,8 +777,8 @@
                     <div class="checkbox-item">
                         <input type="checkbox" id="fire7" name="fire" value="火警8回" checked>
                         <label for="fire7">火警8回</label>
-                    </div>					
-				
+                    </div>                    
+                
                     <div class="checkbox-item">
                         <input type="checkbox" id="gas1" name="gas" value="瓦斯4回" checked>
                         <label for="gas1">瓦斯4回</label>
@@ -674,7 +813,7 @@
                     <div class="custom-device-form">
                         <input type="text" class="new-device-name" placeholder="輸入新設備名稱">
                         <button onclick="addCustomDevice(this, 'smoke')">添加排煙設備</button>
-                    </div>			
+                    </div>            
                 </div>
             </div>
             
@@ -720,7 +859,7 @@
                     <div class="custom-device-form">
                         <input type="text" class="new-device-name" placeholder="輸入新設備名稱">
                         <button onclick="addCustomDevice(this, 'control')">添加控制設備</button>
-                    </div>				
+                    </div>                
                 </div>
             </div>
             
@@ -746,7 +885,7 @@
                     <div class="custom-device-form">
                         <input type="text" class="new-device-name" placeholder="輸入新設備名稱">
                         <button onclick="addCustomDevice(this, 'monitor')">添加監視設備</button>
-                    </div>					
+                    </div>                    
                 </div>
             </div>
             
@@ -760,11 +899,11 @@
                     <div class="custom-device-form">
                         <input type="text" class="new-device-name" placeholder="輸入新設備名稱">
                         <button onclick="addCustomDevice(this, 'report')">添加移報設備</button>
-                    </div>			
+                    </div>            
                 </div>
             </div>
 
-			
+            
  
   
             <div class="navigation">
@@ -776,6 +915,28 @@
         <!-- 步驟3: 點數數量輸入 -->
         <div class="step" id="step3">
             <h2>步驟3: 點數數量</h2>
+            
+            <!-- ====== 新增：棟別選擇器 ====== -->
+            <div class="building-selector">
+                <label for="buildingMode">棟別模式：</label>
+                <select id="buildingMode" onchange="onBuildingModeChange()">
+                    <option value="none">不分棟</option>
+                    <option value="all">分棟</option>
+                    <option value="A">A棟</option>
+                    <option value="B">B棟</option>
+                    <option value="C">C棟</option>
+                    <option value="D">D棟</option>
+                    <option value="E">E棟</option>
+                    <option value="F">F棟</option>
+                    <option value="G">G棟</option>
+                    <option value="H">H棟</option>
+                    <option value="I">I棟</option>
+                    <option value="J">J棟</option>
+                </select>
+                <span class="building-hint">選擇「分棟」會顯示所有棟別；選擇特定棟別則只顯示該棟</span>
+            </div>
+            <!-- ====== 棟別選擇器結束 ====== -->
+            
             <p>請為您選擇的設備輸入各樓層點數數量：</p>
             
             <div id="quantityInputs">
@@ -791,6 +952,28 @@
         <!-- 步驟4: 設備數量整合 -->
         <div class="step" id="step4">
             <h2>步驟4: 設備數量整合</h2>
+            
+            <!-- ====== 新增：棟別選擇器（步驟4也加入） ====== -->
+            <div class="building-selector">
+                <label for="buildingMode4">棟別模式：</label>
+                <select id="buildingMode4" onchange="onBuildingModeChange4()">
+                    <option value="none">不分棟</option>
+                    <option value="all">分棟</option>
+                    <option value="A">A棟</option>
+                    <option value="B">B棟</option>
+                    <option value="C">C棟</option>
+                    <option value="D">D棟</option>
+                    <option value="E">E棟</option>
+                    <option value="F">F棟</option>
+                    <option value="G">G棟</option>
+                    <option value="H">H棟</option>
+                    <option value="I">I棟</option>
+                    <option value="J">J棟</option>
+                </select>
+                <span class="building-hint">選擇「分棟」會顯示所有棟別；選擇特定棟別則只顯示該棟</span>
+            </div>
+            <!-- ====== 棟別選擇器結束 ====== -->
+            
             <p>根據點數數量計算的設備數量：</p>
             
             <!-- 顯示模式切換 -->
@@ -817,6 +1000,39 @@
         <div class="step" id="step5">
             <h2>步驟5: 群組管理</h2>
             
+            <!-- ====== 新增：棟別選擇器（步驟5也加入） ====== -->
+            <div class="building-selector">
+                <label for="buildingMode5">棟別模式：</label>
+                <select id="buildingMode5" onchange="onBuildingModeChange5()">
+                    <option value="none">不分棟</option>
+                    <option value="all">分棟</option>
+                    <option value="A">A棟</option>
+                    <option value="B">B棟</option>
+                    <option value="C">C棟</option>
+                    <option value="D">D棟</option>
+                    <option value="E">E棟</option>
+                    <option value="F">F棟</option>
+                    <option value="G">G棟</option>
+                    <option value="H">H棟</option>
+                    <option value="I">I棟</option>
+                    <option value="J">J棟</option>
+                </select>
+                <span class="building-hint">選擇「分棟」會顯示所有棟別；選擇特定棟別則只顯示該棟</span>
+            </div>
+            <!-- ====== 棟別選擇器結束 ====== -->
+            
+            <!-- ====== 新增：固定工具列 ====== -->
+    <div id="groupToolbar">
+        <div class="toolbar-buttons">
+            <button onclick="createGroup()">群組</button>
+            <button onclick="ungroup()">解除群組</button>
+        </div>
+        <div id="selectionSummary" class="selection-summary"></div>
+        <div id="groupError" class="error-message"></div>
+    </div>
+    <!-- ====== 固定工具列結束 ====== -->
+            
+            
             <div id="groupManagementContent">
                 <!-- 這裡會動態顯示群組管理表格 -->
             </div>
@@ -842,8 +1058,11 @@
         // 顯示模式: 'individual' 或 'compact'
         let viewMode = 'individual';
         
-        // 樓層區分模式: 'none', '2', '3'
+        // 樓層區分模式: 'none', '2', '3' ... '10'
         let zoneMode = 'none';
+        
+        // ====== 新增：棟別模式 ======
+        let buildingMode = 'none';
         
         // 存儲已輸入的數據
         const formData = {
@@ -934,13 +1153,18 @@
             `;
         }
         
-        // 獲取當前的區分標籤
-        function getZoneLabels() {
-            const mode = document.getElementById('zoneMode').value;
-            if (mode === '2') return ['A', 'B'];
-            if (mode === '3') return ['A', 'B', 'C'];
-            return ['']; // 不分區
+function getZoneLabels() {
+    const mode = document.getElementById('zoneMode').value;
+    const num = parseInt(mode);
+    if (!isNaN(num) && num >= 2 && num <= 10) {
+        const labels = [];
+        for (let i = 0; i < num; i++) {
+            labels.push(String.fromCharCode(65 + i));
         }
+        return labels;
+    }
+    return [''];
+}
         
         // 將樓層依區分標籤展開為多個樓層
         function splitFloorIntoSections(floor, zoneLabels) {
@@ -948,23 +1172,173 @@
             return zoneLabels.map(label => `${floor}-${label}`);
         }
         
-        // 獲取所有展開後的樓層列表（包含區分）
-        function getAllExpandedFloors(aboveGroundInput, belowGroundInput) {
-            const zoneLabels = getZoneLabels();
-            const floors = [
-                ...parseFloorInput(aboveGroundInput),
-                ...parseFloorInput(belowGroundInput, true)
-            ];
-            
-            if (zoneLabels.length <= 1) return floors;
-            
-            const expanded = [];
-            floors.forEach(floor => {
-                zoneLabels.forEach(label => {
-                    expanded.push(`${floor}-${label}`);
+        // ====== 獲取棟別顯示文字 ======
+        function getBuildingModeText() {
+            if (buildingMode === 'none') return '不分棟';
+            if (buildingMode === 'all') return '分棟 (全部)';
+            return `${buildingMode}棟`;
+        }
+        
+// ====== 獲取所有展開後的樓層列表（包含區分和棟別過濾） ======
+function getAllExpandedFloors(aboveGroundInput, belowGroundInput) {
+    const zoneLabels = getZoneLabels();
+    const floors = [
+        ...parseFloorInput(aboveGroundInput),
+        ...parseFloorInput(belowGroundInput, true)
+    ];
+    
+    if (zoneLabels.length <= 1) return floors;
+    
+    const expanded = [];
+    floors.forEach(floor => {
+        zoneLabels.forEach(label => {
+            expanded.push(`${floor}-${label}`);
+        });
+    });
+    
+    // ★★★ 分棟過濾與排序 ★★★
+    if (buildingMode === 'all') {
+        // 「分棟」模式：顯示所有棟別，按「棟別優先」排序
+        // 例如：5F-A, 4F-A, 3F-A, 2F-A, 1F-A, B1F-A, 5F-B, 4F-B, ...
+        const sortedByBuilding = [];
+        const buildingLabels = zoneLabels;
+        buildingLabels.forEach(label => {
+            const buildingFloors = expanded
+                .filter(floor => floor.endsWith(`-${label}`))
+                .sort((a, b) => {
+                    const floorA = a.replace(`-${label}`, '');
+                    const floorB = b.replace(`-${label}`, '');
+                    // ★★★ 修改：使用 compareFloors(a, b) 從高到低 ★★★
+                    return compareFloors(floorA, floorB);
                 });
+            sortedByBuilding.push(...buildingFloors);
+        });
+        return sortedByBuilding;
+    } else if (buildingMode !== 'none') {
+        // 特定棟別：只顯示該棟，並從高到低排序
+        const filtered = expanded.filter(floor => floor.endsWith(`-${buildingMode}`));
+        return filtered.sort((a, b) => {
+            const floorA = a.replace(`-${buildingMode}`, '');
+            const floorB = b.replace(`-${buildingMode}`, '');
+            return compareFloors(floorA, floorB);
+        });
+    }
+    
+    // 「不分棟」模式：返回所有樓層（保持原有順序）
+    return expanded;
+}
+
+// ====== 樓層比較函數（從高到低排序） ======
+function compareFloors(a, b) {
+    const getFloorInfo = (floor) => {
+        if (floor.startsWith('R')) {
+            if (floor === 'RF') return { type: 'roof', num: 0 };
+            return { type: 'roof', num: parseInt(floor.slice(1)) };
+        }
+        if (floor.startsWith('B')) {
+            if (floor.startsWith('BM')) {
+                return { type: 'basementM', num: parseInt(floor.slice(2)) };
+            }
+            return { type: 'basement', num: parseInt(floor.slice(1)) };
+        }
+        if (floor.endsWith('MF')) {
+            return { type: 'groundM', num: parseInt(floor) };
+        }
+        return { type: 'ground', num: parseInt(floor) };
+    };
+    
+    const aInfo = getFloorInfo(a);
+    const bInfo = getFloorInfo(b);
+    
+    // 屋頂層特殊處理（RF 最高）
+    if (aInfo.type === 'roof' && bInfo.type === 'roof') {
+        return bInfo.num - aInfo.num;
+    }
+    if (aInfo.type === 'roof') return -1;
+    if (bInfo.type === 'roof') return 1;
+    
+    // 地上樓層（從高到低）
+    if (!a.startsWith('B') && !b.startsWith('B')) {
+        if (aInfo.num === bInfo.num) {
+            // 同樓層：夾層(MF)在前
+            if (a.endsWith('MF') && !b.endsWith('MF')) return -1;
+            if (!a.endsWith('MF') && b.endsWith('MF')) return 1;
+            return 0;
+        }
+        return bInfo.num - aInfo.num; // 數字大的在前（從高到低）
+    }
+    
+    // 地下樓層（從低到高：B1, B2, B3...）
+    if (a.startsWith('B') && b.startsWith('B')) {
+        if (aInfo.num === bInfo.num) {
+            if (a.startsWith('BM') && !b.startsWith('BM')) return -1;
+            if (!a.startsWith('BM') && b.startsWith('BM')) return 1;
+            return 0;
+        }
+        return aInfo.num - bInfo.num; // 數字小的在前（B1 在 B2 前面）
+    }
+    
+    // 地上 vs 地下：地上在前
+    if (!a.startsWith('B') && b.startsWith('B')) {
+        return -1;
+    }
+    if (a.startsWith('B') && !b.startsWith('B')) {
+        return 1;
+    }
+    
+    return 0;
+}
+
+        
+        // ========== 棟別相關函數 ==========
+        
+        // 同步所有棟別選擇器
+        function syncBuildingSelectors(value) {
+            const selectors = ['buildingMode', 'buildingMode4', 'buildingMode5'];
+            selectors.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = value;
             });
-            return expanded;
+            buildingMode = value;
+        }
+        
+        // 當步驟3的棟別模式變更時觸發
+        function onBuildingModeChange() {
+            const select = document.getElementById('buildingMode');
+            syncBuildingSelectors(select.value);
+            if (currentStep === 3) {
+                generateFloorQuantityTable();
+            } else if (currentStep === 4) {
+                generateEquipmentSummary();
+            } else if (currentStep === 5) {
+                generateGroupManagementTable();
+            }
+        }
+        
+        // 當步驟4的棟別模式變更時觸發
+        function onBuildingModeChange4() {
+            const select = document.getElementById('buildingMode4');
+            syncBuildingSelectors(select.value);
+            if (currentStep === 4) {
+                generateEquipmentSummary();
+            } else if (currentStep === 3) {
+                generateFloorQuantityTable();
+            } else if (currentStep === 5) {
+                generateGroupManagementTable();
+            }
+        }
+        
+        // 當步驟5的棟別模式變更時觸發
+        function onBuildingModeChange5() {
+            const select = document.getElementById('buildingMode5');
+            syncBuildingSelectors(select.value);
+            if (currentStep === 5) {
+                generateGroupManagementTable();
+            } else if (currentStep === 3) {
+                generateFloorQuantityTable();
+            } else if (currentStep === 4) {
+                generateEquipmentSummary();
+            }
         }
         
         // ========== 初始化頁面 ==========
@@ -1002,6 +1376,9 @@
                 document.getElementById('zoneMode').value = formData.zoneMode;
                 zoneMode = formData.zoneMode;
             }
+            
+            // 同步棟別選擇器
+            syncBuildingSelectors('none');
         });
  
         // 刪除自定義設備
@@ -1362,7 +1739,6 @@
         }
 
 // 導出HTML（支援兩種模式）
-	// 導出HTML（支援兩種模式）
 function exportHTML() {
     // 確保保存最新數據
     saveFormData();
@@ -1377,13 +1753,16 @@ function exportHTML() {
     // 判斷匯出模式（使用當前 viewMode）
     const exportMode = viewMode || 'individual';
     
+    // ====== 獲取棟別資訊 ======
+    const buildingModeText = getBuildingModeText();
+    
     // 創建HTML內容
     let htmlContent = `
         <!DOCTYPE html>
         <html lang="zh-TW">
         <head>
             <meta charset="UTF-8">
-            <title>${formData.caseName || '未命名案件'} - 設備統計</title>
+            <title>${formData.caseName || '未命名案件'} - 設備統計${buildingModeText !== '不分棟' ? ` (${buildingModeText})` : ''}</title>
             <style>
     .exported-html {
         font-family: "細明體", "MingLiU", "標楷體", "KaiTi", "Arial Unicode MS", sans-serif;
@@ -1476,11 +1855,12 @@ function exportHTML() {
             </style>
         </head>
         <body class="exported-html">
-            <h1>${formData.caseName || '未命名案件'} - 設備統計</h1>
+            <h1>${formData.caseName || '未命名案件'} - 設備統計${buildingModeText !== '不分棟' ? ` (${buildingModeText})` : ''}</h1>
             <div>
                 <p><strong>地上樓層:</strong> ${formData.aboveGroundFloors || '無'}</p>
                 <p><strong>地下樓層:</strong> ${formData.belowGroundFloors || '無'}</p>
-                <p><strong>樓層區分:</strong> ${formData.zoneMode === '2' ? '分2區 (A、B)' : formData.zoneMode === '3' ? '分3區 (A、B、C)' : '不分區'}</p>
+                <p><strong>樓層區分:</strong> ${formData.zoneMode === '2' ? '分2區 (A、B)' : formData.zoneMode === '3' ? '分3區 (A、B、C)' : formData.zoneMode === '4' ? '分4區 (A、B、C、D)' : formData.zoneMode === '5' ? '分5區 (A、B、C、D、E)' : formData.zoneMode === '6' ? '分6區 (A、B、C、D、E、F)' : formData.zoneMode === '7' ? '分7區 (A、B、C、D、E、F、G)' : formData.zoneMode === '8' ? '分8區 (A、B、C、D、E、F、G、H)' : formData.zoneMode === '9' ? '分9區 (A、B、C、D、E、F、G、H、I)' : formData.zoneMode === '10' ? '分10區 (A、B、C、D、E、F、G、H、I、J)' : '不分區'}</p>
+                <p><strong>棟別模式:</strong> ${buildingModeText}</p>
                 <p><strong>顯示模式:</strong> ${exportMode === 'compact' ? '緊湊 (標題與點數不變，僅設備數量合併排煙+控制+監視)' : '個別'}</p>
             </div>
     `;
@@ -1862,7 +2242,7 @@ function exportHTML() {
     const caseName = formData.caseName || '未命名案件';
     const now = new Date();
     const dateStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
-    const fileName = `${caseName}_${dateStr}.html`;
+    const fileName = `${caseName}_${dateStr}${buildingModeText !== '不分棟' ? `_${buildingModeText.replace(/[()（）]/g, '').replace(/\s/g, '')}` : ''}.html`;
     
     const dataBlob = new Blob([htmlContent], { type: 'text/html' });
     const downloadLink = document.createElement('a');
@@ -1875,7 +2255,6 @@ function exportHTML() {
 
 
 
-		
         
         // 根據名稱查找設備
         function findDeviceByName(category, name) {
@@ -1962,7 +2341,7 @@ function calculateGroupTotal(group) {
 
 
         
-// 計算群組電流消耗（支援個別/緊湊模式）- 精確版
+// 計算群組電流消耗（支援個別/緊湊模式）
 function calculateGroupCurrentConsumption(group) {
     let totalCurrent = 0;
     const exportMode = viewMode || 'individual';
@@ -1970,7 +2349,7 @@ function calculateGroupCurrentConsumption(group) {
     
     group.floors.forEach(floor => {
         let mergedTotalPoints = 0;
-        let mergedWeightedCurrent = 0; // 點數加權的電流總和
+        let mergedEquipmentCurrent = 0; // 改為設備數量的電流總和
         
         formData.selectedDevices.forEach(device => {
             const value = formData.quantities[floor] && formData.quantities[floor][device.id] ? 
@@ -1981,9 +2360,11 @@ function calculateGroupCurrentConsumption(group) {
             const deviceCurrent = currentConsumption[device.name] || currentConsumption['default'];
             
             if (exportMode === 'compact' && mergedCategories.includes(device.category)) {
-                // 緊湊模式：排煙+控制+監視 累積點數和加權電流
+                // 緊湊模式：排煙+控制+監視 累積點數
                 mergedTotalPoints += value;
-                mergedWeightedCurrent += value * deviceCurrent;
+                // 改為計算設備數量 × 電流
+                const equipmentCount = calculateEquipmentCount(device, value);
+                mergedEquipmentCurrent += equipmentCount * deviceCurrent;
             } else {
                 // 個別模式 或 非合併類別：正常計算
                 const equipmentCount = calculateEquipmentCount(device, value);
@@ -1993,12 +2374,15 @@ function calculateGroupCurrentConsumption(group) {
         
         // 緊湊模式：排煙+控制+監視 合併後計算電流消耗
         if (exportMode === 'compact' && mergedTotalPoints > 0) {
-            // 合併設備數量 = 總點數 / 4
             const mergedCount = Math.ceil(mergedTotalPoints / 4);
-            // 合併後的電流 = 合併設備數量 × (加權平均電流)
-            // 加權平均電流 = 各設備點數加權總和 / 總點數
-            const avgCurrent = mergedWeightedCurrent / mergedTotalPoints;
-            totalCurrent += mergedCount * avgCurrent;
+            // 改為使用合併設備數量的電流總和
+            if (mergedEquipmentCurrent > 0) {
+                totalCurrent += mergedEquipmentCurrent;
+            } else {
+                // 降級方案：用平均電流估算
+                const avgCurrent = 0.4;
+                totalCurrent += mergedCount * avgCurrent;
+            }
         }
     });
     
@@ -2245,7 +2629,8 @@ function calculateGroupCurrentConsumption(group) {
             const floors = getAllExpandedFloors(aboveGroundInput, belowGroundInput);
             
             if (floors.length === 0) {
-                floors.push('RF');
+                container.innerHTML = '<p>沒有符合所選棟別的樓層，請檢查樓層區分設定或棟別選擇。</p>';
+                return;
             }
             
             const groupedDevices = {};
@@ -2387,13 +2772,24 @@ function calculateGroupCurrentConsumption(group) {
             const caseDiv = document.createElement('div');
             caseDiv.className = 'form-group';
             const zoneModeText = formData.zoneMode === '2' ? '分2區 (A、B)' : 
-                                 formData.zoneMode === '3' ? '分3區 (A、B、C)' : '不分區';
+                                 formData.zoneMode === '3' ? '分3區 (A、B、C)' : 
+                                 formData.zoneMode === '4' ? '分4區 (A、B、C、D)' :
+                                 formData.zoneMode === '5' ? '分5區 (A、B、C、D、E)' :
+                                 formData.zoneMode === '6' ? '分6區 (A、B、C、D、E、F)' :
+                                 formData.zoneMode === '7' ? '分7區 (A、B、C、D、E、F、G)' :
+                                 formData.zoneMode === '8' ? '分8區 (A、B、C、D、E、F、G、H)' :
+                                 formData.zoneMode === '9' ? '分9區 (A、B、C、D、E、F、G、H、I)' :
+                                 formData.zoneMode === '10' ? '分10區 (A、B、C、D、E、F、G、H、I、J)' :
+                                 '不分區';
+            const buildingModeText = getBuildingModeText();
+            
             caseDiv.innerHTML = `
                 <h3>案件基本資料</h3>
                 <p><strong>案件名稱:</strong> ${formData.caseName}</p>
                 <p><strong>地上樓層:</strong> ${formData.aboveGroundFloors || '無'}</p>
                 <p><strong>地下樓層:</strong> ${formData.belowGroundFloors || '無'}</p>
                 <p><strong>樓層區分:</strong> ${zoneModeText}</p>
+                <p><strong>棟別模式:</strong> ${buildingModeText}</p>
                 <p><strong>顯示模式:</strong> ${viewMode === 'compact' ? '緊湊 (標題與點數不變，僅設備數量合併排煙+控制+監視)' : '個別'}</p>
             `;
             container.appendChild(caseDiv);
@@ -2404,7 +2800,8 @@ function calculateGroupCurrentConsumption(group) {
             const floors = getAllExpandedFloors(aboveGroundInput, belowGroundInput);
             
             if (floors.length === 0) {
-                floors.push('RF');
+                container.innerHTML += '<p>沒有符合所選棟別的樓層，請檢查樓層區分設定或棟別選擇。</p>';
+                return;
             }
             
             // 按類別分組設備
@@ -2558,7 +2955,6 @@ function calculateGroupCurrentConsumption(group) {
         }
         
         // 生成群組管理表格
-		// 生成群組管理表格
 function generateGroupManagementTable() {
     const container = document.getElementById('groupManagementContent');
     container.innerHTML = '';
@@ -2577,7 +2973,8 @@ function generateGroupManagementTable() {
     const floors = getAllExpandedFloors(aboveGroundInput, belowGroundInput);
     
     if (floors.length === 0) {
-        floors.push('RF');
+        container.innerHTML += '<p>沒有符合所選棟別的樓層，請檢查樓層區分設定或棟別選擇。</p>';
+        return;
     }
     
     // 計算每個樓層各類別的設備數量
@@ -2590,16 +2987,9 @@ function generateGroupManagementTable() {
                          parseInt(formData.quantities[floor][device.id]) || 0 : 0;
             let equipmentCount = calculateEquipmentCount(device, value);
             
-            // 使用與匯出報表一致的類別名稱
             let categoryName = device.category;
-            // 將「火警設備」映射為「定址設備」
-            if (categoryName === '火警設備') {
-                categoryName = '定址設備';
-            }
-            // 將「瓦斯設備」映射為「中繼模組」
-            if (categoryName === '瓦斯設備') {
-                categoryName = '中繼模組';
-            }
+            if (categoryName === '火警設備') categoryName = '定址設備';
+            if (categoryName === '瓦斯設備') categoryName = '中繼模組';
             
             if (!floorEquipmentCounts[floor][categoryName]) {
                 floorEquipmentCounts[floor][categoryName] = 0;
@@ -2608,18 +2998,31 @@ function generateGroupManagementTable() {
         });
     });
     
+    // 過濾群組
+    const currentFloorsSet = new Set(floors);
+    const filteredGroups = formData.groups.filter(group => {
+        return group.floors.some(floor => currentFloorsSet.has(floor));
+    });
+    
+    const groupFloorsMap = {};
+    filteredGroups.forEach(group => {
+        const filteredFloors = group.floors.filter(floor => currentFloorsSet.has(floor));
+        if (filteredFloors.length > 0) {
+            groupFloorsMap[group.name] = filteredFloors;
+        }
+    });
+    
     const table = document.createElement('table');
     
-    // ★★★ 修改表頭：使用與匯出報表一致的用語 ★★★
     const thead = document.createElement('thead');
     let headerRow = '<tr><th>群組</th><th>勾選</th><th>樓層</th>';
-    headerRow += '<th>定址設備</th>';      // 原「火警設備」
-    headerRow += '<th>中繼模組</th>';      // 原「瓦斯設備」
+    headerRow += '<th>定址設備</th>';
+    headerRow += '<th>中繼模組</th>';
     headerRow += '<th>排煙設備</th>';
     headerRow += '<th>控制設備</th>';
     headerRow += '<th>監視設備</th>';
     headerRow += '<th>移報設備</th>';
-    headerRow += '<th>中繼箱</th>';        // 新增「中繼箱」欄位
+    headerRow += '<th>中繼箱</th>';
     headerRow += '<th>小計</th>';
     headerRow += '<th>電流消耗(mA)</th></tr>';
     
@@ -2627,8 +3030,6 @@ function generateGroupManagementTable() {
     table.appendChild(thead);
     
     const tbody = document.createElement('tbody');
-    
-    // 定義類別順序（與匯出報表一致）
     const categoryOrder = ['定址設備', '中繼模組', '排煙設備', '控制設備', '監視設備', '移報設備'];
     
     floors.forEach(floor => {
@@ -2644,7 +3045,6 @@ function generateGroupManagementTable() {
             <td>${floor}</td>
         `;
         
-        // 依序取得各類別的設備數量
         let categoryTotals = {};
         let totalCount = 0;
         
@@ -2654,14 +3054,10 @@ function generateGroupManagementTable() {
             totalCount += count;
         });
         
-        // ★★★ 計算中繼箱 = 中繼模組 + 排煙 + 控制 + 監視（合併計算）★★★
-        // 中繼箱點數總和 = 中繼模組 + 排煙 + 控制 + 監視 的總點數
         let repeaterTotalPoints = 0;
         const repeaterCategoriesForGroup = ['中繼模組', '排煙設備', '控制設備', '監視設備'];
         repeaterCategoriesForGroup.forEach(cat => {
             if (floorEquipmentCounts[floor][cat]) {
-                // 這裡需要重新計算點數，不能用設備數量
-                // 從原始點數計算
                 formData.selectedDevices.forEach(device => {
                     let deviceCategory = device.category;
                     if (deviceCategory === '火警設備') deviceCategory = '定址設備';
@@ -2676,21 +3072,20 @@ function generateGroupManagementTable() {
         });
         const repeaterCount = Math.ceil(repeaterTotalPoints / 4);
         
-        // 顯示各類別數量
         categoryOrder.forEach(cat => {
             rowHtml += `<td>${categoryTotals[cat] || 0}</td>`;
         });
         
-        // 顯示中繼箱
         rowHtml += `<td>${repeaterCount}</td>`;
         
-        // 計算電流消耗
+        // ★★★ 修改：使用設備數量 × 電流 ★★★
         let floorCurrent = 0;
         formData.selectedDevices.forEach(device => {
             const value = formData.quantities[floor] && formData.quantities[floor][device.id] ? 
                          parseInt(formData.quantities[floor][device.id]) || 0 : 0;
             const deviceCurrent = currentConsumption[device.name] || currentConsumption['default'];
-            floorCurrent += value * deviceCurrent;
+            const equipmentCount = calculateEquipmentCount(device, value);
+            floorCurrent += equipmentCount * deviceCurrent;
         });
         
         rowHtml += `<td>${totalCount}</td>`;
@@ -2700,8 +3095,9 @@ function generateGroupManagementTable() {
         tbody.appendChild(row);
     });
     
-    // 群組小計行
-    formData.groups.forEach(group => {
+    // ★★★ 修改：群組小計行的電流計算 ★★★
+    Object.keys(groupFloorsMap).forEach(groupName => {
+        const groupFloors = groupFloorsMap[groupName];
         const groupRow = document.createElement('tr');
         groupRow.className = 'group-total-row';
         
@@ -2710,12 +3106,11 @@ function generateGroupManagementTable() {
         let groupCurrent = 0;
         let groupRepeaterPoints = 0;
         
-        group.floors.forEach(floor => {
+        groupFloors.forEach(floor => {
             categoryOrder.forEach(cat => {
                 categoryTotals[cat] += floorEquipmentCounts[floor][cat] || 0;
             });
             
-            // 計算中繼箱點數
             const repeaterCategoriesForGroup2 = ['中繼模組', '排煙設備', '控制設備', '監視設備'];
             repeaterCategoriesForGroup2.forEach(cat => {
                 formData.selectedDevices.forEach(device => {
@@ -2730,11 +3125,13 @@ function generateGroupManagementTable() {
                 });
             });
             
+            // ★★★ 修改：使用設備數量 × 電流 ★★★
             formData.selectedDevices.forEach(device => {
                 const value = formData.quantities[floor] && formData.quantities[floor][device.id] ? 
                              parseInt(formData.quantities[floor][device.id]) || 0 : 0;
                 const deviceCurrent = currentConsumption[device.name] || currentConsumption['default'];
-                groupCurrent += value * deviceCurrent;
+                const equipmentCount = calculateEquipmentCount(device, value);
+                groupCurrent += equipmentCount * deviceCurrent;
             });
         });
         
@@ -2747,8 +3144,8 @@ function generateGroupManagementTable() {
         }
         
         let rowHtml = `
-            <td colspan="2"><strong>${group.name} 群組小計</strong></td>
-            <td>${group.floors.join(', ')}</td>
+            <td colspan="2"><strong>${groupName} 群組小計</strong></td>
+            <td>${groupFloors.join(', ')}</td>
         `;
         
         categoryOrder.forEach(cat => {
@@ -2766,7 +3163,7 @@ function generateGroupManagementTable() {
         
         if (groupSubtotal > 255) {
             document.getElementById('groupError').textContent = 
-                `警告: ${group.name} 群組的設備總數 ${groupSubtotal} 超過 255 的限制，請調整群組配置！`;
+                `警告: ${groupName} 群組的設備總數 ${groupSubtotal} 超過 255 的限制，請調整群組配置！`;
         }
     });
     
@@ -2775,6 +3172,8 @@ function generateGroupManagementTable() {
     
     updateSelectionSummary();
 }
+
+
         
 // 更新選擇摘要
 function updateSelectionSummary() {
@@ -2796,12 +3195,16 @@ function updateSelectionSummary() {
     
     selectedFloors.forEach(floor => {
         formData.selectedDevices.forEach(device => {
-            const value = formData.quantities[floor] && formData.quantities[floor][device.id] ? parseInt(formData.quantities[floor][device.id]) || 0 : 0;
+            const value = formData.quantities[floor] && formData.quantities[floor][device.id] ? 
+                         parseInt(formData.quantities[floor][device.id]) || 0 : 0;
+            if (value === 0) return;
+            
+            // ★★★ 修改：先計算設備數量，再用設備數量 × 電流 ★★★
             let equipmentCount = calculateEquipmentCount(device, value);
             const deviceCurrent = currentConsumption[device.name] || currentConsumption['default'];
-            currentTotal += value * deviceCurrent;
+            currentTotal += equipmentCount * deviceCurrent;
             
-            // ★★★ 修改類別名稱以與匯出報表一致 ★★★
+            // 計算各類別設備數量（保持不變）
             let category = device.category;
             if (category === '火警設備') category = '定址設備';
             if (category === '瓦斯設備') category = '中繼模組';
@@ -2828,6 +3231,7 @@ function updateSelectionSummary() {
         電流消耗: ${currentTotal.toFixed(1)} mA${currentWarning}
     `;
 }
+
         
         
         // 創建群組
@@ -2880,11 +3284,11 @@ function updateSelectionSummary() {
             generateGroupManagementTable();
         }
     </script>
-		<!-- 在每個工具的HTML檔案中，body結束前加入 -->
+        <!-- 在每個工具的HTML檔案中，body結束前加入 -->
 <button onclick="window.location.href='index.html'" 
         style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #4a6fa5; color: white; border: none; border-radius: 5px; cursor: pointer;">
     返回主選單
-</button>	
-	
+</button>    
+    
 </body>
 </html>
