@@ -1095,20 +1095,62 @@
         // ========== 樓層區分相關函數 ==========
         
         // 當樓層區分模式變更時觸發
-        function onZoneModeChange() {
-            const select = document.getElementById('zoneMode');
-            zoneMode = select.value;
-            formData.zoneMode = zoneMode;
-            
-            // 如果已經輸入過樓層，更新提示
-            const aboveGround = document.getElementById('aboveGroundFloors').value.trim();
-            const belowGround = document.getElementById('belowGroundFloors').value.trim();
-            
-            if (aboveGround || belowGround) {
-                // 顯示區分後的樓層範例
-                showZonePreview();
-            }
+function onZoneModeChange() {
+    const select = document.getElementById('zoneMode');
+    zoneMode = select.value;
+    formData.zoneMode = zoneMode;
+    
+    // ★★★ 更新所有棟別選擇器的選項 ★★★
+    updateBuildingSelectors();
+    
+    const aboveGround = document.getElementById('aboveGroundFloors').value.trim();
+    const belowGround = document.getElementById('belowGroundFloors').value.trim();
+    
+    if (aboveGround || belowGround) {
+        showZonePreview();
+    }
+}
+
+function updateBuildingSelectors() {
+    const zoneLabels = getZoneLabels();
+    const selectors = ['buildingMode', 'buildingMode4', 'buildingMode5'];
+    
+    selectors.forEach(selectorId => {
+        const select = document.getElementById(selectorId);
+        if (!select) return;
+        
+        const currentValue = select.value;
+        select.innerHTML = '';
+        
+        // 不分棟
+        const noneOption = document.createElement('option');
+        noneOption.value = 'none';
+        noneOption.textContent = '不分棟';
+        select.appendChild(noneOption);
+        
+        // 分棟
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = '分棟';
+        select.appendChild(allOption);
+        
+        // 動態添加 A、B、C...
+        zoneLabels.forEach(label => {
+            const option = document.createElement('option');
+            option.value = label;
+            option.textContent = `${label}棟`;
+            select.appendChild(option);
+        });
+        
+        // 恢復有效的選擇值
+        if (currentValue === 'none' || currentValue === 'all' || zoneLabels.includes(currentValue)) {
+            select.value = currentValue;
+        } else {
+            select.value = 'none';
         }
+    });
+}
+
         
         // 顯示樓層區分後的範例
         function showZonePreview() {
@@ -1376,7 +1418,8 @@ function compareFloors(a, b) {
                 document.getElementById('zoneMode').value = formData.zoneMode;
                 zoneMode = formData.zoneMode;
             }
-            
+            updateBuildingSelectors();
+			
             // 同步棟別選擇器
             syncBuildingSelectors('none');
         });
@@ -2113,77 +2156,85 @@ function exportHTML() {
     }
     htmlContent += '</tr></thead><tbody>';
     
+
     // ---- 樓層數據行 ----
-    floors.forEach((floor, index) => {
-        const groupName = floorGroupNames[index];
-        const groupClass = groupName ? groupColors[groupName] : '';
+floors.forEach((floor, index) => {
+    const groupName = floorGroupNames[index];
+    const groupClass = groupName ? groupColors[groupName] : '';
+    
+    // ★★★ 計算該樓層的設備數量總和（小計） ★★★
+    const deviceSubtotal = floorDeviceData[index][floorDeviceData[index].length - 1]; // 最後一個欄位是小計
+    
+    // ★★★ 如果設備小計為 0，跳過該樓層 ★★★
+    if (deviceSubtotal === 0) {
+        return; // 繼續下一個樓層
+    }
+    
+    // 點數行
+    htmlContent += `<tr class="floor-points-row"><td>${floor} (點數)</td>`;
+    floorPointData[index].forEach(val => {
+        htmlContent += `<td>${val === 0 ? '' : val}</td>`;
+    });
+    htmlContent += `<td class="${groupClass}">${groupName}</td></tr>`;
+    
+    // 設備數量行
+    htmlContent += `<tr class="floor-devices-row"><td>${floor} (設備數量)</td>`;
+    floorDeviceData[index].forEach((val, idx) => {
+        // 檢查是否為合併類別中被留空的欄位
+        let isEmptyMerged = false;
+        let isMergedValue = false;
+        let colIndex = 0;
         
-        // 點數行
-        htmlContent += `<tr class="floor-points-row"><td>${floor} (點數)</td>`;
-        floorPointData[index].forEach(val => {
-            htmlContent += `<td>${val === 0 ? '' : val}</td>`;
-        });
-        htmlContent += `<td class="${groupClass}">${groupName}</td></tr>`;
-        
-        // 設備數量行
-        htmlContent += `<tr class="floor-devices-row"><td>${floor} (設備數量)</td>`;
-        floorDeviceData[index].forEach((val, idx) => {
-            // 檢查是否為合併類別中被留空的欄位
-            let isEmptyMerged = false;
-            let isMergedValue = false;
-            let colIndex = 0;
-            
-            for (const category of categoryOrder) {
-                if (category === '中繼器') {
-                    colIndex++;
-                } else if (groupedDevices[category]) {
-                    const deviceCount = groupedDevices[category].length;
-                    if (exportMode === 'compact' && mergedCategories.includes(category)) {
-                        // 判斷這個位置是否為合併數值顯示位置
-                        let showMergedInThisCategory = false;
-                        if (category === '排煙設備') {
-                            showMergedInThisCategory = true;
-                        } else if (category === '控制設備') {
-                            const smokeExists = groupedDevices['排煙設備'] && groupedDevices['排煙設備'].length > 0;
-                            if (!smokeExists) showMergedInThisCategory = true;
-                        } else if (category === '監視設備') {
-                            const smokeExists = groupedDevices['排煙設備'] && groupedDevices['排煙設備'].length > 0;
-                            const controlExists = groupedDevices['控制設備'] && groupedDevices['控制設備'].length > 0;
-                            if (!smokeExists && !controlExists) showMergedInThisCategory = true;
-                        }
-                        
-                        if (idx >= colIndex && idx < colIndex + deviceCount) {
-                            if (showMergedInThisCategory && idx === colIndex) {
-                                isMergedValue = true;
-                                isEmptyMerged = false;
-                            } else {
-                                isEmptyMerged = true;
-                            }
-                            break;
-                        }
-                        colIndex += deviceCount;
-                    } else {
-                        if (idx >= colIndex && idx < colIndex + deviceCount) {
-                            isEmptyMerged = false;
-                            break;
-                        }
-                        colIndex += deviceCount;
+        for (const category of categoryOrder) {
+            if (category === '中繼器') {
+                colIndex++;
+            } else if (groupedDevices[category]) {
+                const deviceCount = groupedDevices[category].length;
+                if (exportMode === 'compact' && mergedCategories.includes(category)) {
+                    let showMergedInThisCategory = false;
+                    if (category === '排煙設備') {
+                        showMergedInThisCategory = true;
+                    } else if (category === '控制設備') {
+                        const smokeExists = groupedDevices['排煙設備'] && groupedDevices['排煙設備'].length > 0;
+                        if (!smokeExists) showMergedInThisCategory = true;
+                    } else if (category === '監視設備') {
+                        const smokeExists = groupedDevices['排煙設備'] && groupedDevices['排煙設備'].length > 0;
+                        const controlExists = groupedDevices['控制設備'] && groupedDevices['控制設備'].length > 0;
+                        if (!smokeExists && !controlExists) showMergedInThisCategory = true;
                     }
+                    
+                    if (idx >= colIndex && idx < colIndex + deviceCount) {
+                        if (showMergedInThisCategory && idx === colIndex) {
+                            isMergedValue = true;
+                            isEmptyMerged = false;
+                        } else {
+                            isEmptyMerged = true;
+                        }
+                        break;
+                    }
+                    colIndex += deviceCount;
+                } else {
+                    if (idx >= colIndex && idx < colIndex + deviceCount) {
+                        isEmptyMerged = false;
+                        break;
+                    }
+                    colIndex += deviceCount;
                 }
             }
-            
-            if (isEmptyMerged) {
-                htmlContent += `<td></td>`;
-            } else if (val === 0) {
-                htmlContent += `<td></td>`;
-            } else if (isMergedValue) {
-                htmlContent += `<td class="compact-merged-count">${val}</td>`;
-            } else {
-                htmlContent += `<td>${val}</td>`;
-            }
-        });
-        htmlContent += `<td class="${groupClass}"></td></tr>`;
+        }
+        
+        if (isEmptyMerged) {
+            htmlContent += `<td></td>`;
+        } else if (val === 0) {
+            htmlContent += `<td></td>`;
+        } else if (isMergedValue) {
+            htmlContent += `<td class="compact-merged-count">${val}</td>`;
+        } else {
+            htmlContent += `<td>${val}</td>`;
+        }
     });
+    htmlContent += `<td class="${groupClass}"></td></tr>`;
+});
     
     // ---- 合計行 ----
     htmlContent += '<tr class="total-row"><td>合計(點數)</td>';
@@ -3236,33 +3287,41 @@ function updateSelectionSummary() {
         
         // 創建群組
         function createGroup() {
-            const selectedFloors = Array.from(document.querySelectorAll('.floor-checkbox:checked'))
-                .map(checkbox => checkbox.getAttribute('data-floor'));
-            
-            if (selectedFloors.length === 0) {
-                alert('請至少選擇一個樓層');
-                return;
-            }
-            
-            const groupName = prompt('請輸入群組名稱:');
-            if (!groupName) return;
-            
-            const alreadyGrouped = formData.groups.some(group => 
-                group.floors.some(floor => selectedFloors.includes(floor))
-            );
-            
-            if (alreadyGrouped) {
-                alert('某些選中的樓層已經屬於其他群組，請先解除群組');
-                return;
-            }
-            
-            formData.groups.push({
-                name: groupName,
-                floors: selectedFloors
-            });
-            
-            generateGroupManagementTable();
-        }
+    const selectedFloors = Array.from(document.querySelectorAll('.floor-checkbox:checked'))
+        .map(checkbox => checkbox.getAttribute('data-floor'));
+    
+    if (selectedFloors.length === 0) {
+        alert('請至少選擇一個樓層');
+        return;
+    }
+    
+    const groupName = prompt('請輸入群組名稱:');
+    if (!groupName) return;
+    
+    // 檢查樓層是否已屬於其他群組
+    const alreadyGrouped = formData.groups.some(group => 
+        group.floors.some(floor => selectedFloors.includes(floor))
+    );
+    
+    if (alreadyGrouped) {
+        alert('某些選中的樓層已經屬於其他群組，請先解除群組');
+        return;
+    }
+    
+    // ★★★ 檢查群組名稱是否已存在 ★★★
+    const groupNameExists = formData.groups.some(group => group.name === groupName);
+    if (groupNameExists) {
+        alert(`群組名稱「${groupName}」已經存在，請使用不同的名稱！`);
+        return;
+    }
+    
+    formData.groups.push({
+        name: groupName,
+        floors: selectedFloors
+    });
+    
+    generateGroupManagementTable();
+}
         
         // 解除群組
         function ungroup() {
