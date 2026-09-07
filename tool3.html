@@ -815,10 +815,69 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        function downloadSystemByType(key, type) {
-            // 簡化下載功能
-            showStatus1('下載功能已簡化', 'info');
-        }
+function downloadSystemByType(key, type) {
+    const isPanel = type === '盤號';
+    const rows = isPanel ? panelGroups[key].rows : systemGroups[key].rows;
+    const displayName = isPanel ? `盤號 ${key}` : `${key}系統`;
+    
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${displayName} - HRR 消防設備清單</title>
+    <style>
+        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 20px; background: #f5f7fa; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
+        h2 { color: #3498db; margin-top: 20px; }
+        .info { background: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #2c3e50; color: white; padding: 10px 14px; text-align: left; }
+        td { padding: 8px 14px; border-bottom: 1px solid #ddd; }
+        tr:nth-child(even) { background: #f8fafc; }
+        .footer { margin-top: 30px; text-align: center; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; padding-top: 20px; }
+        .count { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📋 ${displayName}</h1>
+    <div class="info">
+        <p><strong>案件名稱：</strong>${caseNameInput.value || '未設定'}</p>
+        <p><strong>總機型號：</strong>${modelNumberInput.value || '未設定'}</p>
+        <p><strong>資料筆數：</strong><span class="count">${rows.length}</span></p>
+        <p><strong>匯出時間：</strong>${new Date().toLocaleString()}</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>編號</th>
+                <th>棟別區號</th>
+                <th>地區名稱</th>
+                <th>種別</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    rows.forEach(row => {
+        html += `<tr>
+            <td>${row[0] || ''}</td>
+            <td>${row[1] || ''}</td>
+            <td>${row[2] || ''}</td>
+            <td>${row[3] || ''}</td>
+        </tr>`;
+    });
+
+    html += `</tbody></table>
+    <div class="footer">此報告由 HRR 消防工具整合平台生成</div>
+</div>
+</body>
+</html>`;
+
+    const filename = `${displayName}_${new Date().toISOString().slice(0,10)}.html`;
+    downloadFile1(html, filename);
+    showStatus1(`已下載 ${displayName} (${rows.length} 筆資料)`, 'success');
+}
 
         function downloadFile1(content, filename) {
             const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
@@ -829,13 +888,125 @@ document.addEventListener('DOMContentLoaded', function() {
             URL.revokeObjectURL(a.href);
         }
 
-        downloadAllBtn.addEventListener('click', function() {
-            showStatus1('下載功能已簡化', 'info');
-        });
+downloadAllBtn.addEventListener('click', function() {
+    const allKeys = Object.keys(panelGroups).sort((a,b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
+    if (!allKeys.length) {
+        showStatus1('沒有資料可下載', 'error');
+        return;
+    }
+    
+    let allHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>HRR 消防設備完整清單</title>
+    <style>
+        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 20px; background: #f5f7fa; }
+        .container { max-width: 1300px; margin: 0 auto; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
+        h2 { color: #3498db; margin-top: 30px; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+        .info { background: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #2c3e50; color: white; padding: 10px 14px; text-align: left; }
+        td { padding: 8px 14px; border-bottom: 1px solid #ddd; }
+        tr:nth-child(even) { background: #f8fafc; }
+        .footer { margin-top: 30px; text-align: center; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; padding-top: 20px; }
+        .count { color: #e74c3c; font-weight: bold; }
+        .section-header { background: #f0f8ff; padding: 8px 12px; border-radius: 4px; margin: 15px 0 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📋 HRR 消防設備完整清單</h1>
+    <div class="info">
+        <p><strong>案件名稱：</strong>${caseNameInput.value || '未設定'}</p>
+        <p><strong>總機型號：</strong>${modelNumberInput.value || '未設定'}</p>
+        <p><strong>盤號數量：</strong><span class="count">${allKeys.length}</span></p>
+        <p><strong>匯出時間：</strong>${new Date().toLocaleString()}</p>
+    </div>`;
 
-        downloadHtmlBtn.addEventListener('click', function() {
-            showStatus1('下載功能已簡化', 'info');
+    allKeys.forEach(key => {
+        const rows = panelGroups[key].rows;
+        allHtml += `<h2>📀 盤號 ${key} <span style="font-size:0.8rem;font-weight:normal;color:#888;">（共 ${rows.length} 筆）</span></h2>
+        <table>
+            <thead><tr><th>編號</th><th>棟別區號</th><th>地區名稱</th><th>種別</th></tr></thead>
+            <tbody>`;
+        rows.forEach(row => {
+            allHtml += `<tr><td>${row[0] || ''}</td><td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td></tr>`;
         });
+        allHtml += `</tbody></table>`;
+    });
+
+    allHtml += `<div class="footer">此報告由 HRR 消防工具整合平台生成</div>
+</div>
+</body>
+</html>`;
+
+    downloadFile1(allHtml, `完整清單_${new Date().toISOString().slice(0,10)}.html`);
+    showStatus1(`已下載完整清單，共 ${allKeys.length} 個盤號`, 'success');
+});
+
+downloadHtmlBtn.addEventListener('click', function() {
+    if (!processedData || processedData.length <= 1) {
+        showStatus1('沒有資料可匯出', 'error');
+        return;
+    }
+    
+    const header = processedData[0];
+    const rows = processedData.slice(1);
+    
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>HRR 消防設備清單 - 完整報表</title>
+    <style>
+        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 20px; background: #f5f7fa; }
+        .container { max-width: 1300px; margin: 0 auto; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
+        .info { background: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #2c3e50; color: white; padding: 10px 14px; text-align: left; }
+        td { padding: 8px 14px; border-bottom: 1px solid #ddd; }
+        tr:nth-child(even) { background: #f8fafc; }
+        .footer { margin-top: 30px; text-align: center; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; padding-top: 20px; }
+        .count { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📋 HRR 消防設備清單</h1>
+    <div class="info">
+        <p><strong>案件名稱：</strong>${caseNameInput.value || '未設定'}</p>
+        <p><strong>總機型號：</strong>${modelNumberInput.value || '未設定'}</p>
+        <p><strong>資料筆數：</strong><span class="count">${rows.length}</span></p>
+        <p><strong>匯出時間：</strong>${new Date().toLocaleString()}</p>
+    </div>
+    <table>
+        <thead><tr>`;
+
+    header.forEach(h => {
+        html += `<th>${h || ''}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
+    rows.forEach(row => {
+        html += `<tr>`;
+        row.forEach(cell => {
+            html += `<td>${cell || ''}</td>`;
+        });
+        html += `</tr>`;
+    });
+
+    html += `</tbody></table>
+    <div class="footer">此報告由 HRR 消防工具整合平台生成</div>
+</div>
+</body>
+</html>`;
+
+    downloadFile1(html, `HRR消防清單_${new Date().toISOString().slice(0,10)}.html`);
+    showStatus1(`已匯出完整HTML報表，共 ${rows.length} 筆資料`, 'success');
+});
 
         renderFileList1();
     })();
