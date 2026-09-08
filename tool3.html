@@ -203,7 +203,19 @@
             font-size: 0.6rem; padding: 1px 8px; border-radius: 10px;
             margin-left: 6px; vertical-align: middle;
         }
-
+        .toggle-header {
+            display: flex; align-items: center; gap: 15px; margin-bottom: 12px;
+            background: #f0f4fa; padding: 8px 16px; border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        .toggle-header label {
+            display: flex; align-items: center; gap: 6px;
+            font-weight: 500; color: #2c3e50; cursor: pointer;
+            user-select: none;
+        }
+        .toggle-header input[type="checkbox"] {
+            width: 18px; height: 18px; cursor: pointer;
+        }
         @media (max-width: 900px) {
             .linkage-layout { flex-direction: column; }
             .linkage-left { border-right: none; padding-right: 0; max-height: 40vh; }
@@ -216,53 +228,41 @@
             .case-info { flex-direction: column; align-items: stretch; }
         }
     </style>
-	    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
+    <!-- ========== 防護區塊：禁止右鍵 + 禁止 F12 開發者工具 ========== -->
     <script>
         (function() {
-            // 1. 禁止右鍵選單 (contextmenu)
             document.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
                 return false;
             });
-            
-            // 2. 防堵開發者工具快捷鍵
             function blockDevTools(e) {
-                // F12 鍵
                 if (e.key === 'F12') {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+Shift+I (Windows/Linux) 或 Cmd+Option+I (Mac)
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+Shift+J (Windows/Linux) 或 Cmd+Option+J (Mac)
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+U (檢視原始碼)
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+S (儲存頁面)
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
                     e.preventDefault();
                     return false;
                 }
-                // Ctrl+Shift+C (開啟選取元素)
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
                     e.preventDefault();
                     return false;
                 }
                 return true;
             }
-            
             document.addEventListener('keydown', blockDevTools);
-            
-            // 3. 偵測開發者工具是否開啟 (透過console被呼叫)
             let devtoolsOpen = false;
             const element = new Image();
             Object.defineProperty(element, 'id', {
@@ -278,14 +278,11 @@
                 console.clear();
                 if (devtoolsOpen) {
                     console.clear();
-                    // 可選：顯示警告或重新導向
-                    // alert('請關閉開發者工具後繼續使用');
                 }
             }, 1000);
         })();
     </script>
     <!-- ========== 防護區塊結束 ========== -->	
-	
 </head>
 <body>
 <div class="main-container">
@@ -345,6 +342,12 @@
         <div id="status1" class="status"></div>
         <div id="loading1" class="loading"><div class="spinner"></div><p>處理中...</p></div>
         <div class="preview-section" id="previewSection1">
+            <div class="toggle-header">
+                <label>
+                    <input type="checkbox" id="toggleBuildingColumn" checked> 顯示「棟別區號」欄位
+                </label>
+                <span style="font-size:0.85rem;color:#6c757d;">取消勾選後該欄位將隱藏</span>
+            </div>
             <h4>預覽結果：</h4>
             <div id="tabsContainer1">
                 <div id="tabsHeader1"></div>
@@ -389,6 +392,13 @@
             </span>
         </div>
 
+        <div class="toggle-header" style="margin:10px 0 15px; background:#f8f0e0; border-left:4px solid #e67e22;">
+            <label>
+                <input type="checkbox" id="toggleRpColumn" checked> 顯示 R/P 值
+            </label>
+            <span style="font-size:0.85rem;color:#6c757d;">取消勾選後，連動先與樹狀圖中的 R/P 標籤將隱藏</span>
+        </div>
+
         <div class="linkage-layout">
             <div class="linkage-left" id="linkageLeft">
                 <div id="linkageNoData" style="text-align:center;padding:40px;color:#999;">📊 尚未載入資料。請選擇CSV檔案。</div>
@@ -429,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     menuCards.forEach(card => { card.addEventListener('click', () => switchTool(card.dataset.tool)); });
     mobileTabs.forEach(btn => { btn.addEventListener('click', () => switchTool(btn.dataset.tool)); });
 
-    // ===== 工具1: 消檢清單 (簡化版) =====
+    // ===== 工具1: 消檢清單 =====
     (function initInspection() {
         const fileInput = document.getElementById('fileInput1');
         const uploadArea = document.getElementById('uploadArea1');
@@ -446,11 +456,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const downloadAllDiv = document.getElementById('downloadAll1');
         const caseNameInput = document.getElementById('caseName');
         const modelNumberInput = document.getElementById('modelNumber');
+        const toggleBuilding = document.getElementById('toggleBuildingColumn');
 
         let uploadedFiles = [];
         let processedData = [];
         let systemGroups = {};
         let panelGroups = {};
+
+        // 格式化編號為 XX-XXX-X (6碼) 或 XX-XX-XXX-X (8碼)
+        function formatId(val) {
+            if (!val) return val;
+            const s = String(val).trim();
+            // 8碼: 11223344 -> 11-22-334-4
+            if (/^\d{8}$/.test(s)) {
+                return s.substring(0,2) + '-' + s.substring(2,4) + '-' + s.substring(4,7) + '-' + s.substring(7,8);
+            }
+            // 6碼: 112233 -> 11-223-3
+            if (/^\d{6}$/.test(s)) {
+                return s.substring(0,2) + '-' + s.substring(2,5) + '-' + s.substring(5,6);
+            }
+            // 已經是 XX-XXX-X 或 XX-XX-XXX-X 格式
+            if (/^\d{2}-\d{3}-\d{1}$/.test(s)) return s;
+            if (/^\d{2}-\d{2}-\d{3}-\d{1}$/.test(s)) return s;
+            return s;
+        }
 
         uploadArea.addEventListener('click', () => fileInput.click());
         uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.background='#eef2ff'; });
@@ -602,20 +631,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        function formatA(val) {
-            if (!val) return val;
-            const s = String(val).trim();
-            if (/^\d{8}$/.test(s)) {
-                return s.substring(0,2) + '-' + s.substring(2,4) + '-' + s.substring(4,7) + '-' + s.substring(7,8);
-            }
-            if (/^\d{6}$/.test(s)) {
-                return s.substring(0,2) + '-' + s.substring(2,5) + '-' + s.substring(5,6);
-            }
-            if (/^\d{2}-\d{2}-\d{3}-\d{1}$/.test(s)) return s;
-            if (/^\d{2}-\d{3}-\d{1}$/.test(s)) return s;
-            return s;
-        }
-
         function getSystem(formattedValue) {
             if (!formattedValue) return '其他';
             const str = String(formattedValue).trim();
@@ -646,35 +661,31 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const header = processedData[0];
             const rows = processedData.slice(1);
-            rows.sort((a,b) => (a[0]||'').localeCompare(b[0]||''));
-            processedData = [header, ...rows];
+            // 格式化編號
+            const formattedRows = rows.map(row => {
+                const newRow = [...row];
+                newRow[0] = formatId(row[0]);
+                return newRow;
+            });
+            formattedRows.sort((a,b) => (a[0]||'').localeCompare(b[0]||''));
+            processedData = [header, ...formattedRows];
 
             systemGroups = {};
             panelGroups = {};
 
             const refMap = {};
-            rows.forEach(row => {
-                const fa = formatA(row[0]);
+            formattedRows.forEach(row => {
+                const fa = row[0];
                 const areaName = row[2] || '';
                 if (fa && areaName) {
                     refMap[fa] = areaName;
-                    const match6 = fa.match(/^(\d{2})-(\d{3})-(\d{1})$/);
-                    if (match6) {
-                        const eightCode = '00-' + match6[1] + '-' + match6[2] + '-' + match6[3];
-                        refMap[eightCode] = areaName;
-                    }
-                    const match8 = fa.match(/^(\d{2})-(\d{2})-(\d{3})-(\d{1})$/);
-                    if (match8 && match8[1] === '00') {
-                        const sixCode = match8[2] + '-' + match8[3] + '-' + match8[4];
-                        refMap[sixCode] = areaName;
-                    }
                 }
             });
             window.deviceReferenceMap = refMap;
             console.log('📚 設備對照表已建立，共 ' + Object.keys(refMap).length + ' 筆');
 
-            rows.forEach(row => {
-                const fa = formatA(row[0]);
+            formattedRows.forEach(row => {
+                const fa = row[0];
                 const sys = getSystem(fa);
                 const panel = getPanelCode(fa);
                 const newRow = [...row];
@@ -704,8 +715,6 @@ document.addEventListener('DOMContentLoaded', function() {
             showStatus1(`成功處理 ${uploadedFiles.length} 個文件，共 ${total} 筆數據，分為 ${panelCount} 個盤號 / ${Object.keys(systemGroups).length} 個系統，設備對照表已建立 ${Object.keys(refMap).length} 筆`, 'success');
         }
 
-        // ... 其餘 Tab 函數省略 (與之前相同) ...
-        // 此處為簡化，實際使用請保留完整函數
         function createTabContent2(tabId, key, rows, type) {
             const content = document.createElement('div');
             content.className = 'tab-content';
@@ -716,31 +725,33 @@ document.addEventListener('DOMContentLoaded', function() {
             systemHeader.className = 'system-header';
             systemHeader.innerHTML = `<h4>${displayName}（共 ${rows.length} 筆）</h4>`;
             content.appendChild(systemHeader);
+
             const table = document.createElement('table');
             table.className = 'preview-table';
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            ['編號', '棟別區號', '地區名稱', '種別'].forEach(headerText => {
+            
+            const showBuilding = toggleBuilding.checked;
+            const headers = ['編號', '棟別區號', '地區名稱', '種別'];
+            const visibleHeaders = showBuilding ? headers : headers.filter(h => h !== '棟別區號');
+            
+            visibleHeaders.forEach(headerText => {
                 const th = document.createElement('th');
                 th.textContent = headerText;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
+
             const tbody = document.createElement('tbody');
             rows.forEach(row => {
                 const tr = document.createElement('tr');
-                const display = [...row];
-                display[0] = formatA(display[0]);
-                display.forEach(cell => {
+                const displayRow = showBuilding ? row : [row[0], row[2], row[3]];
+                displayRow.forEach(cell => {
                     const td = document.createElement('td');
                     td.textContent = cell || '';
                     tr.appendChild(td);
                 });
-                while (tr.cells.length < 4) {
-                    const td = document.createElement('td');
-                    tr.appendChild(td);
-                }
                 tbody.appendChild(tr);
             });
             table.appendChild(tbody);
@@ -815,12 +826,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-function downloadSystemByType(key, type) {
-    const isPanel = type === '盤號';
-    const rows = isPanel ? panelGroups[key].rows : systemGroups[key].rows;
-    const displayName = isPanel ? `盤號 ${key}` : `${key}系統`;
-    
-    let html = `<!DOCTYPE html>
+        toggleBuilding.addEventListener('change', function() {
+            const panelKeys = Object.keys(panelGroups).sort((a,b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
+            const systemKeys = Object.keys(systemGroups).sort((a,b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
+            const contents = document.querySelectorAll('#tabsContent1 .tab-content');
+            contents.forEach(el => el.remove());
+            panelKeys.forEach((key) => {
+                const g = panelGroups[key];
+                const content = createTabContent2(`panel-${key}`, key, g.rows, '盤號');
+                document.getElementById('tabsContent1').appendChild(content);
+            });
+            systemKeys.forEach((key) => {
+                const g = systemGroups[key];
+                const content = createTabContent2(`system-${key}`, key, g.rows, '系統');
+                document.getElementById('tabsContent1').appendChild(content);
+            });
+            const activeTab = document.querySelector('#tabsHeader1 .tab-btn.active');
+            if (activeTab) {
+                switchTab2(activeTab.dataset.tab);
+            } else if (panelKeys.length > 0) {
+                switchTab2(`panel-${panelKeys[0]}`);
+            } else if (systemKeys.length > 0) {
+                switchTab2(`system-${systemKeys[0]}`);
+            }
+        });
+
+        // 匯出單個系統/盤號
+        function downloadSystemByType(key, type) {
+            const isPanel = type === '盤號';
+            const rows = isPanel ? panelGroups[key].rows : systemGroups[key].rows;
+            const displayName = isPanel ? `盤號 ${key}` : `${key}系統`;
+            const showBuilding = toggleBuilding.checked;
+            
+            let html = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -850,34 +888,28 @@ function downloadSystemByType(key, type) {
     </div>
     <table>
         <thead>
-            <tr>
-                <th>編號</th>
-                <th>棟別區號</th>
-                <th>地區名稱</th>
-                <th>種別</th>
-            </tr>
-        </thead>
-        <tbody>`;
-
-    rows.forEach(row => {
-        html += `<tr>
-            <td>${row[0] || ''}</td>
-            <td>${row[1] || ''}</td>
-            <td>${row[2] || ''}</td>
-            <td>${row[3] || ''}</td>
-        </tr>`;
-    });
-
-    html += `</tbody></table>
+            <tr>`;
+            const headers = showBuilding ? ['編號', '棟別區號', '地區名稱', '種別'] : ['編號', '地區名稱', '種別'];
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += `</tr></thead><tbody>`;
+            rows.forEach(row => {
+                html += `<tr>`;
+                // 確保編號使用 formatId 格式化
+                const displayRow = showBuilding ? 
+                    [formatId(row[0]), row[1], row[2], row[3]] : 
+                    [formatId(row[0]), row[2], row[3]];
+                displayRow.forEach(cell => html += `<td>${cell || ''}</td>`);
+                html += `</tr>`;
+            });
+            html += `</tbody></table>
     <div class="footer">此報告由 HRR 消防工具整合平台生成</div>
 </div>
 </body>
 </html>`;
-
-    const filename = `${displayName}_${new Date().toISOString().slice(0,10)}.html`;
-    downloadFile1(html, filename);
-    showStatus1(`已下載 ${displayName} (${rows.length} 筆資料)`, 'success');
-}
+            const filename = `${displayName}_${new Date().toISOString().slice(0,10)}.html`;
+            downloadFile1(html, filename);
+            showStatus1(`已下載 ${displayName} (${rows.length} 筆資料)`, 'success');
+        }
 
         function downloadFile1(content, filename) {
             const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
@@ -888,14 +920,15 @@ function downloadSystemByType(key, type) {
             URL.revokeObjectURL(a.href);
         }
 
-downloadAllBtn.addEventListener('click', function() {
-    const allKeys = Object.keys(panelGroups).sort((a,b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
-    if (!allKeys.length) {
-        showStatus1('沒有資料可下載', 'error');
-        return;
-    }
-    
-    let allHtml = `<!DOCTYPE html>
+        // 下載所有系統HTML
+        downloadAllBtn.addEventListener('click', function() {
+            const allKeys = Object.keys(panelGroups).sort((a,b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
+            if (!allKeys.length) {
+                showStatus1('沒有資料可下載', 'error');
+                return;
+            }
+            const showBuilding = toggleBuilding.checked;
+            let allHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -924,38 +957,42 @@ downloadAllBtn.addEventListener('click', function() {
         <p><strong>盤號數量：</strong><span class="count">${allKeys.length}</span></p>
         <p><strong>匯出時間：</strong>${new Date().toLocaleString()}</p>
     </div>`;
-
-    allKeys.forEach(key => {
-        const rows = panelGroups[key].rows;
-        allHtml += `<h2>📀 盤號 ${key} <span style="font-size:0.8rem;font-weight:normal;color:#888;">（共 ${rows.length} 筆）</span></h2>
-        <table>
-            <thead><tr><th>編號</th><th>棟別區號</th><th>地區名稱</th><th>種別</th></tr></thead>
-            <tbody>`;
-        rows.forEach(row => {
-            allHtml += `<tr><td>${row[0] || ''}</td><td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td></tr>`;
-        });
-        allHtml += `</tbody></table>`;
-    });
-
-    allHtml += `<div class="footer">此報告由 HRR 消防工具整合平台生成</div>
+            const headers = showBuilding ? ['編號', '棟別區號', '地區名稱', '種別'] : ['編號', '地區名稱', '種別'];
+            allKeys.forEach(key => {
+                const rows = panelGroups[key].rows;
+                allHtml += `<h2>📀 盤號 ${key} <span style="font-size:0.8rem;font-weight:normal;color:#888;">（共 ${rows.length} 筆）</span></h2>
+                <table><thead><tr>`;
+                headers.forEach(h => allHtml += `<th>${h}</th>`);
+                allHtml += `</tr></thead><tbody>`;
+                rows.forEach(row => {
+                    allHtml += `<tr>`;
+                    const displayRow = showBuilding ? 
+                        [formatId(row[0]), row[1], row[2], row[3]] : 
+                        [formatId(row[0]), row[2], row[3]];
+                    displayRow.forEach(cell => allHtml += `<td>${cell || ''}</td>`);
+                    allHtml += `</tr>`;
+                });
+                allHtml += `</tbody></table>`;
+            });
+            allHtml += `<div class="footer">此報告由 HRR 消防工具整合平台生成</div>
 </div>
 </body>
 </html>`;
+            downloadFile1(allHtml, `完整清單_${new Date().toISOString().slice(0,10)}.html`);
+            showStatus1(`已下載完整清單，共 ${allKeys.length} 個盤號`, 'success');
+        });
 
-    downloadFile1(allHtml, `完整清單_${new Date().toISOString().slice(0,10)}.html`);
-    showStatus1(`已下載完整清單，共 ${allKeys.length} 個盤號`, 'success');
-});
-
-downloadHtmlBtn.addEventListener('click', function() {
-    if (!processedData || processedData.length <= 1) {
-        showStatus1('沒有資料可匯出', 'error');
-        return;
-    }
-    
-    const header = processedData[0];
-    const rows = processedData.slice(1);
-    
-    let html = `<!DOCTYPE html>
+        // 匯出完整HTML
+        downloadHtmlBtn.addEventListener('click', function() {
+            if (!processedData || processedData.length <= 1) {
+                showStatus1('沒有資料可匯出', 'error');
+                return;
+            }
+            const header = processedData[0];
+            const rows = processedData.slice(1);
+            const showBuilding = toggleBuilding.checked;
+            const headers = showBuilding ? ['編號', '棟別區號', '地區名稱', '種別'] : ['編號', '地區名稱', '種別'];
+            let html = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -984,29 +1021,24 @@ downloadHtmlBtn.addEventListener('click', function() {
     </div>
     <table>
         <thead><tr>`;
-
-    header.forEach(h => {
-        html += `<th>${h || ''}</th>`;
-    });
-    html += `</tr></thead><tbody>`;
-
-    rows.forEach(row => {
-        html += `<tr>`;
-        row.forEach(cell => {
-            html += `<td>${cell || ''}</td>`;
-        });
-        html += `</tr>`;
-    });
-
-    html += `</tbody></table>
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += `</tr></thead><tbody>`;
+            rows.forEach(row => {
+                html += `<tr>`;
+                const displayRow = showBuilding ? 
+                    [formatId(row[0]), row[1], row[2], row[3]] : 
+                    [formatId(row[0]), row[2], row[3]];
+                displayRow.forEach(cell => html += `<td>${cell || ''}</td>`);
+                html += `</tr>`;
+            });
+            html += `</tbody></table>
     <div class="footer">此報告由 HRR 消防工具整合平台生成</div>
 </div>
 </body>
 </html>`;
-
-    downloadFile1(html, `HRR消防清單_${new Date().toISOString().slice(0,10)}.html`);
-    showStatus1(`已匯出完整HTML報表，共 ${rows.length} 筆資料`, 'success');
-});
+            downloadFile1(html, `HRR消防清單_${new Date().toISOString().slice(0,10)}.html`);
+            showStatus1(`已匯出完整HTML報表，共 ${rows.length} 筆資料`, 'success');
+        });
 
         renderFileList1();
     })();
@@ -1030,6 +1062,7 @@ downloadHtmlBtn.addEventListener('click', function() {
         const tbody = document.getElementById('linkageBody');
         const graphContainer = document.getElementById('graphContainer');
         const graphEmptyHint = document.getElementById('graphEmptyHint');
+        const toggleRp = document.getElementById('toggleRpColumn');
 
         let currentData = [];
         let linkageMap = {};
@@ -1169,37 +1202,33 @@ downloadHtmlBtn.addEventListener('click', function() {
                     destinations: []
                 };
                 
-          
-			// ✅ 解析連動先
-for (let j = 0; j < 10; j++) {
-    const idx = 8 + j * 2;
-    if (idx < r1.length && r1[idx] && r1[idx].trim() !== '') {
-        const destNum = formatLinkNumber(r1[idx] || '');
-        if (destNum && destNum.trim() !== '' && destNum !== '0') {
-            const detailType = (r1.length > idx + 1) ? (r1[idx + 1] || '') : '';
-            const destName = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
-            
-            // ✅ R/P 值：如果是 '00'，從 r2[idx] 取值
-            let destMessage = '';
-            if (destNum === '00') {
-                destMessage = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
-                if (!destMessage.trim()) {
-                    continue;
+                for (let j = 0; j < 10; j++) {
+                    const idx = 8 + j * 2;
+                    if (idx < r1.length && r1[idx] && r1[idx].trim() !== '') {
+                        const destNum = formatLinkNumber(r1[idx] || '');
+                        if (destNum && destNum.trim() !== '' && destNum !== '0') {
+                            const detailType = (r1.length > idx + 1) ? (r1[idx + 1] || '') : '';
+                            const destName = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
+                            
+                            let destMessage = '';
+                            if (destNum === '00') {
+                                destMessage = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
+                                if (!destMessage.trim()) {
+                                    continue;
+                                }
+                            } else {
+                                destMessage = (r2 && r2.length > idx + 2) ? (r2[idx + 2] || '') : '';
+                            }
+                            
+                            row.destinations.push({
+                                number: destNum,
+                                detailType: detailType,
+                                name: destName,
+                                message: destMessage
+                            });
+                        }
+                    }
                 }
-            } else {
-                // 一般連動先的 R/P 值在 r2[idx + 2]
-                destMessage = (r2 && r2.length > idx + 2) ? (r2[idx + 2] || '') : '';
-            }
-            
-            row.destinations.push({
-                number: destNum,
-                detailType: detailType,
-                name: destName,
-                message: destMessage
-            });
-        }
-    }
-}
                 
                 if (row.destinations.length === 0) {
                     const rpValue = (r2 && r2[10]) || (r2 && r2[9]) || (r2 && r2[8]) || '';
@@ -1262,99 +1291,97 @@ for (let j = 0; j < 10; j++) {
             return s;
         }
 
-		function displayLinkageData(data) {
-    thead.innerHTML = '';
-    tbody.innerHTML = '';
-    
-    if (!data || data.length === 0) {
-        noData.style.display = 'block';
-        table.style.display = 'none';
-        statsDiv.style.display = 'none';
-        graphContainer.style.display = 'none';
-        graphEmptyHint.style.display = 'flex';
-        return;
-    }
-
-    noData.style.display = 'none';
-    table.style.display = 'table';
-    statsDiv.style.display = 'block';
-    rowCount.textContent = data.length;
-
-    const filteredData = data.map(row => ({
-        ...row,
-        destinations: row.destinations.filter(d => {
-            const num = d.number.trim();
-            return num !== '' && num !== '0';
-        })
-    }));
-
-    const headers = ['通番', '番号', '名称', '詳細種別', '連動先'];
-    const trh = document.createElement('tr');
-    headers.forEach(h => {
-        const th = document.createElement('th');
-        th.textContent = h;
-        trh.appendChild(th);
-    });
-    thead.appendChild(trh);
-
-    filteredData.forEach((row, idx) => {
-        const tr = document.createElement('tr');
-        tr.dataset.index = idx;
-        
-        const refName = getDeviceName(row.number);
-        const displayName = refName || row.name || '';
-        
-        const basic = [row.sequence, row.number, displayName, row.detailType];
-        basic.forEach(c => {
-            const td = document.createElement('td');
-            td.textContent = c || '';
-            tr.appendChild(td);
-        });
-        
-        const destTd = document.createElement('td');
-        if (row.destinations && row.destinations.length > 0) {
-            // ✅ 先收集所有的 R/P 值
-            const rpValues = [];
-            const realDestinations = [];
+        function displayLinkageData(data) {
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
             
-            row.destinations.forEach(d => {
-                if (d.number === '00' && d.message && d.message.trim() !== '') {
-                    // 檢查這個 R/P 值是否已經存在
-                    if (!rpValues.includes(d.message)) {
-                        rpValues.push(d.message);
-                    }
-                } else if (d.number !== '00') {
-                    realDestinations.push(d.number);
-                }
+            if (!data || data.length === 0) {
+                noData.style.display = 'block';
+                table.style.display = 'none';
+                statsDiv.style.display = 'none';
+                graphContainer.style.display = 'none';
+                graphEmptyHint.style.display = 'flex';
+                return;
+            }
+
+            noData.style.display = 'none';
+            table.style.display = 'table';
+            statsDiv.style.display = 'block';
+            rowCount.textContent = data.length;
+
+            const filteredData = data.map(row => ({
+                ...row,
+                destinations: row.destinations.filter(d => {
+                    const num = d.number.trim();
+                    return num !== '' && num !== '0';
+                })
+            }));
+
+            const showRp = toggleRp.checked;
+            const headers = showRp ? ['通番', '番号', '名称', '詳細種別', '連動先'] : ['通番', '番号', '名称', '詳細種別'];
+            const trh = document.createElement('tr');
+            headers.forEach(h => {
+                const th = document.createElement('th');
+                th.textContent = h;
+                trh.appendChild(th);
             });
-            
-            // 組合成最終顯示
-            let displayParts = [];
-            // 先顯示實際的連動先（只顯示番号）
-            if (realDestinations.length > 0) {
-                displayParts = realDestinations;
-            }
-            // 再顯示 R/P 值（去重後）
-            if (rpValues.length > 0) {
-                displayParts = displayParts.concat(rpValues.map(v => `R/P:${v}`));
-            }
-            
-            destTd.textContent = displayParts.join(', ');
-            destTd.style.color = '#27ae60';
-        } else {
-            destTd.textContent = '—';
-            destTd.style.color = '#999';
+            thead.appendChild(trh);
+
+            filteredData.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.dataset.index = idx;
+                
+                const refName = getDeviceName(row.number);
+                const displayName = refName || row.name || '';
+                
+                const basic = [row.sequence, row.number, displayName, row.detailType];
+                basic.forEach(c => {
+                    const td = document.createElement('td');
+                    td.textContent = c || '';
+                    tr.appendChild(td);
+                });
+                
+                if (showRp) {
+                    const destTd = document.createElement('td');
+                    if (row.destinations && row.destinations.length > 0) {
+                        const rpValues = [];
+                        const realDestinations = [];
+                        
+                        row.destinations.forEach(d => {
+                            if (d.number === '00' && d.message && d.message.trim() !== '') {
+                                if (!rpValues.includes(d.message)) {
+                                    rpValues.push(d.message);
+                                }
+                            } else if (d.number !== '00') {
+                                realDestinations.push(d.number);
+                            }
+                        });
+                        
+                        let displayParts = [];
+                        if (realDestinations.length > 0) {
+                            displayParts = realDestinations;
+                        }
+                        if (rpValues.length > 0) {
+                            displayParts = displayParts.concat(rpValues.map(v => `R/P:${v}`));
+                        }
+                        
+                        destTd.textContent = displayParts.join(', ');
+                        destTd.style.color = '#27ae60';
+                    } else {
+                        destTd.textContent = '—';
+                        destTd.style.color = '#999';
+                    }
+                    tr.appendChild(destTd);
+                }
+                
+                tr.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    selectLinkageRow(idx);
+                });
+                
+                tbody.appendChild(tr);
+            });
         }
-        tr.appendChild(destTd);
-        
-        tr.addEventListener('click', function() {
-            const idx = parseInt(this.dataset.index);
-            selectLinkageRow(idx);
-        });
-        
-        tbody.appendChild(tr);
-    });
-}
 
         function selectLinkageRow(index) {
             document.querySelectorAll('#linkageBody tr').forEach(el => el.classList.remove('active'));
@@ -1403,6 +1430,7 @@ for (let j = 0; j < 10; j++) {
             graphContainer.style.display = 'block';
             graphContainer.innerHTML = '';
             
+            const showRp = toggleRp.checked;
             const visited = new Set();
             
             function buildTree(row, depth) {
@@ -1444,31 +1472,28 @@ for (let j = 0; j < 10; j++) {
                         if (destRow) {
                             const child = buildTree(destRow, depth + 1);
                             if (child) {
-                                child.rpOutput = dest.message || '';
+                                child.rpOutput = showRp ? dest.message || '' : '';
                                 node.destinations.push(child);
                             }
-							} else {
-    const refName2 = getDeviceName(dest.number);
-    const hasRef = !!refName2;
-    const isEventCode = dest.number === '00' && dest.message && dest.message.trim() !== '';
-    
-    // ✅ 判斷 dest.message 是否為數字（R/P 值）
-    const isRpValue = !isNaN(dest.message) && dest.message.trim() !== '';
-    
-    node.destinations.push({
-        number: dest.number,
-        name: isEventCode ? `事件 R/P: ${dest.message}` : (refName2 || '(未定義)'),
-        detailType: dest.detailType || '',
-        depth: depth + 1,
-        isSource: false,
-        isMissing: !hasRef && !isEventCode && !isRpValue,
-        isFromRef: hasRef || isEventCode || isRpValue,
-        isCircular: false,
-        // ✅ 只有當 message 是數字時才顯示為 R/P 值
-        rpOutput: isRpValue ? dest.message : '',
-        destinations: []
-    });
-}
+                        } else {
+                            const refName2 = getDeviceName(dest.number);
+                            const hasRef = !!refName2;
+                            const isEventCode = dest.number === '00' && dest.message && dest.message.trim() !== '';
+                            const isRpValue = !isNaN(dest.message) && dest.message.trim() !== '';
+                            
+                            node.destinations.push({
+                                number: dest.number,
+                                name: isEventCode ? (showRp ? `事件 R/P: ${dest.message}` : `事件`) : (refName2 || '(未定義)'),
+                                detailType: dest.detailType || '',
+                                depth: depth + 1,
+                                isSource: false,
+                                isMissing: !hasRef && !isEventCode && !isRpValue,
+                                isFromRef: hasRef || isEventCode || isRpValue,
+                                isCircular: false,
+                                rpOutput: (showRp && isRpValue) ? dest.message : '',
+                                destinations: []
+                            });
+                        }
                     });
                 }
                 return node;
@@ -1480,102 +1505,115 @@ for (let j = 0; j < 10; j++) {
                 return;
             }
             
-            renderTreeContainer(graphContainer, root);
+            renderTreeContainer(graphContainer, root, showRp);
         }
 
-		function renderTreeContainer(container, node) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'tree-container';
-    wrapper.style.cssText = 'display:flex;flex-direction:column;gap:2px;padding:5px 0;';
-    
-    const item = document.createElement('div');
-    item.className = 'tree-item';
-    item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:3px 0;';
-    
-    const indent = document.createElement('span');
-    indent.style.cssText = `width:${node.depth * 20}px;flex-shrink:0;`;
-    item.appendChild(indent);
-    
-    const connector = document.createElement('span');
-    connector.className = 'connector';
-    connector.style.cssText = 'color:#b0c4de;font-family:monospace;font-size:1.2rem;width:30px;text-align:center;flex-shrink:0;';
-    if (node.depth === 0) {
-        connector.textContent = '●';
-        connector.style.color = '#3498db';
-        connector.style.fontSize = '1.4rem';
-    } else {
-        connector.textContent = '└─';
-    }
-    item.appendChild(connector);
-    
-    const box = document.createElement('span');
-    box.className = 'node-box';
-    box.style.cssText = 'padding:6px 14px;border-radius:6px;background:white;border:1.5px solid #d0d7e0;font-size:0.85rem;flex:1;transition:all 0.15s;';
-    
-    if (node.isSource) {
-        box.style.borderColor = '#3498db';
-        box.style.background = '#eaf4ff';
-        box.style.fontWeight = '600';
-    } else if (node.isMissing) {
-        box.style.borderColor = '#e74c3c';
-        box.style.background = '#fdf0ef';
-        box.style.color = '#c0392b';
-    } else if (node.isCircular) {
-        box.style.borderColor = '#f39c12';
-        box.style.background = '#fef9e7';
-        box.style.color = '#b7950b';
-    } else if (node.isFromRef) {
-        box.style.borderColor = '#8e44ad';
-        box.style.background = '#f4ecf7';
-    } else {
-        box.style.borderColor = '#27ae60';
-        box.style.background = '#eafaf1';
-    }
-    
+        function renderTreeContainer(container, node, showRp) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'tree-container';
+            wrapper.style.cssText = 'display:flex;flex-direction:column;gap:2px;padding:5px 0;';
+            
+            const item = document.createElement('div');
+            item.className = 'tree-item';
+            item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:3px 0;';
+            
+            const indent = document.createElement('span');
+            indent.style.cssText = `width:${node.depth * 20}px;flex-shrink:0;`;
+            item.appendChild(indent);
+            
+            const connector = document.createElement('span');
+            connector.className = 'connector';
+            connector.style.cssText = 'color:#b0c4de;font-family:monospace;font-size:1.2rem;width:30px;text-align:center;flex-shrink:0;';
+            if (node.depth === 0) {
+                connector.textContent = '●';
+                connector.style.color = '#3498db';
+                connector.style.fontSize = '1.4rem';
+            } else {
+                connector.textContent = '└─';
+            }
+            item.appendChild(connector);
+            
+            const box = document.createElement('span');
+            box.className = 'node-box';
+            box.style.cssText = 'padding:6px 14px;border-radius:6px;background:white;border:1.5px solid #d0d7e0;font-size:0.85rem;flex:1;transition:all 0.15s;';
+            
+            if (node.isSource) {
+                box.style.borderColor = '#3498db';
+                box.style.background = '#eaf4ff';
+                box.style.fontWeight = '600';
+            } else if (node.isMissing) {
+                box.style.borderColor = '#e74c3c';
+                box.style.background = '#fdf0ef';
+                box.style.color = '#c0392b';
+            } else if (node.isCircular) {
+                box.style.borderColor = '#f39c12';
+                box.style.background = '#fef9e7';
+                box.style.color = '#b7950b';
+            } else if (node.isFromRef) {
+                box.style.borderColor = '#8e44ad';
+                box.style.background = '#f4ecf7';
+            } else {
+                box.style.borderColor = '#27ae60';
+                box.style.background = '#eafaf1';
+            }
+            
+            let label = `<strong>${node.number}</strong>`;
+            if (node.name && node.name !== '(未定義)') {
+                label += ` <span style="font-weight:400;color:#555;">${node.name}</span>`;
+            }
+            if (node.detailType && !node.isSource && !node.isFromRef && !node.isMissing) {
+                label += ` <span style="font-size:0.7rem;color:#888;margin-left:6px;">[${node.detailType}]</span>`;
+            }
+            if (showRp && node.rpOutput && node.rpOutput.trim() !== '') {
+                label += ` <span class="rp-badge">📤 R/P: ${node.rpOutput}</span>`;
+            }
+            if (node.isFromRef && !node.isSource) {
+                label += ` <span class="ref-badge">📚 參考</span>`;
+            }
+            if (node.isCircular) {
+                label += ` <span style="color:#f39c12;font-size:0.7rem;">↻ 循環</span>`;
+            }
+            box.innerHTML = label;
+            item.appendChild(box);
+            wrapper.appendChild(item);
+            
+            if (node.destinations && node.destinations.length > 0) {
+                const childrenWrapper = document.createElement('div');
+                childrenWrapper.className = 'tree-children';
+                childrenWrapper.style.cssText = 'padding-left:20px;';
+                node.destinations.forEach(child => {
+                    renderTreeContainer(childrenWrapper, child, showRp);
+                });
+                wrapper.appendChild(childrenWrapper);
+            } else if (!node.isMissing && !node.isSource && !node.isCircular) {
+                const endItem = document.createElement('div');
+                endItem.style.cssText = 'display:flex;align-items:center;gap:10px;padding:2px 0;padding-left:40px;';
+                const endLabel = document.createElement('span');
+                endLabel.style.cssText = 'font-size:0.7rem;color:#aaa;';
+                endLabel.textContent = '（無連動先）';
+                endItem.appendChild(endLabel);
+                wrapper.appendChild(endItem);
+            }
+            
+            container.appendChild(wrapper);
+        }
 
-// ✅ 顯示順序：番号 → 名稱 → [詳細種別] → 📤 R/P: 值
-let label = `<strong>${node.number}</strong>`;
-if (node.name && node.name !== '(未定義)') {
-    label += ` <span style="font-weight:400;color:#555;">${node.name}</span>`;
-}
-// 詳細種別（放在 R/P 前面）
-if (node.detailType && !node.isSource && !node.isFromRef && !node.isMissing) {
-    label += ` <span style="font-size:0.7rem;color:#888;margin-left:6px;">[${node.detailType}]</span>`;
-}
-// R/P 值（放在詳細種別後面）
-if (node.rpOutput && node.rpOutput.trim() !== '') {
-    label += ` <span class="rp-badge">📤 R/P: ${node.rpOutput}</span>`;
-}
-    if (node.isFromRef && !node.isSource) {
-        label += ` <span class="ref-badge">📚 參考</span>`;
-    }
-    if (node.isCircular) {
-        label += ` <span style="color:#f39c12;font-size:0.7rem;">↻ 循環</span>`;
-    }
-    box.innerHTML = label;
-    item.appendChild(box);
-    wrapper.appendChild(item);
-    
-    if (node.destinations && node.destinations.length > 0) {
-        const childrenWrapper = document.createElement('div');
-        childrenWrapper.className = 'tree-children';
-        childrenWrapper.style.cssText = 'padding-left:20px;';
-        node.destinations.forEach(child => {
-            renderTreeContainer(childrenWrapper, child);
+        toggleRp.addEventListener('change', function() {
+            if (currentData.length > 0) {
+                displayLinkageData(currentData);
+                const activeRow = document.querySelector('#linkageBody tr.active');
+                if (activeRow) {
+                    const idx = parseInt(activeRow.dataset.index);
+                    if (!isNaN(idx)) {
+                        selectLinkageRow(idx);
+                    } else {
+                        selectLinkageRow(0);
+                    }
+                } else {
+                    selectLinkageRow(0);
+                }
+            }
         });
-        wrapper.appendChild(childrenWrapper);
-    } else if (!node.isMissing && !node.isSource && !node.isCircular) {
-        const endItem = document.createElement('div');
-        endItem.style.cssText = 'display:flex;align-items:center;gap:10px;padding:2px 0;padding-left:40px;';
-        const endLabel = document.createElement('span');
-        endLabel.style.cssText = 'font-size:0.7rem;color:#aaa;';
-        endLabel.textContent = '（無連動先）';
-        endItem.appendChild(endLabel);
-        wrapper.appendChild(endItem);
-    }
-    
-    container.appendChild(wrapper);
-}
 
         exportBtn.addEventListener('click', function() {
             if (!currentData || currentData.length === 0) {
@@ -1583,6 +1621,7 @@ if (node.rpOutput && node.rpOutput.trim() !== '') {
                 return;
             }
 
+            const showRp = toggleRp.checked;
             let html = `<!DOCTYPE html>
 <html>
 <head>
@@ -1633,9 +1672,11 @@ if (node.rpOutput && node.rpOutput.trim() !== '') {
             <h3>📊 連動資料表</h3>
             <table>
                 <tr>
-                    <th>通番</th><th>番号</th><th>名称</th><th>詳細種別</th>
-                    <th>連動先1番号</th><th>連動先1詳細種別</th><th>連動先1地区メッセージ</th>
-                </tr>`;
+                    <th>通番</th><th>番号</th><th>名称</th><th>詳細種別</th>`;
+            if (showRp) {
+                html += `<th>連動先1番号</th><th>連動先1詳細種別</th><th>連動先1地区メッセージ</th>`;
+            }
+            html += `</tr>`;
 
             currentData.forEach(row => {
                 const refName = getDeviceName(row.number);
@@ -1647,15 +1688,17 @@ if (node.rpOutput && node.rpOutput.trim() !== '') {
                     <td>${displayName}</td>
                     <td>${row.detailType || ''}</td>`;
                 
-                if (row.destinations && row.destinations.length > 0) {
-                    const d = row.destinations[0];
-                    html += `<td>${d.number || ''}</td><td>${d.detailType || ''}</td><td>${d.message || ''}</td>`;
-                } else {
-                    html += `<td></td><td></td><td></td>`;
+                if (showRp) {
+                    if (row.destinations && row.destinations.length > 0) {
+                        const d = row.destinations[0];
+                        html += `<td>${d.number || ''}</td><td>${d.detailType || ''}</td><td>${d.message || ''}</td>`;
+                    } else {
+                        html += `<td></td><td></td><td></td>`;
+                    }
                 }
                 html += `</tr>`;
                 
-                if (row.destinations && row.destinations.length > 1) {
+                if (showRp && row.destinations && row.destinations.length > 1) {
                     for (let i = 1; i < row.destinations.length; i++) {
                         const d = row.destinations[i];
                         html += `<tr class="dest-row">
