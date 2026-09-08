@@ -87,6 +87,8 @@
         .btn-info:hover { background: #138496; }
         .btn-danger { background: #e74c3c; color: white; }
         .btn-danger:hover { background: #c0392b; }
+        .btn-csv { background: #2ecc71; color: white; }
+        .btn-csv:hover { background: #27ae60; }
         .status { padding: 12px 18px; border-radius: 6px; margin: 12px 0; display: none; font-weight: 500; }
         .status.success { background: #d4edda; color: #155724; display: block; }
         .status.error { background: #f8d7da; color: #721c24; display: block; }
@@ -216,6 +218,13 @@
         .toggle-header input[type="checkbox"] {
             width: 18px; height: 18px; cursor: pointer;
         }
+        .export-btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn .fa-file-csv { color: #27ae60; }
         @media (max-width: 900px) {
             .linkage-layout { flex-direction: column; }
             .linkage-left { border-right: none; padding-right: 0; max-height: 40vh; }
@@ -288,7 +297,7 @@
 <div class="main-container">
     <div class="main-header">
         <h1><i class="fas fa-fire-extinguisher"></i> HRR 消防工具整合平台</h1>
-        <p>Ver.6 2026/7/3 HTBO/Jim - R/P 修正版 (idx+2)</p>
+        <p>Ver.7 2026/9/8 HTBO/Jim - R/P 過濾修正版</p>
     </div>
 
     <div class="menu-grid" id="menuGrid">
@@ -338,6 +347,7 @@
         </div>
         <div class="export-options">
             <button class="btn btn-warning" id="downloadHtmlBtn1" disabled><i class="fas fa-file-code"></i> 匯出完整HTML</button>
+            <button class="btn btn-csv" id="downloadCsvBtn1" disabled><i class="fas fa-file-csv"></i> 匯出完整CSV</button>
         </div>
         <div id="status1" class="status"></div>
         <div id="loading1" class="loading"><div class="spinner"></div><p>處理中...</p></div>
@@ -348,13 +358,19 @@
                 </label>
                 <span style="font-size:0.85rem;color:#6c757d;">取消勾選後該欄位將隱藏</span>
             </div>
-            <h4>預覽結果：</h4>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h4>預覽結果：</h4>
+                <div class="export-btn-group">
+                    <button class="btn btn-csv btn-sm" id="downloadSingleCsvBtn" style="padding:6px 12px; font-size:0.8rem; display:none;"><i class="fas fa-file-csv"></i> 下載當前CSV</button>
+                </div>
+            </div>
             <div id="tabsContainer1">
                 <div id="tabsHeader1"></div>
                 <div id="tabsContent1"></div>
             </div>
             <div id="downloadAll1" class="hidden" style="margin-top:15px;">
                 <button class="btn btn-success" id="downloadAllBtn1"><i class="fas fa-download"></i> 下載所有系統HTML</button>
+                <button class="btn btn-csv" id="downloadAllCsvBtn1" style="margin-left:10px;"><i class="fas fa-file-csv"></i> 下載所有系統CSV</button>
             </div>
         </div>
     </div>
@@ -370,12 +386,14 @@
                 <li><strong>點擊左側任一編號</strong>，右側顯示該設備的連動樹狀圖</li>
                 <li>點擊「輸出HTML報告」可匯出為HTML檔案</li>
                 <li><strong>📌 參考資料：</strong>如已先使用「消檢清單」處理過資料，會自動帶入設備地區名稱</li>
+                <li><strong>⚠️ R/P 過濾邏輯：</strong>勾選「顯示 R/P 值」時顯示所有連動關係；取消勾選時，僅隱藏純數值 R/P 輸出（如 R/P:1），設備連動關係（如 00-01-035-4）仍會保留</li>
             </ol>
         </div>
 
         <div class="upload-section">
             <button class="btn btn-primary" id="linkageFileBtn"><i class="fas fa-file-csv"></i> 選擇CSV檔案</button>
             <button class="btn btn-success" id="exportLinkageBtn" disabled><i class="fas fa-file-code"></i> 輸出HTML報告</button>
+            <button class="btn btn-csv" id="exportLinkageCsvBtn" disabled><i class="fas fa-file-csv"></i> 輸出CSV報告</button>
             <input type="file" id="linkageFileInput" accept=".csv" style="display:none;">
             <div id="linkageFileName" style="margin-top:10px; color:#666;">尚未選擇檔案</div>
         </div>
@@ -396,7 +414,7 @@
             <label>
                 <input type="checkbox" id="toggleRpColumn" checked> 顯示 R/P 值
             </label>
-            <span style="font-size:0.85rem;color:#6c757d;">取消勾選後，連動先與樹狀圖中的 R/P 標籤將隱藏</span>
+            <span style="font-size:0.85rem;color:#6c757d;">取消勾選後，純數值 R/P 輸出將隱藏，設備連動關係仍保留</span>
         </div>
 
         <div class="linkage-layout">
@@ -447,7 +465,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const processBtn = document.getElementById('processBtn1');
         const clearBtn = document.getElementById('clearBtn1');
         const downloadHtmlBtn = document.getElementById('downloadHtmlBtn1');
+        const downloadCsvBtn = document.getElementById('downloadCsvBtn1');
         const downloadAllBtn = document.getElementById('downloadAllBtn1');
+        const downloadAllCsvBtn = document.getElementById('downloadAllCsvBtn1');
+        const downloadSingleCsvBtn = document.getElementById('downloadSingleCsvBtn');
         const statusEl = document.getElementById('status1');
         const loadingEl = document.getElementById('loading1');
         const previewSection = document.getElementById('previewSection1');
@@ -462,20 +483,18 @@ document.addEventListener('DOMContentLoaded', function() {
         let processedData = [];
         let systemGroups = {};
         let panelGroups = {};
+        let currentTabKey = null;
 
         // 格式化編號為 XX-XXX-X (6碼) 或 XX-XX-XXX-X (8碼)
         function formatId(val) {
             if (!val) return val;
             const s = String(val).trim();
-            // 8碼: 11223344 -> 11-22-334-4
             if (/^\d{8}$/.test(s)) {
                 return s.substring(0,2) + '-' + s.substring(2,4) + '-' + s.substring(4,7) + '-' + s.substring(7,8);
             }
-            // 6碼: 112233 -> 11-223-3
             if (/^\d{6}$/.test(s)) {
                 return s.substring(0,2) + '-' + s.substring(2,5) + '-' + s.substring(5,6);
             }
-            // 已經是 XX-XXX-X 或 XX-XX-XXX-X 格式
             if (/^\d{2}-\d{3}-\d{1}$/.test(s)) return s;
             if (/^\d{2}-\d{2}-\d{3}-\d{1}$/.test(s)) return s;
             return s;
@@ -548,6 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
             renderFileList1();
             previewSection.classList.remove('show');
             downloadHtmlBtn.disabled = true;
+            downloadCsvBtn.disabled = true;
             downloadAllDiv.classList.add('hidden');
             window.deviceReferenceMap = {};
             showStatus1('已清除所有文件，設備對照表已清空', 'info');
@@ -562,6 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingEl.style.display = 'block';
             previewSection.classList.remove('show');
             downloadHtmlBtn.disabled = true;
+            downloadCsvBtn.disabled = true;
             downloadAllDiv.classList.add('hidden');
             showStatus1('正在處理文件...', 'info');
 
@@ -661,7 +682,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const header = processedData[0];
             const rows = processedData.slice(1);
-            // 格式化編號
             const formattedRows = rows.map(row => {
                 const newRow = [...row];
                 newRow[0] = formatId(row[0]);
@@ -709,6 +729,7 @@ document.addEventListener('DOMContentLoaded', function() {
             renderTabs1();
             previewSection.classList.add('show');
             downloadHtmlBtn.disabled = false;
+            downloadCsvBtn.disabled = false;
             downloadAllDiv.classList.remove('hidden');
             const total = Object.values(systemGroups).reduce((s,g) => s + g.rows.length, 0);
             const panelCount = Object.keys(panelGroups).length;
@@ -756,16 +777,74 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             table.appendChild(tbody);
             content.appendChild(table);
+
+            content.dataset.tabKey = tabId;
+            content.dataset.key = key;
+            content.dataset.type = type;
+            content.dataset.rows = JSON.stringify(rows);
+
             return content;
         }
 
         function switchTab2(tabKey) {
+            currentTabKey = tabKey;
             document.querySelectorAll('#tabsHeader1 .tab-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === tabKey);
             });
             document.querySelectorAll('#tabsContent1 .tab-content').forEach(content => {
                 content.classList.toggle('active', content.id === `tab-${tabKey}`);
             });
+            updateSingleDownloadBtn(tabKey);
+        }
+
+        function updateSingleDownloadBtn(tabKey) {
+            if (!tabKey) {
+                downloadSingleCsvBtn.style.display = 'none';
+                return;
+            }
+            const content = document.getElementById(`tab-${tabKey}`);
+            if (content) {
+                downloadSingleCsvBtn.style.display = 'inline-flex';
+                const isPanel = content.dataset.type === '盤號';
+                const key = content.dataset.key;
+                const displayName = isPanel ? `盤號 ${key}` : `${key}系統`;
+                downloadSingleCsvBtn.textContent = `📥 下載 ${displayName} CSV`;
+                downloadSingleCsvBtn.onclick = function() {
+                    const rowsData = JSON.parse(content.dataset.rows || '[]');
+                    const showBuilding = toggleBuilding.checked;
+                    const headers = showBuilding ? ['編號', '棟別區號', '地區名稱', '種別'] : ['編號', '地區名稱', '種別'];
+                    const dataRows = rowsData.map(row => {
+                        return showBuilding ? row : [row[0], row[2], row[3]];
+                    });
+                    downloadCsvFile(dataRows, headers, displayName);
+                };
+            } else {
+                downloadSingleCsvBtn.style.display = 'none';
+            }
+        }
+
+        function downloadCsvFile(rows, headers, filename) {
+            let csvContent = headers.join(',') + '\n';
+            rows.forEach(row => {
+                const escapedRow = row.map(cell => {
+                    if (cell === null || cell === undefined) return '';
+                    const str = String(cell);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return '"' + str.replace(/"/g, '""') + '"';
+                    }
+                    return str;
+                });
+                csvContent += escapedRow.join(',') + '\n';
+            });
+
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            const safeName = filename.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
+            a.download = `${safeName}_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showStatus1(`已下載 ${filename} (${rows.length} 筆資料)`, 'success');
         }
 
         function renderTabs1() {
@@ -849,67 +928,43 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (systemKeys.length > 0) {
                 switchTab2(`system-${systemKeys[0]}`);
             }
+            updateSingleDownloadBtn(currentTabKey);
         });
 
-        // 匯出單個系統/盤號
-        function downloadSystemByType(key, type) {
-            const isPanel = type === '盤號';
-            const rows = isPanel ? panelGroups[key].rows : systemGroups[key].rows;
-            const displayName = isPanel ? `盤號 ${key}` : `${key}系統`;
+        // ===== 匯出完整 CSV =====
+        downloadCsvBtn.addEventListener('click', function() {
+            if (!processedData || processedData.length <= 1) {
+                showStatus1('沒有資料可匯出', 'error');
+                return;
+            }
+            const rows = processedData.slice(1);
             const showBuilding = toggleBuilding.checked;
-            
-            let html = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>${displayName} - HRR 消防設備清單</title>
-    <style>
-        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 20px; background: #f5f7fa; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
-        h2 { color: #3498db; margin-top: 20px; }
-        .info { background: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #2c3e50; color: white; padding: 10px 14px; text-align: left; }
-        td { padding: 8px 14px; border-bottom: 1px solid #ddd; }
-        tr:nth-child(even) { background: #f8fafc; }
-        .footer { margin-top: 30px; text-align: center; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; padding-top: 20px; }
-        .count { color: #e74c3c; font-weight: bold; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>📋 ${displayName}</h1>
-    <div class="info">
-        <p><strong>案件名稱：</strong>${caseNameInput.value || '未設定'}</p>
-        <p><strong>總機型號：</strong>${modelNumberInput.value || '未設定'}</p>
-        <p><strong>資料筆數：</strong><span class="count">${rows.length}</span></p>
-        <p><strong>匯出時間：</strong>${new Date().toLocaleString()}</p>
-    </div>
-    <table>
-        <thead>
-            <tr>`;
             const headers = showBuilding ? ['編號', '棟別區號', '地區名稱', '種別'] : ['編號', '地區名稱', '種別'];
-            headers.forEach(h => html += `<th>${h}</th>`);
-            html += `</tr></thead><tbody>`;
-            rows.forEach(row => {
-                html += `<tr>`;
-                // 確保編號使用 formatId 格式化
-                const displayRow = showBuilding ? 
-                    [formatId(row[0]), row[1], row[2], row[3]] : 
-                    [formatId(row[0]), row[2], row[3]];
-                displayRow.forEach(cell => html += `<td>${cell || ''}</td>`);
-                html += `</tr>`;
+            const dataRows = rows.map(row => {
+                return showBuilding ? row : [row[0], row[2], row[3]];
             });
-            html += `</tbody></table>
-    <div class="footer">此報告由 HRR 消防工具整合平台生成</div>
-</div>
-</body>
-</html>`;
-            const filename = `${displayName}_${new Date().toISOString().slice(0,10)}.html`;
-            downloadFile1(html, filename);
-            showStatus1(`已下載 ${displayName} (${rows.length} 筆資料)`, 'success');
-        }
+            downloadCsvFile(dataRows, headers, 'HRR消防清單_完整');
+        });
+
+        // ===== 匯出所有系統 CSV =====
+        downloadAllCsvBtn.addEventListener('click', function() {
+            const allKeys = Object.keys(panelGroups).sort((a,b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
+            if (!allKeys.length) {
+                showStatus1('沒有資料可下載', 'error');
+                return;
+            }
+            const showBuilding = toggleBuilding.checked;
+            const headers = showBuilding ? ['盤號', '編號', '棟別區號', '地區名稱', '種別'] : ['盤號', '編號', '地區名稱', '種別'];
+            const allRows = [];
+            allKeys.forEach(key => {
+                const rows = panelGroups[key].rows;
+                rows.forEach(row => {
+                    const displayRow = showBuilding ? [key, row[0], row[1], row[2], row[3]] : [key, row[0], row[2], row[3]];
+                    allRows.push(displayRow);
+                });
+            });
+            downloadCsvFile(allRows, headers, 'HRR消防清單_所有盤號');
+        });
 
         function downloadFile1(content, filename) {
             const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
@@ -920,7 +975,6 @@ document.addEventListener('DOMContentLoaded', function() {
             URL.revokeObjectURL(a.href);
         }
 
-        // 下載所有系統HTML
         downloadAllBtn.addEventListener('click', function() {
             const allKeys = Object.keys(panelGroups).sort((a,b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
             if (!allKeys.length) {
@@ -945,7 +999,6 @@ document.addEventListener('DOMContentLoaded', function() {
         tr:nth-child(even) { background: #f8fafc; }
         .footer { margin-top: 30px; text-align: center; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; padding-top: 20px; }
         .count { color: #e74c3c; font-weight: bold; }
-        .section-header { background: #f0f8ff; padding: 8px 12px; border-radius: 4px; margin: 15px 0 5px; }
     </style>
 </head>
 <body>
@@ -982,13 +1035,11 @@ document.addEventListener('DOMContentLoaded', function() {
             showStatus1(`已下載完整清單，共 ${allKeys.length} 個盤號`, 'success');
         });
 
-        // 匯出完整HTML
         downloadHtmlBtn.addEventListener('click', function() {
             if (!processedData || processedData.length <= 1) {
                 showStatus1('沒有資料可匯出', 'error');
                 return;
             }
-            const header = processedData[0];
             const rows = processedData.slice(1);
             const showBuilding = toggleBuilding.checked;
             const headers = showBuilding ? ['編號', '棟別區號', '地區名稱', '種別'] : ['編號', '地區名稱', '種別'];
@@ -1048,6 +1099,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fileInput = document.getElementById('linkageFileInput');
         const fileBtn = document.getElementById('linkageFileBtn');
         const exportBtn = document.getElementById('exportLinkageBtn');
+        const exportCsvBtn = document.getElementById('exportLinkageCsvBtn');
         const fileName = document.getElementById('linkageFileName');
         const statusEl = document.getElementById('linkageStatus');
         const infoDiv = document.getElementById('linkageInfo');
@@ -1066,6 +1118,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let currentData = [];
         let linkageMap = {};
+        let currentFileName = '';
 
         function updateRefInfo() {
             const refKeys = Object.keys(window.deviceReferenceMap);
@@ -1082,6 +1135,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInput.addEventListener('change', function() {
             const file = this.files[0];
             if (!file) return;
+            currentFileName = file.name.replace(/\.[^.]+$/, '');
             fileName.textContent = `已選擇: ${file.name}`;
             parseLinkageFile(file);
         });
@@ -1230,10 +1284,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
-                if (row.destinations.length === 0) {
-                    const rpValue = (r2 && r2[10]) || (r2 && r2[9]) || (r2 && r2[8]) || '';
-                    if (rpValue.trim() !== '' && rpValue !== '00' && rpValue !== '0') {
-                        const name = (r2 && r2[1]) || '';
+                // 處理 R/P 輸出（作為 dest 補充）
+                const rpValue = (r2 && r2[10]) || (r2 && r2[9]) || (r2 && r2[8]) || '';
+                if (rpValue.trim() !== '' && rpValue !== '00' && rpValue !== '0') {
+                    const name = (r2 && r2[1]) || '';
+                    // 檢查是否已有相同 R/P 值
+                    const hasRp = row.destinations.some(d => d.number === '00' && d.message === rpValue);
+                    if (!hasRp) {
                         row.destinations.push({
                             number: '00',
                             detailType: 'R/P 輸出',
@@ -1265,6 +1322,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (result.length > 0) {
                 exportBtn.disabled = false;
+                exportCsvBtn.disabled = false;
                 const refKeys = Object.keys(window.deviceReferenceMap);
                 const refMsg = refKeys.length > 0 ? `（已載入 ${refKeys.length} 筆參考設備）` : '';
                 showLinkageStatus(`成功載入 ${result.length} 筆資料 ${refMsg}`, 'success');
@@ -1273,6 +1331,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 exportBtn.disabled = true;
+                exportCsvBtn.disabled = true;
                 showLinkageStatus('沒有找到有效資料，請確認檔案格式正確', 'error');
             }
             updateRefInfo();
@@ -1289,6 +1348,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 return clean.substring(0,2) + '-' + clean.substring(2,5) + '-' + clean.substring(5,6);
             }
             return s;
+        }
+
+        // ===== 核心修正：R/P 過濾邏輯 =====
+        function filterDestinations(destinations, showRp) {
+            return destinations.filter(d => {
+                const num = d.number.trim();
+                // 空值或 0 跳過
+                if (num === '' || num === '0') return false;
+                
+                // 如果是設備編號（非 '00'），一律保留
+                if (num !== '00') {
+                    return true;
+                }
+                
+                // 如果是 '00'（代表事件/R/P）
+                const msg = (d.message || '').trim();
+                
+                // 如果沒有訊息，跳過
+                if (!msg) return false;
+                
+                // 如果 showRp 為 true（顯示 R/P），保留所有 '00' 項目
+                if (showRp) {
+                    return true;
+                }
+                
+                // showRp 為 false（隱藏 R/P）：
+                // 如果是純數字（R/P 值），則過濾掉
+                // 如果是非數字（事件描述，如 "1F珈琲廳鐵捲門"），則保留
+                if (!isNaN(msg)) {
+                    return false; // 純數字 R/P 值，隱藏
+                }
+                return true; // 非數字事件描述，保留
+            });
         }
 
         function displayLinkageData(data) {
@@ -1309,16 +1401,17 @@ document.addEventListener('DOMContentLoaded', function() {
             statsDiv.style.display = 'block';
             rowCount.textContent = data.length;
 
+            const showRp = toggleRp.checked;
+            
+            // 使用修正後的過濾邏輯
             const filteredData = data.map(row => ({
                 ...row,
-                destinations: row.destinations.filter(d => {
-                    const num = d.number.trim();
-                    return num !== '' && num !== '0';
-                })
+                destinations: filterDestinations(row.destinations, showRp)
             }));
 
-            const showRp = toggleRp.checked;
-            const headers = showRp ? ['通番', '番号', '名称', '詳細種別', '連動先'] : ['通番', '番号', '名称', '詳細種別'];
+            // === 修正重點：無論是否顯示 R/P，都保留「連動先」欄位 ===
+            // 但內容會根據 showRp 過濾
+            const headers = ['通番', '番号', '名称', '詳細種別', '連動先'];
             const trh = document.createElement('tr');
             headers.forEach(h => {
                 const th = document.createElement('th');
@@ -1341,38 +1434,42 @@ document.addEventListener('DOMContentLoaded', function() {
                     tr.appendChild(td);
                 });
                 
-                if (showRp) {
-                    const destTd = document.createElement('td');
-                    if (row.destinations && row.destinations.length > 0) {
-                        const rpValues = [];
-                        const realDestinations = [];
-                        
-                        row.destinations.forEach(d => {
-                            if (d.number === '00' && d.message && d.message.trim() !== '') {
+                // 連動先欄位 - 顯示設備連動關係，R/P 值根據 showRp 決定是否顯示
+                const destTd = document.createElement('td');
+                if (row.destinations && row.destinations.length > 0) {
+                    const rpValues = [];
+                    const realDestinations = [];
+                    
+                    row.destinations.forEach(d => {
+                        if (d.number === '00' && d.message && d.message.trim() !== '') {
+                            // 只有當 showRp 為 true 時才顯示 R/P 值
+                            if (showRp) {
                                 if (!rpValues.includes(d.message)) {
                                     rpValues.push(d.message);
                                 }
-                            } else if (d.number !== '00') {
-                                realDestinations.push(d.number);
                             }
-                        });
-                        
-                        let displayParts = [];
-                        if (realDestinations.length > 0) {
-                            displayParts = realDestinations;
+                        } else if (d.number !== '00') {
+                            realDestinations.push(d.number);
                         }
-                        if (rpValues.length > 0) {
-                            displayParts = displayParts.concat(rpValues.map(v => `R/P:${v}`));
-                        }
-                        
-                        destTd.textContent = displayParts.join(', ');
-                        destTd.style.color = '#27ae60';
-                    } else {
-                        destTd.textContent = '—';
-                        destTd.style.color = '#999';
+                    });
+                    
+                    let displayParts = [];
+                    // 設備連動關係永遠顯示
+                    if (realDestinations.length > 0) {
+                        displayParts = realDestinations;
                     }
-                    tr.appendChild(destTd);
+                    // R/P 值僅在 showRp 為 true 時顯示
+                    if (showRp && rpValues.length > 0) {
+                        displayParts = displayParts.concat(rpValues.map(v => `R/P:${v}`));
+                    }
+                    
+                    destTd.textContent = displayParts.join(', ') || '—';
+                    destTd.style.color = displayParts.length > 0 ? '#27ae60' : '#999';
+                } else {
+                    destTd.textContent = '—';
+                    destTd.style.color = '#999';
                 }
+                tr.appendChild(destTd);
                 
                 tr.addEventListener('click', function() {
                     const idx = parseInt(this.dataset.index);
@@ -1467,7 +1564,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 
                 if (row.destinations) {
-                    row.destinations.forEach(dest => {
+                    // 使用相同的過濾邏輯
+                    const filteredDests = filterDestinations(row.destinations, showRp);
+                    filteredDests.forEach(dest => {
                         const destRow = findRowByNumber(dest.number);
                         if (destRow) {
                             const child = buildTree(destRow, depth + 1);
@@ -1481,9 +1580,21 @@ document.addEventListener('DOMContentLoaded', function() {
                             const isEventCode = dest.number === '00' && dest.message && dest.message.trim() !== '';
                             const isRpValue = !isNaN(dest.message) && dest.message.trim() !== '';
                             
+                            // 如果 showRp 為 false，且是純數字 R/P，則跳過
+                            if (!showRp && isRpValue && dest.number === '00') {
+                                return;
+                            }
+                            
+                            let displayName2 = '(未定義)';
+                            if (isEventCode) {
+                                displayName2 = showRp ? `事件: ${dest.message}` : `事件`;
+                            } else if (refName2) {
+                                displayName2 = refName2;
+                            }
+                            
                             node.destinations.push({
                                 number: dest.number,
-                                name: isEventCode ? (showRp ? `事件 R/P: ${dest.message}` : `事件`) : (refName2 || '(未定義)'),
+                                name: displayName2,
                                 detailType: dest.detailType || '',
                                 depth: depth + 1,
                                 isSource: false,
@@ -1615,6 +1726,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // ===== 匯出連動 HTML 報告 =====
         exportBtn.addEventListener('click', function() {
             if (!currentData || currentData.length === 0) {
                 showLinkageStatus('無資料可匯出', 'error');
@@ -1640,18 +1752,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .dest-row td { background: #f9f9f9; padding-left: 30px; font-size: 0.85rem; }
         .dest-row td:first-child::before { content: "↳ "; color: #6c8ebf; }
         .footer { margin-top: 30px; text-align: center; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; padding-top: 20px; }
-        .graph-section { margin-top: 30px; border-top: 2px solid #e9ecef; padding-top: 20px; display: none; }
-        .tree-container { display: flex; flex-direction: column; gap: 2px; padding: 5px 0; }
-        .tree-item { display: flex; align-items: center; gap: 10px; padding: 3px 0; }
-        .node-box { padding: 6px 14px; border-radius: 6px; background: white; border: 1.5px solid #d0d7e0; font-size: 0.85rem; flex: 1; }
-        .node-box.source-box { border-color: #3498db; background: #eaf4ff; font-weight: 600; }
-        .node-box.target-box { border-color: #27ae60; background: #eafaf1; }
-        .node-box.missing-box { border-color: #e74c3c; background: #fdf0ef; color: #c0392b; }
-        .node-box.reference-box { border-color: #8e44ad; background: #f4ecf7; }
-        .connector { color: #b0c4de; font-family: monospace; font-size: 1.2rem; width: 30px; text-align: center; flex-shrink: 0; }
-        .tree-children { padding-left: 20px; }
-        .ref-badge { display: inline-block; background: #8e44ad; color: white; font-size: 0.6rem; padding: 1px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
-        .rp-badge { display: inline-block; background: #e67e22; color: white; font-size: 0.6rem; padding: 1px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -1672,13 +1772,17 @@ document.addEventListener('DOMContentLoaded', function() {
             <h3>📊 連動資料表</h3>
             <table>
                 <tr>
-                    <th>通番</th><th>番号</th><th>名称</th><th>詳細種別</th>`;
-            if (showRp) {
-                html += `<th>連動先1番号</th><th>連動先1詳細種別</th><th>連動先1地区メッセージ</th>`;
-            }
-            html += `</tr>`;
+                    <th>通番</th><th>番号</th><th>名称</th><th>詳細種別</th>
+                    <th>連動先</th>
+                </tr>`;
 
-            currentData.forEach(row => {
+            // 使用相同的過濾邏輯
+            const filteredData = currentData.map(row => ({
+                ...row,
+                destinations: filterDestinations(row.destinations, showRp)
+            }));
+
+            filteredData.forEach(row => {
                 const refName = getDeviceName(row.number);
                 const displayName = refName || row.name || '';
                 
@@ -1686,29 +1790,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${row.sequence || ''}</td>
                     <td>${row.number || ''}</td>
                     <td>${displayName}</td>
-                    <td>${row.detailType || ''}</td>`;
+                    <td>${row.detailType || ''}</td>
+                    <td>`;
                 
-                if (showRp) {
-                    if (row.destinations && row.destinations.length > 0) {
-                        const d = row.destinations[0];
-                        html += `<td>${d.number || ''}</td><td>${d.detailType || ''}</td><td>${d.message || ''}</td>`;
-                    } else {
-                        html += `<td></td><td></td><td></td>`;
-                    }
+                if (row.destinations && row.destinations.length > 0) {
+                    const parts = [];
+                    row.destinations.forEach(d => {
+                        if (d.number === '00' && d.message) {
+                            if (showRp) {
+                                parts.push(`R/P:${d.message}`);
+                            }
+                        } else if (d.number !== '00') {
+                            parts.push(d.number);
+                        }
+                    });
+                    html += parts.join(', ') || '—';
+                } else {
+                    html += '—';
                 }
-                html += `</tr>`;
-                
-                if (showRp && row.destinations && row.destinations.length > 1) {
-                    for (let i = 1; i < row.destinations.length; i++) {
-                        const d = row.destinations[i];
-                        html += `<tr class="dest-row">
-                            <td></td><td></td><td></td><td></td>
-                            <td>${d.number || ''}</td>
-                            <td>${d.detailType || ''}</td>
-                            <td>${d.message || ''}</td>
-                        </tr>`;
-                    }
-                }
+                html += `</td></tr>`;
             });
 
             html += `</table>
@@ -1720,10 +1820,85 @@ document.addEventListener('DOMContentLoaded', function() {
             const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `HRR系統報告_${new Date().toISOString().slice(0,10)}.html`;
+            const safeName = currentFileName || 'HRR系統報告';
+            a.download = `${safeName}_${new Date().toISOString().slice(0,10)}.html`;
             a.click();
             URL.revokeObjectURL(a.href);
             showLinkageStatus('HTML報告下載成功', 'success');
+        });
+
+        // ===== 匯出連動 CSV 報告 =====
+        exportCsvBtn.addEventListener('click', function() {
+            if (!currentData || currentData.length === 0) {
+                showLinkageStatus('無資料可匯出', 'error');
+                return;
+            }
+
+            const showRp = toggleRp.checked;
+            const headers = ['通番', '番号', '名称', '詳細種別', '棟別', '樓層', '地區', '軟體', '盤號', '連動先列表'];
+            
+            // 使用相同的過濾邏輯
+            const filteredData = currentData.map(row => ({
+                ...row,
+                destinations: filterDestinations(row.destinations, showRp)
+            }));
+            
+            const rows = filteredData.map(row => {
+                const refName = getDeviceName(row.number);
+                const displayName = refName || row.name || '';
+                
+                let destList = '';
+                if (row.destinations && row.destinations.length > 0) {
+                    const parts = [];
+                    row.destinations.forEach(d => {
+                        const num = d.number || '';
+                        const msg = d.message || '';
+                        if (num === '00' && msg) {
+                            if (showRp) {
+                                parts.push(`R/P:${msg}`);
+                            }
+                        } else if (num !== '00') {
+                            parts.push(num);
+                        }
+                    });
+                    destList = parts.join('; ');
+                }
+                
+                return [
+                    row.sequence || '',
+                    row.number || '',
+                    displayName,
+                    row.detailType || '',
+                    row.building || '',
+                    row.floor || '',
+                    row.area || '',
+                    row.soft || '',
+                    row.panelNo || '',
+                    destList || ''
+                ];
+            });
+
+            let csvContent = headers.join(',') + '\n';
+            rows.forEach(row => {
+                const escapedRow = row.map(cell => {
+                    if (cell === null || cell === undefined) return '';
+                    const str = String(cell);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes(';')) {
+                        return '"' + str.replace(/"/g, '""') + '"';
+                    }
+                    return str;
+                });
+                csvContent += escapedRow.join(',') + '\n';
+            });
+
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            const safeName = currentFileName || 'HRR系統連動資料';
+            a.download = `${safeName}_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showLinkageStatus('CSV報告下載成功', 'success');
         });
 
         window.getDeviceName = getDeviceName;
