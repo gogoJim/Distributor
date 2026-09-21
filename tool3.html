@@ -1193,149 +1193,150 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function processLinkageData(data) {
-            window.currentData = [];
-            
-            console.log('原始資料行數:', data.length);
-            
-            let objectName = '', systemName = '';
-            if (data.length > 0 && data[0] && data[0][0]) {
-                const first = data[0][0] || '';
-                const om = first.match(/物件名【(.+?)】/);
-                const sm = first.match(/システム名【(.+?)】/);
-                if (om) objectName = om[1];
-                if (sm) systemName = sm[1];
-            }
-            
-            if (objectName || systemName) {
-                infoDiv.style.display = 'block';
-                infoContent.innerHTML = `<p><strong>物件名稱:</strong> ${objectName}</p><p><strong>系統名稱:</strong> ${systemName}</p>`;
-            } else {
-                infoDiv.style.display = 'none';
-            }
+    window.currentData = [];
+    
+    console.log('原始資料行數:', data.length);
+    
+    let objectName = '', systemName = '';
+    if (data.length > 0 && data[0] && data[0][0]) {
+        const first = data[0][0] || '';
+        const om = first.match(/物件名【(.+?)】/);
+        const sm = first.match(/システム名【(.+?)】/);
+        if (om) objectName = om[1];
+        if (sm) systemName = sm[1];
+    }
+    
+    if (objectName || systemName) {
+        infoDiv.style.display = 'block';
+        infoContent.innerHTML = `<p><strong>物件名稱:</strong> ${objectName}</p><p><strong>系統名稱:</strong> ${systemName}</p>`;
+    } else {
+        infoDiv.style.display = 'none';
+    }
 
-            let start = 0;
-            for (let i = 0; i < Math.min(30, data.length); i++) {
-                if (data[i] && data[i][0] && !isNaN(parseInt(data[i][0]))) {
-                    start = i;
-                    break;
-                }
-            }
-            
-            console.log('資料開始位置:', start);
-
-            const result = [];
-            for (let i = start; i < data.length - 1; i += 2) {
-                const r1 = data[i];
-                const r2 = data[i + 1];
-                if (!r1) continue;
-                
-                const seqNum = parseInt(r1[0]);
-                const sequence = r1[0] || '';
-                
-                const rawNum = r1[1] || '';
-                const num = formatLinkNumber(rawNum);
-                if (!num || num.trim() === '') continue;
-                
-                if (isNaN(seqNum) || sequence === '') {
-                    const name = (r2 && r2[1]) || '';
-                    const isFaGaP = name === '火災(FA)' || name === 'ガス漏れ(GA)' || name === '発信機(P)';
-                    if (!isFaGaP) continue;
-                }
-                
-                const row = {
-                    sequence: sequence || (num === '00' ? '代表' : ''),
-                    number: num,
-                    name: (r2 && r2[1]) || '',
-                    detailType: r1[2] || '',
-                    building: r1[3] || '',
-                    floor: r1[4] || '',
-                    area: r1[5] || '',
-                    soft: r1[6] || '',
-                    panelNo: r1[7] || '',
-                    linkType: (r2 && r2[6]) || '',
-                    destinations: []
-                };
-                
-                for (let j = 0; j < 10; j++) {
-                    const idx = 8 + j * 2;
-                    if (idx < r1.length && r1[idx] && r1[idx].trim() !== '') {
-                        const destNum = formatLinkNumber(r1[idx] || '');
-                        if (destNum && destNum.trim() !== '' && destNum !== '0') {
-                            const detailType = (r1.length > idx + 1) ? (r1[idx + 1] || '') : '';
-                            const destName = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
-                            
-                            let destMessage = '';
-                            if (destNum === '00') {
-                                destMessage = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
-                                if (!destMessage.trim()) {
-                                    continue;
-                                }
-                            } else {
-                                destMessage = (r2 && r2.length > idx + 2) ? (r2[idx + 2] || '') : '';
-                            }
-                            
-                            row.destinations.push({
-                                number: destNum,
-                                detailType: detailType,
-                                name: destName,
-                                message: destMessage
-                            });
-                        }
-                    }
-                }
-                
-                // 處理 R/P 輸出（作為 dest 補充）
-                const rpValue = (r2 && r2[10]) || (r2 && r2[9]) || (r2 && r2[8]) || '';
-                if (rpValue.trim() !== '' && rpValue !== '00' && rpValue !== '0') {
-                    const name = (r2 && r2[1]) || '';
-                    // 檢查是否已有相同 R/P 值
-                    const hasRp = row.destinations.some(d => d.number === '00' && d.message === rpValue);
-                    if (!hasRp) {
-                        row.destinations.push({
-                            number: '00',
-                            detailType: 'R/P 輸出',
-                            name: name || '代表',
-                            message: rpValue
-                        });
-                    }
-                }
-                
-                result.push(row);
-            }
-
-            console.log('解析結果筆數:', result.length);
-            
-            window.currentData = result;
-            currentData = result;
-            
-            linkageMap = {};
-            result.forEach((row, idx) => {
-                if (row.number === '00') {
-                    linkageMap['00_' + row.sequence] = idx;
-                    linkageMap['00_' + row.name] = idx;
-                } else {
-                    linkageMap[row.number] = idx;
-                }
-            });
-            
-            displayLinkageData(result);
-            
-            if (result.length > 0) {
-                exportBtn.disabled = false;
-                exportCsvBtn.disabled = false;
-                const refKeys = Object.keys(window.deviceReferenceMap);
-                const refMsg = refKeys.length > 0 ? `（已載入 ${refKeys.length} 筆參考設備）` : '';
-                showLinkageStatus(`成功載入 ${result.length} 筆資料 ${refMsg}`, 'success');
-                if (result.length > 0) {
-                    selectLinkageRow(0);
-                }
-            } else {
-                exportBtn.disabled = true;
-                exportCsvBtn.disabled = true;
-                showLinkageStatus('沒有找到有效資料，請確認檔案格式正確', 'error');
-            }
-            updateRefInfo();
+    let start = 0;
+    for (let i = 0; i < Math.min(30, data.length); i++) {
+        if (data[i] && data[i][0] && !isNaN(parseInt(data[i][0]))) {
+            start = i;
+            break;
         }
+    }
+    
+    console.log('資料開始位置:', start);
+
+    const result = [];
+    for (let i = start; i < data.length - 1; i += 2) {
+        const r1 = data[i];
+        const r2 = data[i + 1];
+        if (!r1) continue;
+        
+        const seqNum = parseInt(r1[0]);
+        const sequence = r1[0] || '';
+        
+        const rawNum = r1[1] || '';
+        const num = formatLinkNumber(rawNum);
+        if (!num || num.trim() === '') continue;
+        
+        if (isNaN(seqNum) || sequence === '') {
+            const name = (r2 && r2[1]) || '';
+            const isFaGaP = name === '火災(FA)' || name === 'ガス漏れ(GA)' || name === '発信機(P)';
+            if (!isFaGaP) continue;
+        }
+        
+        const row = {
+            sequence: sequence || (num === '00' ? '代表' : ''),
+            number: num,
+            name: (r2 && r2[1]) || '',
+            detailType: r1[2] || '',
+            building: r1[3] || '',
+            floor: r1[4] || '',
+            area: r1[5] || '',
+            soft: r1[6] || '',
+            panelNo: r1[7] || '',
+            linkType: (r2 && r2[6]) || '',
+            destinations: []
+        };
+        
+        // ✅ 修正：正確解析連動先與對應的 R/P 值
+        // r1 結構: [8]=連動先1番号, [9]=連動先1詳細種別, [10]=連動先2番号, [11]=連動先2詳細種別, ...
+        // r2 結構: [8]=R/P值1, [10]=R/P值2, [12]=R/P值3, ...
+        // 注意：r2[8] 對應 r1[8]，r2[10] 對應 r1[10]，以此類推
+        
+        for (let j = 0; j < 10; j++) {
+            const idx = 8 + j * 2;  // 8, 10, 12, 14, 16, 18, 20, 22, 24, 26
+            
+            if (idx >= r1.length) break;
+            
+            const destNumRaw = r1[idx];
+            if (!destNumRaw || destNumRaw.trim() === '') continue;
+            
+            const destNum = formatLinkNumber(destNumRaw || '');
+            if (!destNum || destNum.trim() === '' || destNum === '0') continue;
+            
+            // 詳細種別（在 r1 的 idx+1 位置）
+            const detailType = (r1.length > idx + 1) ? (r1[idx + 1] || '') : '';
+            
+            // ✅ 關鍵修正：R/P 值在 r2 的「相同 idx」位置，不是 idx+2
+            // 名稱也在 r2 的「相同 idx」位置
+            const destName = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
+            
+            // R/P 值：對於設備編號（非00），R/P值就是 r2[idx]
+            // 對於 '00'（代表事件），r2[idx] 是事件訊息
+            let destMessage = '';
+            if (destNum === '00') {
+                // '00' 代表事件，訊息在 r2[idx]
+                destMessage = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
+                if (!destMessage.trim()) {
+                    continue; // 沒有訊息就跳過
+                }
+            } else {
+                // 設備編號，R/P 值在 r2[idx]
+                destMessage = (r2 && r2.length > idx) ? (r2[idx] || '') : '';
+            }
+            
+            row.destinations.push({
+                number: destNum,
+                detailType: detailType,
+                name: destName,
+                message: destMessage
+            });
+        }
+        
+        result.push(row);
+    }
+
+    console.log('解析結果筆數:', result.length);
+    
+    window.currentData = result;
+    currentData = result;
+    
+    linkageMap = {};
+    result.forEach((row, idx) => {
+        if (row.number === '00') {
+            linkageMap['00_' + row.sequence] = idx;
+            linkageMap['00_' + row.name] = idx;
+        } else {
+            linkageMap[row.number] = idx;
+        }
+    });
+    
+    displayLinkageData(result);
+    
+    if (result.length > 0) {
+        exportBtn.disabled = false;
+        exportCsvBtn.disabled = false;
+        const refKeys = Object.keys(window.deviceReferenceMap);
+        const refMsg = refKeys.length > 0 ? `（已載入 ${refKeys.length} 筆參考設備）` : '';
+        showLinkageStatus(`成功載入 ${result.length} 筆資料 ${refMsg}`, 'success');
+        if (result.length > 0) {
+            selectLinkageRow(0);
+        }
+    } else {
+        exportBtn.disabled = true;
+        exportCsvBtn.disabled = true;
+        showLinkageStatus('沒有找到有效資料，請確認檔案格式正確', 'error');
+    }
+    updateRefInfo();
+}
 
         function formatLinkNumber(s) {
             if (!s) return '';
@@ -1440,18 +1441,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     const rpValues = [];
                     const realDestinations = [];
                     
-                    row.destinations.forEach(d => {
-                        if (d.number === '00' && d.message && d.message.trim() !== '') {
-                            // 只有當 showRp 為 true 時才顯示 R/P 值
-                            if (showRp) {
-                                if (!rpValues.includes(d.message)) {
-                                    rpValues.push(d.message);
-                                }
-                            }
-                        } else if (d.number !== '00') {
-                            realDestinations.push(d.number);
-                        }
-                    });
+				row.destinations.forEach(d => {
+    if (d.number === '00' && d.message && d.message.trim() !== '') {
+        // 只有當 showRp 為 true 時才顯示 R/P 值
+        if (showRp) {
+            if (!rpValues.includes(d.message)) {
+                rpValues.push(d.message);
+            }
+        }
+    } else if (d.number !== '00') {
+        // 設備連動：顯示編號，如果有 R/P 值則一併顯示
+        realDestinations.push(d.number);
+        // 將設備的 R/P 值也收集起來（只在 showRp 時顯示）
+        if (showRp && d.message && d.message.trim() !== '' && !isNaN(d.message)) {
+            if (!rpValues.includes(d.message)) {
+                rpValues.push(d.message);
+            }
+        }
+    }
+});
                     
                     let displayParts = [];
                     // 設備連動關係永遠顯示
