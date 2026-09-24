@@ -17,134 +17,129 @@
             height: 100vh;
         }
 
-#info-panel {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: rgba(255, 255, 255, 0.96);
-    padding: 16px 18px;        /* 從 20px 縮小為 16px 18px */
-    border-radius: 16px;
-    width: 360px;              /* 從 440px 縮小為 360px */
-    max-width: 32vw;           /* 新增：限制最大寬度為視窗寬度的32% */
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    z-index: 100;
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.5);
-    max-height: 82vh;
-    overflow-y: auto;
-    pointer-events: auto;
-    font-size: 0.9rem;         /* 從 0.95rem 稍微縮小 */
-    transition: width 0.2s ease;
-}
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 16px 18px;
+            border-radius: 16px;
+            width: 360px;
+            max-width: 32vw;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 100;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.5);
+            max-height: 82vh;
+            overflow-y: auto;
+            pointer-events: auto;
+            font-size: 0.9rem;
+            transition: width 0.2s ease;
+        }
 
-/* 縮小內部標題和文字 */
-#info-panel h1 {
-    font-size: 1.3rem;         /* 從 1.5rem 縮小 */
-    margin-bottom: 8px;
-}
+        #info-panel h1 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
 
-#info-panel h2 {
-    font-size: 1rem;           /* 從預設大小縮小 */
-}
+        #info-panel h2 {
+            font-size: 1rem;
+        }
 
-.calculation-step {
-    padding: 8px 10px;         /* 從 12px 縮小 */
-    margin: 8px 0;             /* 從 12px 0 縮小 */
-    font-size: 0.8rem;         /* 從 0.85rem 縮小 */
-}
+        .calculation-step {
+            padding: 8px 10px;
+            margin: 8px 0;
+            font-size: 0.8rem;
+        }
 
-.fix-note, .correction-note {
-    padding: 8px;              /* 從 10px 縮小 */
-    margin: 8px 0;             /* 從 12px 0 縮小 */
-    font-size: 0.8rem;
-}
+        .fix-note, .correction-note {
+            padding: 8px;
+            margin: 8px 0;
+            font-size: 0.8rem;
+        }
 
-/* 響應式：當螢幕較小時進一步縮小 */
-@media (max-width: 1000px) {
-    #info-panel {
-        width: 280px;
-        padding: 12px 14px;
-        max-width: 38vw;
-    }
-    #info-panel h1 {
-        font-size: 1.1rem;
-    }
-    .control-group {
-        margin-bottom: 10px;
-    }
-}
+        @media (max-width: 1000px) {
+            #info-panel {
+                width: 280px;
+                padding: 12px 14px;
+                max-width: 38vw;
+            }
+            #info-panel h1 {
+                font-size: 1.1rem;
+            }
+            .control-group {
+                margin-bottom: 10px;
+            }
+        }
 
-@media (max-width: 700px) {
-    #info-panel {
-        width: 240px;
-        max-width: 70vw;
-        padding: 10px 12px;
-        top: 10px;
-        left: 10px;
-        font-size: 0.8rem;
-    }
-    #info-panel h1 {
-        font-size: 1rem;
-    }
-    .calculation-step {
-        padding: 6px 8px;
-    }
-}
+        @media (max-width: 700px) {
+            #info-panel {
+                width: 240px;
+                max-width: 70vw;
+                padding: 10px 12px;
+                top: 10px;
+                left: 10px;
+                font-size: 0.8rem;
+            }
+            #info-panel h1 {
+                font-size: 1rem;
+            }
+            .calculation-step {
+                padding: 6px 8px;
+            }
+        }
 
+        #controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(30,30,40,0.92);
+            backdrop-filter: blur(8px);
+            padding: 18px 22px;
+            border-radius: 20px;
+            width: 220px;
+            max-width: 35vw;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+            z-index: 100;
+            border: 1px solid rgba(255,255,255,0.2);
+            pointer-events: auto;
+            color: #f0f0f0;
+            transition: width 0.2s ease;
+        }
 
-#controls {
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
-    background: rgba(30,30,40,0.92);
-    backdrop-filter: blur(8px);
-    padding: 18px 22px;
-    border-radius: 20px;
-    width: 220px;           /* 從 380px 縮小為 320px */
-    max-width: 35vw;        /* 新增：限制最大寬度為視窗寬度的35% */
-    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
-    z-index: 100;
-    border: 1px solid rgba(255,255,255,0.2);
-    pointer-events: auto;
-    color: #f0f0f0;
-    transition: width 0.2s ease;  /* 平滑過渡 */
-}
+        @media (max-width: 1000px) {
+            #controls {
+                width: 280px;
+                padding: 14px 18px;
+            }
+            .control-group {
+                margin-bottom: 12px;
+            }
+            button {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+        }
 
-/* 響應式：當螢幕較小時進一步縮小 */
-@media (max-width: 1000px) {
-    #controls {
-        width: 280px;
-        padding: 14px 18px;
-    }
-    .control-group {
-        margin-bottom: 12px;
-    }
-    button {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 700px) {
-    #controls {
-        width: 240px;
-        max-width: 40vw;
-        padding: 12px 14px;
-        bottom: 12px;
-        right: 12px;
-    }
-    .control-label {
-        font-size: 0.8rem;
-    }
-    .section-title {
-        font-size: 0.9rem;
-    }
-    button {
-        padding: 5px 10px;
-        font-size: 0.75rem;
-    }
-}
-
+        @media (max-width: 700px) {
+            #controls {
+                width: 240px;
+                max-width: 40vw;
+                padding: 12px 14px;
+                bottom: 12px;
+                right: 12px;
+            }
+            .control-label {
+                font-size: 0.8rem;
+            }
+            .section-title {
+                font-size: 0.9rem;
+            }
+            button {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+        }
 
         h1, h2 {
             margin-top: 0;
@@ -244,6 +239,45 @@
         }
         .highlight-text {
             color: #ffaa66;
+            font-weight: bold;
+        }
+        /* 面積顯示專用樣式 */
+        .area-display {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin: 12px 0;
+            border-left: 5px solid #ff9800;
+            box-shadow: 0 2px 8px rgba(255,152,0,0.15);
+        }
+        .area-display .area-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #c0392b;
+        }
+        .area-display .area-unit {
+            font-size: 0.9rem;
+            color: #e65100;
+        }
+        .area-display .area-label {
+            font-size: 0.8rem;
+            color: #6d4c41;
+        }
+        .calc-detail {
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 8px 10px;
+            margin: 6px 0;
+            font-size: 0.75rem;
+            color: #444;
+            font-family: "Consolas", "Courier New", monospace;
+            line-height: 1.5;
+            border: 1px solid #eee;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .calc-detail .highlight {
+            color: #c0392b;
             font-weight: bold;
         }
         /* 自訂按鈕樣式 - 安裝配件 */
@@ -381,7 +415,7 @@
 </head>
 <body>
     <div id="container">
-        <div class="version-info">✨ Ver.11 安裝配件展示 | 監視涵蓋範圍</div>
+        <div class="version-info">✨ Ver.12 安裝配件展示 | 監視涵蓋範圍 + 截面積計算</div>
         <div id="info-panel">
             <h1>🔥 DRC 火焰探測器可視化 <span style="font-size:0.8rem;">(監視涵蓋範圍)</span></h1>
             <div class="fix-note">
@@ -393,7 +427,7 @@
             <div class="correction-note">
                 <p><strong>✂️ 橘紅色粗線即為交線</strong> — 跟隨傾斜角度變化，觀察截面形狀即為作圖<strong>"監視範圍"</strong>之依據。</p>
                 <span style="color:#c0392b;">※ 滑鼠滾輪 -- 縮放。</span><br>
-				<span style="color:#c0392b;">※ 按下滑鼠左鍵不放移動滑鼠 -- 改變視角。</span>
+                <span style="color:#c0392b;">※ 按下滑鼠左鍵不放移動滑鼠 -- 改變視角。</span>
             </div>
             <!-- 安裝配件按鈕 (左側面板) -->
             <button id="accessoryModalBtn" class="accessory-btn">🔧 安裝配件｜技術展示</button>
@@ -413,8 +447,23 @@
                 📐 平面傾角 = <span id="cut-angle" class="value-display">90</span>°</p>
                 <p>📌 計算精度：高精度網格 (72x52)</p>
             </div>
+            
+            <!-- 新增：即時截面積顯示區 -->
+            <div class="area-display">
+                <div class="area-label">📊 即時截面積 (Shoelace Formula)</div>
+                <div style="margin-top:6px;">
+                    <span class="area-value" id="cross-area">0.000</span>
+                    <span class="area-unit">m²</span>
+                </div>
+                <div style="margin-top:6px; font-size:0.8rem; color:#6d4c41;">
+                    📏 截面周長 = <strong id="cross-perimeter">0.000</strong> m<br>
+                    ⭕ 等效圓直徑 = <strong id="cross-diameter">0.000</strong> m<br>
+                    🔺 交點數量 = <strong id="cross-points">0</strong> 個
+                </div>
+            </div>
+            
             <div id="calculation">
-                <h2>📊 即時交線資訊</h2>
+                <h2>📊 即時交線與面積計算</h2>
                 <div id="calc-steps"></div>
             </div>
         </div>
@@ -463,10 +512,10 @@
             <span class="close-modal">&times;</span>
             <h2>🔩 DRC 火焰探測器 · 安裝配件與技術資訊</h2>
 
-            <!-- 影片展示區 (YouTube 或 範例說明影片) -->
+            <!-- 影片展示區 -->
             <div class="video-container">
                 <h3 style="color:#ffdd99; margin-top:0; margin-bottom:12px;">🎥 安裝教學影片 / 技術概述</h3>
-			<video controls src="accessory_images/DRC組合周邊1.mp4" style="width:100%; border-radius:20px;"></video>
+                <video controls src="accessory_images/DRC組合周邊1.mp4" style="width:100%; border-radius:20px;"></video>
                 <p style="color:#ddccaa; font-size:0.75rem; margin-top:8px; text-align:center;">※ 示範影片：探測器安裝配件組合（示意）</p>
             </div>
             <div class="spec-note">
@@ -556,7 +605,7 @@
         scene.add(pivotRing);
         
         // ========= 圓錐體幾何 (翻轉180度: 尖端朝上，底部Y=0，尖端Y=20) =========
-        const coneHeight = 20;  // 底部0，尖端20
+        const coneHeight = 20;
         
         function getRadiusAtHeightOriginal(y_orig) {
             if (y_orig <= 13) {
@@ -594,7 +643,6 @@
             }
         }
         
-        // 翻轉後: 輸入 y (0底部~20頂部) 輸出半徑
         function getRadiusAtHeightFlipped(y) {
             const y_orig = coneHeight - y;
             return getRadiusAtHeightOriginal(y_orig);
@@ -702,12 +750,46 @@
         // 交線物件
         let intersectionLineObj = null;
         
+        // ===== 新增：全域儲存最近一次交線資料 =====
+        let lastIntersectionData = {
+            area: 0,
+            pointCount: 0,
+            perimeter: 0,
+            points: []
+        };
+        
         // 將「距尖端距離」轉換為世界Y座標
         function tipDistanceToWorldY(tipDist) {
             return coneHeight - tipDist;
         }
         
-        // 計算交線點並更新視覺 (純視覺，不計算面積)
+        // ===== 新增：鞋帶公式計算多邊形面積 =====
+        function calculatePolygonArea(points) {
+            let area = 0;
+            const n = points.length;
+            if (n < 3) return 0;
+            for (let i = 0; i < n; i++) {
+                const p1 = points[i];
+                const p2 = points[(i + 1) % n];
+                area += (p1.x * p2.y - p2.x * p1.y);
+            }
+            return Math.abs(area) / 2;
+        }
+        
+        // ===== 新增：計算多邊形周長 =====
+        function calculatePolygonPerimeter(points) {
+            let perimeter = 0;
+            const n = points.length;
+            if (n < 2) return 0;
+            for (let i = 0; i < n; i++) {
+                const p1 = points[i];
+                const p2 = points[(i + 1) % n];
+                perimeter += Math.hypot(p2.x - p1.x, p2.y - p1.y);
+            }
+            return perimeter;
+        }
+        
+        // 計算交線點並更新視覺 + 面積
         function computeAndUpdateIntersection(tiltDeg, tipDistance, planeAngleDeg) {
             const cutHeightWorld = tipDistanceToWorldY(tipDistance);
             const planeRotX = planeAngleDeg * Math.PI / 180;
@@ -774,6 +856,7 @@
                     cuttingPlane.remove(intersectionLineObj);
                     intersectionLineObj = null;
                 }
+                lastIntersectionData = { area: 0, pointCount: 0, perimeter: 0, points: [] };
                 return;
             }
             
@@ -793,6 +876,7 @@
                     cuttingPlane.remove(intersectionLineObj);
                     intersectionLineObj = null;
                 }
+                lastIntersectionData = { area: 0, pointCount: 0, perimeter: 0, points: [] };
                 return;
             }
             
@@ -805,7 +889,17 @@
             });
             unique.sort((a, b) => a.angle - b.angle);
             
-            // 建立交線視覺 (加粗效果 linewidth 已設為5，但部分瀏覽器支援度有限，視覺上足夠)
+            // ===== 新增：計算面積、周長，存入全域 =====
+            const area = calculatePolygonArea(unique);
+            const perimeter = calculatePolygonPerimeter(unique);
+            lastIntersectionData = {
+                area: area,
+                pointCount: unique.length,
+                perimeter: perimeter,
+                points: unique.map(p => ({ x: p.x, y: p.y }))
+            };
+            
+            // 建立交線視覺
             if (intersectionLineObj) cuttingPlane.remove(intersectionLineObj);
             const vertices = [];
             for (let p of unique) {
@@ -839,14 +933,80 @@
             computeAndUpdateIntersection(tilt, tipDistance, cutAngle);
             
             const worldY = tipDistanceToWorldY(tipDistance);
-            let infoHtml = `<div class="calculation-step"><strong>⚡ 尖端距離基準模式 (純視覺)</strong><br>
+            const area = lastIntersectionData.area;
+            const perimeter = lastIntersectionData.perimeter;
+            const n = lastIntersectionData.pointCount;
+            
+            // ===== 更新即時截面積顯示區 =====
+            document.getElementById('cross-area').textContent = area.toFixed(3);
+            document.getElementById('cross-perimeter').textContent = perimeter.toFixed(3);
+            document.getElementById('cross-diameter').textContent = area > 0 ? (2 * Math.sqrt(area / Math.PI)).toFixed(3) : '0.000';
+            document.getElementById('cross-points').textContent = n;
+            
+            // ===== 建立計算過程 HTML =====
+            let calcProcessHtml = '';
+            if (n >= 3) {
+                const pts = lastIntersectionData.points;
+                // 計算 Σ 各項
+                let sumTerms = [];
+                let sumValue = 0;
+                const showCount = Math.min(8, n);
+                for (let i = 0; i < n; i++) {
+                    const p1 = pts[i];
+                    const p2 = pts[(i + 1) % n];
+                    const term = p1.x * p2.y - p2.x * p1.y;
+                    sumValue += term;
+                    if (i < showCount) {
+                        sumTerms.push(`(${p1.x.toFixed(2)}×${p2.y.toFixed(2)} − ${p2.x.toFixed(2)}×${p1.y.toFixed(2)})`);
+                    }
+                }
+                const sumStr = sumTerms.join('<br>+ ') + (n > showCount ? `<br>+ ... (共 ${n} 項)` : '');
+                
+                calcProcessHtml = `
+                    <div class="calculation-step">
+                        <strong>🧮 截面積計算過程（鞋帶公式）</strong>
+                        <div class="calc-detail">
+                            A = ½ |Σ(xᵢ·yᵢ₊₁ − xᵢ₊₁·yᵢ)|<br>
+                            交點數 n = ${n}<br>
+                            <br>
+                            Σ = ${sumStr}<br>
+                            <br>
+                            Σ = <span class="highlight">${sumValue.toFixed(4)}</span><br>
+                            A = ½ × |${sumValue.toFixed(4)}| = <span class="highlight">${area.toFixed(4)} m²</span>
+                        </div>
+                    </div>
+                    <div class="calculation-step">
+                        <strong>📏 幾何資訊</strong>
+                        <div class="calc-detail">
+                            截面周長 ≈ <span class="highlight">${perimeter.toFixed(3)} m</span><br>
+                            交點數量 = ${n} 個<br>
+                            等效圓直徑 ≈ <span class="highlight">${(2 * Math.sqrt(area / Math.PI)).toFixed(3)} m</span><br>
+                            等效圓面積 = <span class="highlight">${area.toFixed(3)} m²</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                calcProcessHtml = `
+                    <div class="calculation-step">
+                        <strong>🧮 截面積計算</strong>
+                        <div class="calc-detail">
+                            <span style="color:#c0392b;">⚠️ 交點不足 3 個，無法形成有效截面。</span><br>
+                            請調整高度或傾角，使平面與錐體產生有效交線。
+                        </div>
+                    </div>
+                `;
+            }
+            
+            let infoHtml = `<div class="calculation-step"><strong>⚡ 尖端距離基準模式</strong><br>
             📏 距尖端距離: ${tipDistance.toFixed(2)}m → 世界Y座標: ${worldY.toFixed(2)}m<br>
             圓錐傾斜角度: ${tilt}° | 平面傾角: ${cutAngle}°<br>
             <span style="color:#ff5500; font-weight:bold;">✓ 交線即時更新，完整貼合平面</span><br>
             </div>`;
+            infoHtml += calcProcessHtml;
             infoHtml += `<div class="calculation-step"><strong>📐 交線狀態</strong><br>
             <span style="font-size:0.85rem;">可旋轉/縮放觀察截面形狀。</span><br>
-            <span style="font-size:0.75rem;">⚠️ 此動態展示僅用於說明火焰探測器監視涵蓋範圍在CAD套圖的由來,圖面數據僅供參考非實際應用計算數值。</span></div>`;
+            <span style="font-size:0.75rem;">⚠️ 此動態展示僅用於說明火焰探測器監視涵蓋範圍在CAD套圖的由來，圖面數據僅供參考非實際應用計算數值。</span></div>`;
+            
             document.getElementById('calc-steps').innerHTML = infoHtml;
             document.getElementById('cut-position').textContent = tipDistance.toFixed(1);
             document.getElementById('cut-angle').textContent = cutAngle;
