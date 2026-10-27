@@ -1103,7 +1103,8 @@
             });
         });
         
-        // 下一步到系统配置
+
+		        // 下一步到系統配置
         document.getElementById('next-to-system').addEventListener('click', function() {
             if (!validateInputs()) return;
             
@@ -1115,19 +1116,53 @@
             currentProject.name = projectName;
             currentProject.panelModel = panelModel;
             currentProject.numberingMethod = numberingMethod;
-            currentProject.systems = [];
+            
+            // ==========================================
+            // 關鍵修改：先把目前畫面上輸入的樓層抓下來，避免被清空
+            // ==========================================
+            const oldSystems = [];
+            for (let i = 0; i < systemCount; i++) {
+                const floorsInput = document.getElementById(`floors-input-${i}`);
+                let floors = [];
+                
+                // 如果畫面上已經有這個輸入框，就把值抓下來
+                if (floorsInput) {
+                    floors = floorsInput.value.split('\n')
+                        .map(f => f.trim())
+                        .filter(f => f.length > 0);
+                } 
+                // 如果畫面上沒有，才去讀 currentProject 的舊資料
+                else if (currentProject.systems[i]) {
+                    floors = currentProject.systems[i].floors || [];
+                }
+                
+                // 保留該系統原本的設備數量資料
+                const existingDevices = currentProject.systems[i] ? currentProject.systems[i].devices : [];
+                
+                oldSystems.push({
+                    id: `${i+1}`,
+                    floors: floors,
+                    devices: existingDevices
+                });
+            }
+            
+            currentProject.systems = oldSystems;
+            // ==========================================
             
             const container = document.getElementById('systems-container');
             container.innerHTML = '';
             
             for (let i = 0; i < systemCount; i++) {
+                const system = currentProject.systems[i];
+                const floorValue = system.floors.join('\n');
+
                 const div = document.createElement('div');
                 div.className = 'system-item';
                 div.innerHTML = `
-                    <h4>系統分區 ${i+1}</h4>
+                    <h4>系統分區 ${system.id}</h4>
                     <div class="form-group">
                         <label for="floors-input-${i}" class="required">管理樓層 (從高到低):</label>
-                        <textarea id="floors-input-${i}" class="floors-input" placeholder="請從高樓層到低樓層輸入，每行一個樓層\n例如:\n3F\n2F\n1F\nB1F\nB2F"></textarea>
+                        <textarea id="floors-input-${i}" class="floors-input" placeholder="請從高樓層到低樓層輸入，每行一個樓層\n例如:\n3F\n2F\n1F\nB1F\nB2F">${floorValue}</textarea>
                     </div>
                     <div class="form-group">
                         <label>樓層預覽:</label>
@@ -1141,12 +1176,16 @@
                     currentProject.hasUnsavedChanges = true;
                     scheduleAutoSave();
                 });
+                
+                // 立即更新下方的樓層預覽標籤
+                updateFloorsPreview(i);
             }
             
             document.querySelector('.tab-button[data-tab="system-config"]').click();
             currentProject.hasUnsavedChanges = true;
             scheduleAutoSave();
         });
+
         
         // 下一步到设备配置
         document.getElementById('next-to-device').addEventListener('click', function() {
@@ -1912,208 +1951,139 @@
         
         container.innerHTML = html;
     }
-    
+	
+	
+	    // ==========================================
+    // 重構新增：Latitude 編號核心運算邏輯
+    // ==========================================
+
+    // 1. 計算單一設備產生的子編號清單
+    function generateSingleDeviceNumbers(device, startNumber, count, systemId) {
+        const numbers = [];
+        let current = startNumber;
+        
+        for (let i = 0; i < count; i++) {
+            // Latitude 系統：DIMM、R2ML 等有 hasSubNumbers 的設備，每個佔用 1 個主編號，但產生 2 個子編號
+            if (device.hasSubNumbers) {
+                for (let j = 1; j <= 2; j++) {
+                    numbers.push(`${systemId}-${current.toString().padStart(3, '0')}-${j}`);
+                }
+                current += 1;
+            } else {
+                // 普通設備：1 個主編號
+                numbers.push(`${systemId}-${current.toString().padStart(3, '0')}`);
+                current += 1;
+            }
+        }
+        return { numbers, nextStart: current };
+    }
+
+    // 2. 建立遍歷任務清單 (解決三種模式的迴圈差異)
+    function buildNumberingTasks(system, allDevices, numberingMethod, verticalDevices) {
+        const tasks = []; 
+        const reversedFloors = [...system.floors].reverse(); 
+        
+        if (numberingMethod === "horizontal") {
+            reversedFloors.forEach(floor => {
+                allDevices.forEach(device => tasks.push({ floor, device }));
+            });
+        } else if (numberingMethod === "vertical") {
+            allDevices.forEach(device => {
+                reversedFloors.forEach(floor => tasks.push({ floor, device }));
+            });
+        } else if (numberingMethod === "mixed") {
+            allDevices.filter(d => verticalDevices.includes(d.id)).forEach(device => {
+                reversedFloors.forEach(floor => tasks.push({ floor, device }));
+            });
+            reversedFloors.forEach(floor => {
+                allDevices.filter(d => !verticalDevices.includes(d.id)).forEach(device => {
+                    tasks.push({ floor, device });
+                });
+            });
+        }
+        return tasks;
+    }
+
+    // 3. 處理單一系統的編號運算
+    function processSystemNumbering(system, allDevices, numberingMethod, verticalDevices) {
+        const tasks = buildNumberingTasks(system, allDevices, numberingMethod, verticalDevices);
+        const floorData = {}; 
+        let nextNumber = 1;
+        let totalCurrent = 0;
+        const systemDeviceTotals = {};
+
+        system.floors.forEach(floor => { floorData[floor] = {}; });
+
+        tasks.forEach(task => {
+            const { floor, device } = task;
+            const count = system.devices
+                .filter(d => d.floor === floor && d.deviceId === device.id)
+                .reduce((sum, d) => sum + d.count, 0);
+
+            if (count === 0) {
+                floorData[floor][device.id] = {
+                    count: '', range: '', start: nextNumber, end: nextNumber - 1,
+                    name: device.name, code: device.code, current: device.current || 0, numbers: []
+                };
+                return;
+            }
+
+            const { numbers, nextStart } = generateSingleDeviceNumbers(
+                device, nextNumber, count, system.id
+            );
+
+            floorData[floor][device.id] = {
+                count: count,
+                range: formatNumberRange(nextNumber, nextStart - 1),
+                numbers: numbers, 
+                start: nextNumber,
+                end: nextStart - 1,
+                name: device.name,
+                code: device.code,
+                current: device.current || 0
+            };
+
+            nextNumber = nextStart;
+        });
+
+        allDevices.forEach(device => {
+            const total = system.devices.filter(d => d.deviceId === device.id).reduce((sum, d) => sum + d.count, 0);
+            systemDeviceTotals[device.id] = total;
+            totalCurrent += total * (device.current || 0);
+        });
+
+        return { floorData, systemDeviceTotals, totalCurrent, nextNumber };
+    }
+	
+	    // ==========================================
+    // 重構替換：產生報表 HTML 渲染
+    // ==========================================
     function generateResultTable() {
         const resultDiv = document.getElementById('result-container');
         let html = '';
         
-        const panelModel = document.getElementById('panel-model').value.trim();
         const numberingMethod = document.getElementById('result-numbering-method').value;
         
-        // 第一部分：所有系统分区的总览表格
+        // 第一部分：所有系統分區的總覽表格
         html += `<h2>系統分區總覽</h2>`;
         
-        // 先收集所有系统的数据
-        const systemData = [];
-        
-        currentProject.systems.forEach((system) => {
-            const originalFloors = [...system.floors];
-            const reversedFloors = [...system.floors].reverse();
-            
-            const floorData = {};
-            let nextNumber = 1;
+        // 收集所有系統的運算結果
+        const systemData = currentProject.systems.map(system => {
             const allDevices = [...currentProject.selectedDevices];
-            
-            // 根据编号方式处理设备编号
-            if (numberingMethod === "horizontal") {
-                // 横向编号：先编完一层楼的所有设备再往上一层
-                reversedFloors.forEach(floor => {
-                    floorData[floor] = {};
-                    
-                    allDevices.forEach(device => {
-                        const deviceCount = system.devices
-                            .filter(d => d.floor === floor && d.deviceId === device.id)
-                            .reduce((sum, d) => sum + d.count, 0);
-                        
-                        if (deviceCount > 0) {
-                            const start = nextNumber;
-                            const end = start + deviceCount - 1;
-                            floorData[floor][device.id] = {
-                                count: deviceCount,
-                                range: formatNumberRange(start, end),
-                                start: start,
-                                end: end,
-                                name: device.name,
-                                code: device.code,
-                                current: device.current || 0
-                            };
-                            nextNumber = end + 1;
-                        } else {
-                            floorData[floor][device.id] = {
-                                count: '',
-                                range: '',
-                                start: nextNumber,
-                                end: nextNumber - 1,
-                                name: device.name,
-                                code: device.code,
-                                current: device.current || 0
-                            };
-                        }
-                    });
-                });
-            } else if (numberingMethod === "vertical") {
-                // 纵向编号：先编完一种设备的所有楼层再编下一种设备
-                allDevices.forEach(device => {
-                    reversedFloors.forEach(floor => {
-                        if (!floorData[floor]) floorData[floor] = {};
-                        
-                        const deviceCount = system.devices
-                            .filter(d => d.floor === floor && d.deviceId === device.id)
-                            .reduce((sum, d) => sum + d.count, 0);
-                        
-                        if (deviceCount > 0) {
-                            const start = nextNumber;
-                            const end = start + deviceCount - 1;
-                            floorData[floor][device.id] = {
-                                count: deviceCount,
-                                range: formatNumberRange(start, end),
-                                start: start,
-                                end: end,
-                                name: device.name,
-                                code: device.code,
-                                current: device.current || 0
-                            };
-                            nextNumber = end + 1;
-                        } else {
-                            floorData[floor][device.id] = {
-                                count: '',
-                                range: '',
-                                start: nextNumber,
-                                end: nextNumber - 1,
-                                name: device.name,
-                                code: device.code,
-                                current: device.current || 0
-                            };
-                        }
-                    });
-                });
-            } else if (numberingMethod === "mixed") {
-                // 纵横混合：先处理纵向设备，再处理横向设备
-                // 先处理纵向编号的设备
-                allDevices.forEach(device => {
-                    if (currentProject.verticalNumberingDevices.includes(device.id)) {
-                        reversedFloors.forEach(floor => {
-                            if (!floorData[floor]) floorData[floor] = {};
-                            
-                            const deviceCount = system.devices
-                                .filter(d => d.floor === floor && d.deviceId === device.id)
-                                .reduce((sum, d) => sum + d.count, 0);
-                            
-                            if (deviceCount > 0) {
-                                const start = nextNumber;
-                                const end = start + deviceCount - 1;
-                                floorData[floor][device.id] = {
-                                    count: deviceCount,
-                                    range: formatNumberRange(start, end),
-                                    start: start,
-                                    end: end,
-                                    name: device.name,
-                                    code: device.code,
-                                    current: device.current || 0
-                                };
-                                nextNumber = end + 1;
-                            } else {
-                                floorData[floor][device.id] = {
-                                    count: '',
-                                    range: '',
-                                    start: nextNumber,
-                                    end: nextNumber - 1,
-                                    name: device.name,
-                                    code: device.code,
-                                    current: device.current || 0
-                                };
-                            }
-                        });
-                    }
-                });
-
-                // 再处理横向编号的设备
-                reversedFloors.forEach(floor => {
-                    if (!floorData[floor]) floorData[floor] = {};
-                    
-                    allDevices.forEach(device => {
-                        if (!currentProject.verticalNumberingDevices.includes(device.id)) {
-                            const deviceCount = system.devices
-                                .filter(d => d.floor === floor && d.deviceId === device.id)
-                                .reduce((sum, d) => sum + d.count, 0);
-                            
-                            if (deviceCount > 0) {
-                                const start = nextNumber;
-                                const end = start + deviceCount - 1;
-                                floorData[floor][device.id] = {
-                                    count: deviceCount,
-                                    range: formatNumberRange(start, end),
-                                    start: start,
-                                    end: end,
-                                    name: device.name,
-                                    code: device.code,
-                                    current: device.current || 0
-                                };
-                                nextNumber = end + 1;
-                            } else {
-                                floorData[floor][device.id] = {
-                                    count: '',
-                                    range: '',
-                                    start: nextNumber,
-                                    end: nextNumber - 1,
-                                    name: device.name,
-                                    code: device.code,
-                                    current: device.current || 0
-                                };
-                            }
-                        }
-                    });
-                });
-            }
-            
-            // 计算系统总消耗电流
-            const systemDeviceTotals = {};
-            let totalCurrent = 0;
-            
-            allDevices.forEach(device => {
-                const total = system.devices
-                    .filter(d => d.deviceId === device.id)
-                    .reduce((sum, d) => sum + d.count, 0);
-                
-                systemDeviceTotals[device.id] = total;
-                totalCurrent += total * (device.current || 0);
-            });
-            
-            // 保存系统数据
-            systemData.push({
+            const result = processSystemNumbering(
+                system, allDevices, numberingMethod, currentProject.verticalNumberingDevices
+            );
+            return {
                 system: system,
-                floorData: floorData,
-                systemDeviceTotals: systemDeviceTotals,
-                totalCurrent: totalCurrent,
                 allDevices: allDevices,
-                originalFloors: originalFloors,
-                reversedFloors: reversedFloors
-            });
+                ...result 
+            };
         });
         
-        // 生成系统分區表格（按照原始格式）
-        systemData.forEach((data, index) => {
-            const { system, floorData, systemDeviceTotals, totalCurrent, allDevices, originalFloors } = data;
+        // 渲染總覽表格
+        systemData.forEach((data) => {
+            const { system, floorData, systemDeviceTotals, totalCurrent, allDevices } = data;
+            const floorsForDisplay = [...system.floors]; 
             
             const currentWarning = totalCurrent > 117 ? 
                 `<span style="color: #d32f2f; font-weight: bold;">警告: 總消耗電流: ${totalCurrent.toFixed(2)} mA (⚠️超過8成負荷,注意NG147mA限制)</span>` : 
@@ -2136,7 +2106,7 @@
                     <tbody>
             `;
             
-            originalFloors.forEach(floor => {
+            floorsForDisplay.forEach(floor => {
                 const total = system.devices
                     .filter(d => d.floor === floor)
                     .reduce((sum, d) => sum + d.count, 0);
@@ -2171,11 +2141,11 @@
             `;
         });
         
-        // 第二部分：各系统的详细设备编号列表
+        // 第二部分：各系統的詳細設備編號列表
         html += `<h2>設備編號詳細列表</h2>`;
         
-        systemData.forEach((data, index) => {
-            const { system, floorData, systemDeviceTotals, totalCurrent, allDevices, reversedFloors } = data;
+        systemData.forEach((data) => {
+            const { system, floorData, allDevices } = data;
             
             html += `<h3 class="system-title">系統分區: ${system.id}</h3>`;
             html += `<table class="device-table">`;
@@ -2194,58 +2164,36 @@
             `;
 
             let sequence = 1;
-            reversedFloors.forEach(floor => {
+            [...system.floors].reverse().forEach(floor => {
                 allDevices.forEach(device => {
                     const deviceData = floorData[floor][device.id];
                     if (deviceData && deviceData.count > 0) {
-                        // 生成设备编号
-                        for (let i = 0; i < deviceData.count; i++) {
-                            const baseNum = deviceData.start + i;
-                            
-                            // 检查设备是否有子编号
-                            if (device.hasSubNumbers) {
-                                // DIMM和R2ML设备有2个子编号
-                                for (let j = 1; j <= 2; j++) {
-                                    const deviceNumber = `${system.id}-${baseNum.toString().padStart(3, '0')}-${j}`;
-                                    
-                                    html += `
-                                        <tr>
-                                            <td>${sequence++}</td>
-                                            <td>${system.id}</td>
-                                            <td>${floor}</td>
-                                            <td>${device.name} (${device.code})</td>
-                                            <td class="device-number">${deviceNumber}</td>
-                                            <td></td>
-                                        </tr>
-                                    `;
-                                }
-                            } else {
-                                // 普通设备只有主编号，没有子编号
-                                const deviceNumber = `${system.id}-${baseNum.toString().padStart(3, '0')}`;
-                                
-                                html += `
-                                    <tr>
-                                        <td>${sequence++}</td>
-                                        <td>${system.id}</td>
-                                        <td>${floor}</td>
-                                        <td>${device.name} (${device.code})</td>
-                                        <td class="device-number">${deviceNumber}</td>
-                                        <td></td>
-                                    </tr>
-                                `;
-                            }
-                        }
+                        
+                        // 直接使用核心運算產生的 numbers 陣列渲染
+                        deviceData.numbers.forEach((deviceNumber) => {
+                            html += `
+                                <tr>
+                                    <td>${sequence++}</td>
+                                    <td>${system.id}</td>
+                                    <td>${floor}</td>
+                                    <td>${device.name} (${device.code})</td>
+                                    <td class="device-number">${deviceNumber}</td>
+                                    <td></td>
+                                </tr>
+                            `;
+                        });
                     }
                 });
             });
 
             html += `</tbody></table>`;
-            
             html += `<div class="page-break"></div>`;
         });
         
         resultDiv.innerHTML = html;
     }
+    
+
 
     // 辅助函数：格式化数字范围
     function formatNumberRange(start, end) {
