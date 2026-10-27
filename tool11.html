@@ -472,9 +472,11 @@
                 const sysNum = String(sysRaw).trim();
                 const devNum = String(devRaw).trim();
                 const devPadded = /^\d+$/.test(devNum) ? devNum.padStart(3, '0') : devNum;
-                const matchKey = isDistributedPanel
-                    ? `${panelNumber}-1-${devPadded}`
-                    : `${sysNum}-${devPadded}`;
+
+				const matchKey = isDistributedPanel
+					? `${sysNum}-${devPadded}`   // 和总机一样，因为B已去掉CMA前缀
+					: `${sysNum}-${devPadded}`;
+
                 out.push({
                     matchKey,
                     zone: row[colZone] !== undefined ? String(row[colZone]).trim() : '',
@@ -497,15 +499,17 @@
             }
             return s;
         }
-        function getMainDeviceKey(deviceNumber) {
-            const s = normalizeDeviceNumber(deviceNumber);
-            if (!s) return '';
-            const parts = s.split('-');
-            if (parts.length >= 3 && /^\d+$/.test(parts[0]) && /^\d+$/.test(parts[1])) {
-                return parts[0] + '-' + parts[1];
-            }
-            return s;
-        }
+		function getMainDeviceKey(deviceNumber) {
+			const s = normalizeDeviceNumber(deviceNumber);  // "6-1-036"
+			if (!s) return '';
+			const parts = s.split('-');
+			// 形如 CMA-系統-設備 或 CMA-系統-設備-子號
+			if (parts.length >= 3 && /^\d+$/.test(parts[0]) && /^\d+$/.test(parts[1]) && /^\d+$/.test(parts[2])) {
+				// 去掉 CMA 前缀，保留 系統-設備
+				return parts[1] + '-' + parts[2];   // "1-036"
+			}
+			return s;
+		}
 
         // ========= 合併 =========
         mergeBtn.addEventListener('click', function() {
