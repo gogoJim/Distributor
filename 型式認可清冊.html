@@ -139,8 +139,6 @@
             background-color: #fff;
         }
 
-	        /* 👇 在這裡加入以下代碼 */
-        /* 滑鼠移動時整行變色效果 */
         .master-table tbody tr:hover {
             background-color: #e6f3ff !important;
             cursor: pointer;
@@ -151,7 +149,6 @@
             background-color: #d4e8ff;
             transition: background-color 0.15s ease;
         }
-        /* 👆 以上為新增代碼 */
 
         .checkbox-col {
             text-align: center;
@@ -269,49 +266,25 @@
                 return false;
             });
             function blockDevTools(e) {
-                if (e.key === 'F12') {
-                    e.preventDefault();
-                    return false;
-                }
-                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
-                    e.preventDefault();
-                    return false;
-                }
-                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
-                    e.preventDefault();
-                    return false;
-                }
-                if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
-                    e.preventDefault();
-                    return false;
-                }
-                if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
-                    e.preventDefault();
-                    return false;
-                }
-                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
-                    e.preventDefault();
-                    return false;
-                }
+                if (e.key === 'F12') { e.preventDefault(); return false; }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
                 return true;
             }
             document.addEventListener('keydown', blockDevTools);
             let devtoolsOpen = false;
             const element = new Image();
             Object.defineProperty(element, 'id', {
-                get: function() {
-                    devtoolsOpen = true;
-                    console.warn('偵測到開發者工具');
-                    return '';
-                }
+                get: function() { devtoolsOpen = true; console.warn('偵測到開發者工具'); return ''; }
             });
             setInterval(function() {
                 devtoolsOpen = false;
                 console.log(element);
                 console.clear();
-                if (devtoolsOpen) {
-                    console.clear();
-                }
+                if (devtoolsOpen) { console.clear(); }
             }, 1000);
         })();
     </script>
@@ -358,110 +331,11 @@
     </div>
 </div>
 
+<!-- 👇 引入共用資料檔 -->
+<script src="device-data.js"></script>
 <script>
-    const rawData = [
-        { sn: 1, certNo: "內授消字第1131300820號", deviceName: "小規模放水槍", manufacturer: "HOCHIKI", model: "GD-101" },
-        { sn: 2, certNo: "內授消字第1131601828號", deviceName: "瓦斯警報器", manufacturer: "YAZAKI", model: "YF-517D" },
-        { sn: 3, certNo: "內授消字第1141601200號", deviceName: "固定式放水型", manufacturer: "HOCHIKI", model: "GE-101" },
-        { sn: 4, certNo: "AR-A104001", deviceName: "火警受信總機", manufacturer: "HOCHIKI", model: "HRN-ABS2550FGA(T)" },
-        { sn: 5, certNo: "AR-A110008", deviceName: "火警受信總機", manufacturer: "HOCHIKI AMERICA", model: "L@titude" },
-        { sn: 6, certNo: "AR-A111005", deviceName: "火警受信總機", manufacturer: "HOCHIKI AMERICA", model: "K1810-12" },
-        { sn: 7, certNo: "AR-A114003", deviceName: "火警受信總機", manufacturer: "HOCHIKI AMERICA", model: "HCVR-3" },
-        { sn: 8, certNo: "AR-A114004", deviceName: "火警受信總機", manufacturer: "HOCHIKI", model: "HRU-ABS1020(OP)" },
-        { sn: 9, certNo: "AR-A114005", deviceName: "火警受信總機", manufacturer: "HOCHIKI", model: "HRR-AAS5610" },
-        { sn: 10, certNo: "AV-A106001", deviceName: "流水檢測裝置", manufacturer: "HOCHIKI", model: "GNA-EA100" },
-        { sn: 11, certNo: "AV-A106005", deviceName: "流水檢測裝置", manufacturer: "HOCHIKI", model: "GNA-FA100" },
-        { sn: 12, certNo: "AV-A106006", deviceName: "流水檢測裝置", manufacturer: "HOCHIKI", model: "GNA-FA150" },
-        { sn: 13, certNo: "B-A103001", deviceName: "火警警鈴", manufacturer: "HOCHIKI", model: "FBB-150ID" },
-        { sn: 14, certNo: "B-A103002", deviceName: "火警警鈴", manufacturer: "HOCHIKI", model: "FBB-150I" },
-        { sn: 15, certNo: "CSP-A103009-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "GQH-FE72-2" },
-        { sn: 16, certNo: "CSP-A104001-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "GQH-GA72-2" },
-        { sn: 17, certNo: "CSP-A104002-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "HF-E72-2" },
-        { sn: 18, certNo: "CSP-A104003-1", deviceName: "密閉式水噴頭", manufacturer: "HOCHIKI", model: "GQH-FE98-2" },
-        { sn: 19, certNo: "DV-A106014", deviceName: "一齊開放閥", manufacturer: "TOYO", model: "10-65FDEWF" },
-        { sn: 20, certNo: "DV-A106018", deviceName: "一齊開放閥", manufacturer: "TOYO", model: "10-50FDEWF" },
-        { sn: 21, certNo: "FD-114025", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFG-TW70L" },
-        { sn: 22, certNo: "FD-A10213", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DRD-E" },
-        { sn: 23, certNo: "FD-A10233", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "DFE-135" },
-        { sn: 24, certNo: "FD-A10234", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "DSC-EA" },
-        { sn: 25, certNo: "FD-A10250", deviceName: "火警探測器", manufacturer: "HOCHIKI EUROPE", model: "DCD-1E-IS" },
-        { sn: 26, certNo: "FD-A10256", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "DCD-135" },
-        { sn: 27, certNo: "FD-A10257", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SPC-24" },
-        { sn: 28, certNo: "FD-A103008", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DHA-2L" },
-        { sn: 29, certNo: "FD-A103017", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFG-1W70L" },
-        { sn: 30, certNo: "FD-A103018", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DSC-2" },
-        { sn: 31, certNo: "FD-A103019", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "SLV-2" },
-        { sn: 32, certNo: "FD-A105031", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ACC-V" },
-        { sn: 33, certNo: "FD-A105032", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ALN-V" },
-        { sn: 34, certNo: "FD-A106004", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ATJ-EA" },
-        { sn: 35, certNo: "FD-A106022", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SOC-24VN" },
-        { sn: 36, certNo: "FD-A107011", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ALK-NLYA" },
-        { sn: 37, certNo: "FD-A108010", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ABC-12YA" },
-        { sn: 38, certNo: "FD-A110001", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ASB-2LYA" },
-        { sn: 39, certNo: "FD-A110003", deviceName: "火警探測器", manufacturer: "HOCHIKI EUROPE", model: "SOC-E-IS" },
-        { sn: 40, certNo: "FD-A110010", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SOE-24H" },
-        { sn: 41, certNo: "FD-A111040", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "SOE-24V" },
-        { sn: 42, certNo: "FD-A112017", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DRC-13A" },
-        { sn: 43, certNo: "FD-A113003", deviceName: "火警探測器", manufacturer: "HOCHIKI AMERICA", model: "ALO-V" },
-        { sn: 44, certNo: "FD-A114006", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFS-1SE70RLB" },
-        { sn: 45, certNo: "FD-A115", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "DFV-1W70K-J-WI" },
-        { sn: 46, certNo: "FH-A108001", deviceName: "泡沫噴頭", manufacturer: "HOCHIKI", model: "GFH-D35" },
-        { sn: 47, certNo: "L-A103002", deviceName: "火警標示燈", manufacturer: "HOCHIKI", model: "TL-14D" },
-        { sn: 48, certNo: "L-A115001", deviceName: "火警標示燈", manufacturer: "HOCHIKI", model: "PPH-1A" },
-        { sn: 49, certNo: "L-A115002", deviceName: "火警標示燈", manufacturer: "HOCHIKI", model: "PRK-1A" },
-        { sn: 50, certNo: "P-A105004", deviceName: "火警發信機", manufacturer: "HOCHIKI AMERICA", model: "DCP-AMS-LP" },
-        { sn: 51, certNo: "FD-A110003", deviceName: "火警探測器", manufacturer: "HOCHIKI", model: "ATI-NWLHYA" },
-        { sn: 52, certNo: "P-A114001", deviceName: "火警發信機", manufacturer: "HOCHIKI", model: "PRK-1A" },
-        { sn: 53, certNo: "P-A114002", deviceName: "火警發信機", manufacturer: "HOCHIKI", model: "PPH-1A" },
-        { sn: 54, certNo: "RD-A103003", deviceName: "住宅用火災警報器", manufacturer: "HOCHIKI", model: "SS-FL-10HC" },
-        { sn: 55, certNo: "RD-A106011", deviceName: "住宅用火災警報器", manufacturer: "HOCHIKI", model: "SS-2LT-10HC" },
-        { sn: 56, certNo: "RP-A10202", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-S4A" },
-        { sn: 57, certNo: "RP-A103002", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-BY" },
-        { sn: 58, certNo: "RP-A103003", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-G4" },
-        { sn: 59, certNo: "RP-A103004", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-K4P" },
-        { sn: 60, certNo: "RP-A103005", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-KL" },
-        { sn: 61, certNo: "RP-A103006", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-R4(D2/H4)" },
-        { sn: 62, certNo: "RP-A103008", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-K8" },
-        { sn: 63, certNo: "RP-A105007", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-DIMM" },
-        { sn: 64, certNo: "RP-A105008", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-SCI" },
-        { sn: 65, certNo: "RP-A105009", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-R2ML" },
-        { sn: 66, certNo: "RP-A105011", deviceName: "火警中繼器", manufacturer: "HOCHIKI AMERICA", model: "DCP-CZM" },
-        { sn: 67, certNo: "RP-A108007", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-SCI2" },
-        { sn: 68, certNo: "RP-A108008", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-PSCI" },
-        { sn: 69, certNo: "RP-A111005", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CHW-ADSICI2" },
-        { sn: 70, certNo: "RP-A114002", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CMA-ABW2040(OP)" },
-        { sn: 71, certNo: "RP-A115001", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CMA-ABW510(OP)" },
-        { sn: 72, certNo: "RP-A115002", deviceName: "火警中繼器", manufacturer: "HOCHIKI", model: "CMA-ABW1020(OP)" }
-    ];
-
-    const idMapping = [
-        { id: "A101", name: "HRN-ABW510FGA(T)" }, { id: "A102", name: "HRN-ABW1020FGA(T)" }, { id: "A103", name: "HRN-ABS510FGA(T)" },
-        { id: "A104", name: "HRN-ABS1020FGA(T)" }, { id: "A105", name: "HRN-ABS2040FGA(T)" }, { id: "A106", name: "HRN-ABS2550FGA(T)" },
-        { id: "A107", name: "HRR-AAW510" }, { id: "A108", name: "HRR-AAW1020" }, { id: "A109", name: "HRR-AAS510" },
-        { id: "A110", name: "HRR-AAS1020" }, { id: "A111", name: "HRR-AAS2040" }, { id: "A112", name: "HRR-AAS2550" },
-        { id: "A113", name: "HRR-AAS4080" }, { id: "A114", name: "HRR-AAS5100" }, { id: "A115", name: "HRR-AAS5610" },
-        { id: "A116", name: "HRU-ABS1020(OP)" }, { id: "A117", name: "HRU-ABS2040(OP)" }, { id: "A201", name: "ALK-NLYA" },
-        { id: "A202", name: "ASB-2LYA" }, { id: "A203", name: "ATI-NWLHYA" }, { id: "A204", name: "PRK-1A" },
-        { id: "A205", name: "ABC-12YA" }, { id: "A301", name: "CHW-KL" }, { id: "A302", name: "CHW-K4P" },
-        { id: "A303", name: "CHW-K8" }, { id: "A304", name: "CHW-BY" }, { id: "A305", name: "CHW-R4" },
-        { id: "A306", name: "CHW-S4A" }, { id: "A307", name: "CHW-G4" }, { id: "A308", name: "CHW-ADSCI2" },
-        { id: "A309", name: "CHW-PSCI" }, { id: "A310", name: "CMA-ABW510(OP)" }, { id: "A311", name: "CMA-ABW1020(OP)" },
-        { id: "A312", name: "CMA-ABW2040(OP)" }, { id: "A401", name: "FBB-150ID" }, { id: "B101", name: "L@titude" },
-        { id: "B102", name: "L@titude 4" }, { id: "B103", name: "L@titude 6" }, { id: "B104", name: "L@titude 8" },
-        { id: "B105", name: "L@titude 10" }, { id: "B106", name: "L@titude 12" }, { id: "B107", name: "L@titude 14" },
-        { id: "B108", name: "L@titude 16" }, { id: "B201", name: "ALO-V" }, { id: "B202", name: "ATJ-EA" },
-        { id: "B203", name: "ACC-V" }, { id: "B301", name: "DCP-CZM" }, { id: "B302", name: "DCP-DIMM" },
-        { id: "B303", name: "DCP-R2ML" }, { id: "B304", name: "DCP-SCI" }, { id: "B305", name: "DCP-AMS-LP" },
-        { id: "C101", name: "SLV-2" }, { id: "C102", name: "DSC-2" }, { id: "C105", name: "DFS-1SE70RLB" },
-        { id: "C107", name: "DHA-2L" }, { id: "C109", name: "DRC-13A" }, { id: "C115", name: "PPH-1A" },
-        { id: "C117", name: "FBB-150I" }, { id: "C201", name: "SOE-24V" }, { id: "C202", name: "SOE-24H" },
-        { id: "C206", name: "DSC-EA" }, { id: "C208", name: "SPC-24" }, { id: "C301", name: "SOC-E-IS" },
-        { id: "C302", name: "DCD-1E-IS" }, { id: "C304", name: "DRD-E" }, { id: "C401", name: "SS-2LT-10HC" },
-        { id: "C402", name: "SS-FL-10HC" }, { id: "C403", name: "YF-517D" }, { id: "C601", name: "GQH-FE72-2" },
-        { id: "C602", name: "GQH-FE98-2" }, { id: "C605", name: "GFH-D35" }, { id: "C606", name: "GNA-FA100" },
-        { id: "C607", name: "GNA-FA150" }, { id: "D101", name: "HCVR-3" }, { id: "D301", name: "SOE-24V" },
-        { id: "D302", name: "SOE-24H" }, { id: "D303", name: "DCD-135" }
-    ];
+    // ✅ 使用共用資料（序號不再儲存於資料中，改由渲染時動態產生）
+    const rawData = DEVICE_DATA;
 
     let checkedStatus = new Array(rawData.length).fill(false);
     let currentFilteredIndices = [];
@@ -477,15 +351,16 @@
     const clearAllCheckedBtn = document.getElementById("clearAllCheckedBtn");
     const selectedCountSpan = document.getElementById("selectedCountInfo");
 
+    // ✅ 直接從共用資料反查 ID（不再需要 idMapping）
     function findIdByModel(model) {
-        const found = idMapping.find(m => m.name === model);
-        return found ? found.id : null;
+        const found = rawData.find(m => m.model === model);
+        return (found && found.id && found.id !== "-") ? found.id : null;
     }
 
     function saveSelectedToLocalStorage() {
         const selectedItems = [];
         const selectedIds = [];
-        
+
         for (let i = 0; i < checkedStatus.length; i++) {
             if (checkedStatus[i] === true) {
                 const item = rawData[i];
@@ -494,17 +369,17 @@
                     model: item.model,
                     certNo: item.certNo
                 });
-                
+
                 const matchedId = findIdByModel(item.model);
                 if (matchedId) {
                     selectedIds.push(matchedId);
                 }
             }
         }
-        
+
         localStorage.setItem('typeAccept_selected_export', JSON.stringify(selectedItems));
         localStorage.setItem('typeAccept_selected_ids', JSON.stringify(selectedIds));
-        
+
         console.log('✅ 已儲存勾選設備至 localStorage，共', selectedItems.length, '筆，ID清單:', selectedIds);
         return selectedItems.length;
     }
@@ -518,9 +393,9 @@
                     checkedStatus.fill(false);
                     for (let i = 0; i < rawData.length; i++) {
                         const item = rawData[i];
-                        const found = savedItems.some(saved => 
-                            saved.deviceName === item.deviceName && 
-                            saved.model === item.model && 
+                        const found = savedItems.some(saved =>
+                            saved.deviceName === item.deviceName &&
+                            saved.model === item.model &&
                             saved.certNo === item.certNo
                         );
                         if (found) checkedStatus[i] = true;
@@ -558,7 +433,7 @@
                 indicesToShow = rawData.map((_, idx) => idx);
             }
         }
-        
+
         if (indicesToShow.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px;">⚠️ 目前無符合條件的資料，請調整搜尋或「選定」條件</td></tr>`;
             updateSelectedCount();
@@ -570,9 +445,11 @@
             const originalIdx = indicesToShow[i];
             const item = rawData[originalIdx];
             const isChecked = checkedStatus[originalIdx] ? "checked" : "";
+            // ✅ 序號 = 原始資料位置 + 1（搜尋/選定時不重排，新增刪除自動遞補）
+            const displaySn = originalIdx + 1;
             html += `<tr data-original-index="${originalIdx}">
                         <td class="checkbox-col"><input type="checkbox" class="row-checkbox" data-idx="${originalIdx}" ${isChecked}></td>
-                        <td style="text-align:center;">${item.sn}</td>
+                        <td style="text-align:center;">${displaySn}</td>
                         <td>${escapeHtml(item.certNo)}</td>
                         <td>${escapeHtml(item.deviceName)}</td>
                         <td>${escapeHtml(item.manufacturer)}</td>
@@ -580,7 +457,7 @@
                        </tr>`;
         }
         tbody.innerHTML = html;
-        
+
         document.querySelectorAll('.row-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 const idx = parseInt(e.target.getAttribute('data-idx'));
@@ -608,7 +485,7 @@
             const filtered = [];
             for (let i = 0; i < rawData.length; i++) {
                 const item = rawData[i];
-                const combined = `${item.certNo} ${item.deviceName} ${item.manufacturer} ${item.model} ${item.sn}`.toLowerCase();
+                const combined = `${item.certNo} ${item.deviceName} ${item.manufacturer} ${item.model}`.toLowerCase();
                 if (combined.includes(keyword)) {
                     filtered.push(i);
                 }
@@ -663,7 +540,7 @@
     loadCheckedStatusFromStorage();
     renderTable();
     updateSelectedCount();
-    
+
     window.addEventListener('storage', (e) => {
         if (e.key === 'typeAccept_selected_ids' || e.key === 'typeAccept_selected_export') {
             loadCheckedStatusFromStorage();
